@@ -210,13 +210,9 @@ for (const [group, items] of groups) {
       `\n            <article class="card" data-aud="${it.aud}" data-name="${esc((it.title + " " + it.blurb).toLowerCase())}">` +
       (it.thumb
         ? `<button class="thumb" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
-          `<img src="${esc(it.thumb)}" alt="" loading="lazy" decoding="async" /></button>`
+          `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>`
         : `<div class="thumb noimg"></div>`) +
-      `<div class="body"><h3>${esc(it.title)}` +
-      (it.sensitive
-        ? `<span class="warn" title="Names a specific prospect">named prospect</span>`
-        : "") +
-      `</h3><p>${esc(it.blurb)}</p><div class="btns">${btns}</div>` +
+      `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">${btns}</div>` +
       `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
       `</div></article>`;
   }
