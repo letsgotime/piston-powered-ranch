@@ -127,27 +127,27 @@
         );
         --grain-hue: 210deg;
       }
-      [data-brand="dupont"] {
-        --void: #0b0a08;
-        --void-2: #050504;
-        --panel: #17140fcc;
-        --panel-2: #211d16cc;
-        --panel-solid: #211d16;
-        --line: #3a342a;
-        --line-soft: #26221b;
-        --accent: #c4ae7f;
-        --accent-ink: #211d16;
-        --accent-2: #e7dcc0;
-        --accent-2-ink: #211d16;
-        --accent-3: #8c97a6;
+      [data-brand="encanto"] {
+        --void: #0b100a;
+        --void-2: #040603;
+        --panel: #121a10cc;
+        --panel-2: #1a2417cc;
+        --panel-solid: #1a2417;
+        --line: #2c3a28;
+        --line-soft: #202b1d;
+        --accent: #d94f3d;
+        --accent-ink: #1a0b08;
+        --accent-2: #9fc379;
+        --accent-2-ink: #14200c;
+        --accent-3: #c9a15a;
         --neutral: #6b6b6b;
-        --neutral-2: #9a9284;
+        --neutral-2: #8f9a84;
         --ink: #ffffff;
-        --ink-dim: #d8d2c4;
-        --ink-mute: #948c79;
-        --good: #b9c99a;
-        --warn: #c4ae7f;
-        --crit: #c97a6b;
+        --ink-dim: #d4dcc9;
+        --ink-mute: #8a997e;
+        --good: #9fc379;
+        --warn: #c9a15a;
+        --crit: #d94f3d;
         --font-display: Georgia, "Times New Roman", serif;
         --font-body: Arial, Helvetica, sans-serif;
         --tracking-display: 0em;
@@ -522,6 +522,19 @@
         opacity: 0;
         transform: translateY(-14px) scale(0.99);
       }
+      .val-pulse {
+        animation: valpulse 700ms var(--ease-cine);
+      }
+      @keyframes valpulse {
+        0% {
+          color: var(--accent-2);
+          text-shadow: 0 0 14px color-mix(in srgb, var(--accent-2) 60%, transparent);
+        }
+        100% {
+          color: inherit;
+          text-shadow: none;
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
         .view {
           transition: opacity 0.2s linear;
@@ -604,7 +617,7 @@
         letter-spacing: var(--tracking-display);
         text-transform: var(--case-display);
       }
-      [data-brand="dupont"] .h-display {
+      [data-brand="encanto"] .h-display {
         font-weight: 700;
       }
       .h-display .accent {
@@ -616,7 +629,7 @@
         line-height: 1.5;
         font-style: italic;
       }
-      [data-brand="dupont"] .lede {
+      [data-brand="encanto"] .lede {
         font-family: Georgia, serif;
       }
       .mono {
@@ -2426,14 +2439,38 @@
                   autocomplete="email"
                 />
               </div>
-              <div class="field">
+              <div class="field" style="position: relative">
                 <label for="fCode">Password</label>
                 <input
                   id="fCode"
                   type="password"
                   placeholder="••••••"
                   autocomplete="current-password"
+                  style="padding-right: 74px"
                 />
+                <button
+                  type="button"
+                  id="pwToggle"
+                  aria-label="Show password"
+                  aria-pressed="false"
+                  style="
+                    position: absolute;
+                    right: 10px;
+                    bottom: 9px;
+                    font: inherit;
+                    font-size: 11.5px;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    font-weight: 700;
+                    color: var(--ink-mute);
+                    background: none;
+                    border: 0;
+                    padding: 6px 8px;
+                    cursor: pointer;
+                  "
+                >
+                  Show
+                </button>
               </div>
               <button class="btn btn-primary btn-block" id="enterBtn" style="margin-top: 8px">
                 Enter console
@@ -2456,6 +2493,15 @@
               />
             </svg>
             <span
+              ><span
+                id="liveHeartbeat"
+                style="
+                  display: inline-block;
+                  margin-right: 8px;
+                  color: var(--accent-2);
+                  font-weight: 650;
+                "
+                >Live</span
               >Live data from the console database: real submissions and budget entries, zero-start
               until entries come in.</span
             >
@@ -2832,19 +2878,19 @@
             </p>
           </div>
           <div class="reveal d5 fact-strip">
-            <div class="fact">
+            <div class="fact clickable" data-detail="cars" tabindex="0" role="button">
               <div class="fv" id="factCars">300</div>
               <div class="fl">Show Cars</div>
             </div>
-            <div class="fact">
+            <div class="fact clickable" data-detail="vendors" tabindex="0" role="button">
               <div class="fv" id="factVendors">30 to 45</div>
               <div class="fl">Vendor Booths</div>
             </div>
-            <div class="fact">
-              <div class="fv" id="eventCharity">Central Elem., TN</div>
+            <div class="fact clickable" data-detail="charity" tabindex="0" role="button">
+              <div class="fv" id="eventCharity">Community Elementary</div>
               <div class="fl">Charity</div>
             </div>
-            <div class="fact">
+            <div class="fact clickable" data-detail="runofshow" tabindex="0" role="button">
               <div class="fv" id="factHours">9AM to 3PM</div>
               <div class="fl">Show Hours</div>
             </div>
@@ -2932,7 +2978,7 @@
                 <h4>Needs before publishing</h4>
                 <p>
                   A real data-retention window, contact for data requests, and confirmation on
-                  whether any data is shared with duPont REGISTRY or other partner brands.
+                  whether any data is shared with partner brands or venue hosts.
                 </p>
               </div>
             </details>
@@ -3025,7 +3071,30 @@
               Day-of reference for the crew, pulled straight from the working Scope of Work.
             </p>
           </div>
+          <div
+            class="reveal d4 card card-pad"
+            id="opsIntel"
+            style="margin-top: var(--gap-4); display: none"
+          >
+            <span class="sec-label">Live Intelligence</span>
+            <div id="opsIntelRows" style="margin-top: 10px"></div>
+          </div>
           <div class="reveal d4 ops-grid" style="margin-top: var(--gap-4)">
+            <div class="card card-pad clickable ops-card" data-detail="decisions" tabindex="0">
+              <div class="oc-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M9 11l3 3 8-8" />
+                  <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9" />
+                </svg>
+              </div>
+              <div class="oc-t">Decision Desk</div>
+              <div class="oc-s" id="ocDecisions">Loading…</div>
+              <span class="cl-hint"
+                >Details
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M9 18l6-6-6-6" /></svg
+              ></span>
+            </div>
             <div class="card card-pad clickable ops-card" data-detail="runofshow" tabindex="0">
               <div class="oc-ic">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -3723,7 +3792,7 @@
     <div class="protoctl" id="protoctl">
       <span class="lbl">Preview</span>
       <button class="active" data-set-brand="ranch">Piston Ranch</button>
-      <button data-set-brand="dupont">duPont Registry</button>
+      <button data-set-brand="encanto">Encanto Blossom</button>
       <span class="lbl" id="authOffBadge" style="display: none; color: #f8b800">Auth off</span>
     </div>
     <script type="module">
@@ -3775,27 +3844,26 @@
                 "Officers from Unionville PD & fire/EMS requested at every entrance and on standby for the day.",
               detail3: "Open-pit cookout, Cítrico Grill style, right on the field.",
             },
-            dupont: {
-              eventName: "Timepieces at duPont",
-              eventSub: "duPont REGISTRY Live",
-              eventShort: "duPont Live",
-              enterLede: "Sign in to open your Timepieces at duPont link.",
-              themeColor: "#0B0A08",
-              eventTitleHTML: 'Timepieces<br><span class="accent">at duPont</span>',
+            encanto: {
+              eventName: "Encanto Blossom Orchard",
+              eventSub: "Shelbyville, TN · in scoping",
+              eventShort: "Encanto Blossom",
+              enterLede: "Sign in to open your Encanto Blossom link.",
+              themeColor: "#0B100A",
+              eventTitleHTML: 'Encanto<br><span class="accent">Blossom</span>',
               eventLede:
-                "Cars and fine watches, indoors, in place of that month's Donuts with duPont.",
-              heroCap: "NOV 2026 · DATE TBD · NASHVILLE, TN",
+                "Collector cars among the apple rows of a U-Pick orchard in Shelbyville, Tennessee.",
+              heroCap: "DATE TBD · 344 WHITAKER RD, SHELBYVILLE, TN",
               charity: "TBD",
-              vehicleLabel: "Watch or vehicle on display",
-              vehiclePlaceholder: "1965 Rolex Daytona",
+              vehicleLabel: "Vehicle (year / make / model)",
+              vehiclePlaceholder: "2019 Porsche 911 GT3 RS",
               factCars: "TBD",
               factVendors: "TBD",
               factHours: "TBD",
               detail1:
-                "Cars and fine watches shown side by side, same curation standard as Donuts with duPont.",
-              detail2: "Indoors at the warehouse, no weather dependency this time of year.",
-              detail3:
-                "Same duPont REGISTRY Nashville hosting, swapped in for that month's regular slot.",
+                "A locally owned U-Pick apple orchard in Bedford County, an hour from Nashville.",
+              detail2: "Harvest-season setting: rows of apple trees in place of open pasture.",
+              detail3: "Scoping only. Nothing is booked with the orchard yet.",
             },
           },
           n = null;
@@ -4077,6 +4145,15 @@
               (location.hash = ""),
               g("enter"));
           }),
+          document.getElementById("pwToggle").addEventListener("click", function () {
+            var f = document.getElementById("fCode"),
+              show = "password" === f.type;
+            ((f.type = show ? "text" : "password"),
+              (this.textContent = show ? "Hide" : "Show"),
+              this.setAttribute("aria-label", show ? "Hide password" : "Show password"),
+              this.setAttribute("aria-pressed", show ? "true" : "false"),
+              f.focus());
+          }),
           document.getElementById("enterBtn").addEventListener("click", function () {
             var e = (document.getElementById("fEmail").value || "").trim(),
               t = document.getElementById("fCode").value || "";
@@ -4339,6 +4416,70 @@
               );
             },
           },
+          charity: {
+            eyebrow: "Where the money goes",
+            title: "Charity Partner",
+            render: async function () {
+              var e = await B(),
+                nm = (e && e.charity_partner) || "Community Elementary School";
+              return (
+                '<div class="line-item"><span class="li-l">Partner</span><span class="li-v">' +
+                i(nm) +
+                "</span></div>" +
+                '<div class="line-item"><span class="li-l">Event split<small>target, not locked</small></span><span class="li-v">30% to 50% of net</span></div>' +
+                '<div class="line-item"><span class="li-l">Merch sales</span><span class="li-v">100%</span></div>' +
+                '<p class="note" style="margin-top:12px">The public elementary school serving the community the ranch sits in, so the money stays in the county the event runs in. The split is measured on net event revenue, after traffic control, entertainment and other production costs. Always net, never gross.</p>'
+              );
+            },
+          },
+          decisions: {
+            eyebrow: "Live · saves as you type",
+            title: "Decision Desk",
+            render: async function () {
+              var e = await n
+                .from("open_decisions")
+                .select("*")
+                .order("sort_order", { ascending: !0 });
+              if (e.error) return L(e.error);
+              var t = e.data || [];
+              if (!t.length) return '<p class="note">No decisions tracked yet.</p>';
+              return (
+                '<p class="note" style="margin-bottom:12px">Tap a status to flip it. Notes save on their own a moment after you stop typing.</p>' +
+                t
+                  .map(function (d) {
+                    var open = "open" === d.status;
+                    return (
+                      '<div class="dcs-row" data-id="' +
+                      d.id +
+                      '" style="padding:12px 0;border-bottom:1px solid var(--line-soft)">' +
+                      '<div style="display:flex;align-items:center;gap:10px;justify-content:space-between">' +
+                      '<b style="font-size:14px">' +
+                      i(d.label) +
+                      "</b>" +
+                      '<button class="dcs-status" data-id="' +
+                      d.id +
+                      '" style="font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:4px 12px;border-radius:999px;cursor:pointer;border:1px solid;' +
+                      (open
+                        ? "color:var(--accent);border-color:var(--accent);background:transparent"
+                        : "color:var(--accent-2);border-color:var(--accent-2);background:transparent") +
+                      '">' +
+                      (open ? "Open" : "Decided") +
+                      "</button></div>" +
+                      '<textarea class="dcs-notes" data-id="' +
+                      d.id +
+                      '" rows="3" style="width:100%;margin-top:8px;font:inherit;font-size:13.5px;line-height:1.55;color:var(--ink-dim);background:var(--panel-2,rgba(255,255,255,.04));border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px;resize:vertical">' +
+                      i(d.notes || "") +
+                      "</textarea>" +
+                      '<span class="dcs-state" data-id="' +
+                      d.id +
+                      '" style="font-size:11px;color:var(--ink-mute)"></span>' +
+                      "</div>"
+                    );
+                  })
+                  .join("")
+              );
+            },
+          },
           runofshow: {
             eyebrow: "Ops · Run of Show",
             title: "Saturday Timeline",
@@ -4567,6 +4708,7 @@
           };
         }
         var S = document.getElementById("sheetBody");
+        window.__pprRefreshStaff = k;
         async function k() {
           try {
             await a();
@@ -4659,8 +4801,114 @@
             }
             var k = document.getElementById("ocVendors");
             k && (k.textContent = d + " confirmed · $250/booth");
+            var dcs = await n.from("open_decisions").select("status"),
+              dEl = document.getElementById("ocDecisions");
+            if (dEl && dcs && dcs.data) {
+              var openN = dcs.data.filter(function (r) {
+                  return "open" === r.status;
+                }).length,
+                doneN = dcs.data.length - openN;
+              dEl.textContent = openN + " open · " + doneN + " decided";
+            }
+            var intel = document.getElementById("opsIntel"),
+              rows = document.getElementById("opsIntelRows");
+            if (intel && rows) {
+              var pend = await n
+                  .from("submissions")
+                  .select("created_at")
+                  .eq("status", "pending")
+                  .order("created_at", { ascending: !0 }),
+                items = [];
+              if (pend && pend.data) {
+                var pn = pend.data.length;
+                if (pn) {
+                  var oldest = Math.floor(
+                    (Date.now() - new Date(pend.data[0].created_at).getTime()) / 864e5,
+                  );
+                  items.push([
+                    pn + " submission" + (1 === pn ? "" : "s") + " waiting",
+                    oldest
+                      ? "oldest has waited " + oldest + " day" + (1 === oldest ? "" : "s")
+                      : "all from today",
+                  ]);
+                } else items.push(["Review queue clear", "no pending submissions"]);
+              }
+              if (dcs && dcs.data) {
+                var oN = dcs.data.filter(function (r) {
+                  return "open" === r.status;
+                }).length;
+                items.push(
+                  oN
+                    ? [oN + " decisions still open", "work the Decision Desk below"]
+                    : ["Every tracked decision is settled", ""],
+                );
+              }
+              var days = Math.ceil((new Date("2026-10-10T09:00:00-05:00") - Date.now()) / 864e5),
+                mdays = Math.ceil((new Date("2026-08-30T09:00:00-05:00") - Date.now()) / 864e5);
+              items.push([
+                days + " days to show day",
+                mdays > 0 ? mdays + " days to the marketing launch" : "marketing launch is live",
+              ]);
+              rows.innerHTML = items
+                .map(function (it) {
+                  return (
+                    '<div class="line-item"><span class="li-l">' +
+                    i(it[0]) +
+                    (it[1] ? "<small>" + i(it[1]) + "</small>" : "") +
+                    "</span></div>"
+                  );
+                })
+                .join("");
+              intel.style.display = "";
+            }
           } catch (e) {}
         }
+        var dcsTimers = {};
+        function dcsState(id, msg, ok) {
+          var el = document.querySelector('.dcs-state[data-id="' + id + '"]');
+          el &&
+            ((el.textContent = msg),
+            (el.style.color = ok ? "var(--accent-2)" : "var(--crit,#e5484d)"));
+        }
+        document.addEventListener("click", function (e) {
+          var b = e.target.closest(".dcs-status");
+          if (!b) return;
+          var id = b.getAttribute("data-id"),
+            toOpen = "Decided" === b.textContent.trim(),
+            next = toOpen ? "open" : "decided";
+          ((b.textContent = toOpen ? "Open" : "Decided"),
+            (b.style.color = toOpen ? "var(--accent)" : "var(--accent-2)"),
+            (b.style.borderColor = b.style.color),
+            n
+              .from("open_decisions")
+              .update({ status: next })
+              .eq("id", id)
+              .then(function (r) {
+                r.error
+                  ? ((b.textContent = toOpen ? "Decided" : "Open"),
+                    dcsState(id, "Could not save: " + (r.error.message || "error"), !1))
+                  : dcsState(id, "Saved", !0);
+              }));
+        });
+        document.addEventListener("input", function (e) {
+          var t = e.target.closest(".dcs-notes");
+          if (!t) return;
+          var id = t.getAttribute("data-id");
+          (dcsState(id, "Typing…", !0),
+            clearTimeout(dcsTimers[id]),
+            (dcsTimers[id] = setTimeout(function () {
+              (dcsState(id, "Saving…", !0),
+                n
+                  .from("open_decisions")
+                  .update({ notes: t.value })
+                  .eq("id", id)
+                  .then(function (r) {
+                    r.error
+                      ? dcsState(id, "Could not save: " + (r.error.message || "error"), !1)
+                      : dcsState(id, "Saved", !0);
+                  }));
+            }, 700)));
+        });
         function T() {
           var e = document.getElementById("sheetScrim"),
             t = document.getElementById("sheet");
@@ -4716,9 +4964,31 @@
           A = document.getElementById("sheetClose");
         (x && x.addEventListener("click", M), A && A.addEventListener("click", M));
         var q = 0;
+        var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         function P(e, t) {
           var n = document.getElementById(e);
-          n && (n.textContent = t);
+          if (!n) return;
+          var old = n.textContent;
+          if (old === t) return;
+          var from = parseFloat(old.replace(/[^0-9.]/g, "")),
+            to = parseFloat(String(t).replace(/[^0-9.]/g, ""));
+          if (
+            !reduceMotion &&
+            isFinite(from) &&
+            isFinite(to) &&
+            /^[0-9,.]+$/.test(String(t).trim()) &&
+            from !== to
+          ) {
+            var t0 = performance.now();
+            (function step(now) {
+              var k = Math.min(1, (now - t0) / 600),
+                ease = 1 - Math.pow(1 - k, 3);
+              ((n.textContent = String(Math.round(from + (to - from) * ease))),
+                k < 1 ? requestAnimationFrame(step) : (n.textContent = t));
+            })(t0);
+          } else n.textContent = t;
+          reduceMotion ||
+            (n.classList.remove("val-pulse"), void n.offsetWidth, n.classList.add("val-pulse"));
         }
         function D(e, t) {
           var n = document.getElementById(e);
@@ -5417,7 +5687,8 @@
             t("pgBadgeImg3", e.logoFull || "/brand/pg-mark.png"));
         })(),
           V("ranch"),
-          (async function () {
+          (window.__pprRefreshFacts = async function () {
+            l = null;
             var e = await B();
             e &&
               (e.charity_partner && P("eventCharity", e.charity_partner),
@@ -5428,7 +5699,23 @@
                   "factVendors",
                   e.target_vendor_booths_low + " to " + e.target_vendor_booths_high,
                 ));
+            var hb = document.getElementById("liveHeartbeat");
+            if (hb) {
+              var d = new Date();
+              hb.textContent =
+                "Live · updated " +
+                d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+              reduceMotion ||
+                (hb.classList.remove("val-pulse"),
+                void hb.offsetWidth,
+                hb.classList.add("val-pulse"));
+            }
           })(),
+          setInterval(function () {
+            document.hidden ||
+              (window.__pprRefreshFacts(),
+              "function" == typeof window.__pprRefreshStaff && window.__pprRefreshStaff());
+          }, 45e3),
           (async function () {
             var e = document.getElementById("fVendorCategory");
             if (e) {
