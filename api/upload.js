@@ -8,7 +8,7 @@ import { verifySession, sessionSecret } from "./upload-session.js";
  * license plates and VINs in the pixels, and those must never be readable from
  * a guessable URL. Reads go through /api/media.js, which requires staff auth.
  *
- * This endpoint is deliberately reachable without login — the Submit form is
+ * This endpoint is deliberately reachable without login. The Submit form is
  * public by requirement. Everything below is therefore a hard limit enforced
  * server-side, not a client-side courtesy.
  */
@@ -72,7 +72,7 @@ export default async function handler(request, response) {
         const gateOn = Boolean(process.env.TURNSTILE_SECRET);
         if (gateOn) {
           const session = verifySession(payload.session, sessionSecret());
-          if (!session) throw new Error("Verification required — refresh the form and try again");
+          if (!session) throw new Error("Verification required. Refresh the form and try again");
           if (session.d !== String(payload.draftId || "")) {
             throw new Error("Session does not match this submission");
           }

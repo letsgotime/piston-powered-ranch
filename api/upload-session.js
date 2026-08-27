@@ -4,7 +4,7 @@ import { createHmac, timingSafeEqual, randomUUID } from "node:crypto";
  * Exchanges one Turnstile token for a short-lived, signed upload session.
  *
  * Turnstile tokens are single-use at siteverify, but one vehicle submission can
- * be 50 photos plus video, voice and documents — each its own call to
+ * be 50 photos plus video, voice and documents, each its own call to
  * /api/upload. Verifying per file would fail on the second one with
  * "timeout-or-duplicate". So the human is checked once here, and the result is
  * a signed session that authorises that submitter's uploads for a short window.
@@ -60,7 +60,7 @@ export default async function handler(request, response) {
   const secret = process.env.TURNSTILE_SECRET || "";
   if (!secret) {
     // Not configured: uploads remain open. Loud on the server, explicit to the client.
-    console.warn("[turnstile] TURNSTILE_SECRET unset — upload gate NOT enforced");
+    console.warn("[turnstile] TURNSTILE_SECRET unset, upload gate NOT enforced");
     return response.status(200).json({ enforced: false, session: null });
   }
 
@@ -83,7 +83,7 @@ export default async function handler(request, response) {
       .filter(Boolean),
   );
   if (expectedHostnames.size === 0) {
-    console.error("[turnstile] TURNSTILE_HOSTNAMES unset — refusing to verify");
+    console.error("[turnstile] TURNSTILE_HOSTNAMES unset, refusing to verify");
     return response.status(403).json({ error: "Verification misconfigured" });
   }
 

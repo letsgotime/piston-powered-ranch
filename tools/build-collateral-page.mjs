@@ -91,7 +91,7 @@ const CATALOG = [
   },
   {
     base: "PPR_Social_Square_1080x1080",
-    title: "Social — Square",
+    title: "Social Square",
     aud: "community",
     group: "Social",
     blurb: "1080 × 1080. Feed posts.",
@@ -99,7 +99,7 @@ const CATALOG = [
   },
   {
     base: "PPR_Social_Story_1080x1920",
-    title: "Social — Story",
+    title: "Social Story",
     aud: "community",
     group: "Social",
     blurb: "1080 × 1920. Stories and Reels.",
@@ -223,4 +223,4 @@ writeFileSync(
     .replace("<!--CARDS-->", cards)
     .replace("<!--COUNT-->", String(total)),
 );
-console.log(`collateral/index.html — ${groups.size} groups, ${total} downloadable files`);
+console.log(`collateral/index.html: ${groups.size} groups, ${total} downloadable files`);
