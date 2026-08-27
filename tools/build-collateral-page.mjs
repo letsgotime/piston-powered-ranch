@@ -27,11 +27,11 @@ const CATALOG = [
   },
   {
     base: "PPR_OnePager_TitleSponsor_111Motorcars",
-    title: "Title Sponsor Pitch — 111 Motorcars",
+    title: "Title Sponsor Pitch",
     aud: "title",
     group: "Sponsorship",
     sensitive: true,
-    blurb: "The named pitch for the Franklin dealership. Premier title position.",
+    blurb: "The premier title position pitch. One title, top billing.",
   },
   {
     base: "PPR_OnePager_Sponsors",
@@ -46,14 +46,6 @@ const CATALOG = [
     aud: "sponsors",
     group: "Sponsorship",
     blurb: "Two-page short form. Send this first, lead with the one-pager after.",
-  },
-  {
-    base: "PPR_Teaser_TitleSponsor_111Motorcars",
-    title: "Title Sponsor Teaser",
-    aud: "title",
-    group: "Sponsorship",
-    sensitive: true,
-    blurb: "Short-form version of the 111 Motorcars pitch.",
   },
   {
     base: "PPR_OnePager_Vendors",
