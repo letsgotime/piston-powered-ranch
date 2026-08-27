@@ -1,0 +1,18 @@
+{
+  "generated": null,
+  "count": 1,
+  "items": [
+    {
+      "name": "PPR_OnePager_Sponsors.pdf",
+      "size": 434545,
+      "sizeLabel": "424 KB",
+      "ext": "PDF",
+      "kind": "One-Pager",
+      "kindOrder": 1,
+      "audience": "Sponsors",
+      "blurb": "General sponsorship pitch.",
+      "sensitive": false,
+      "variant": "screen"
+    }
+  ]
+}

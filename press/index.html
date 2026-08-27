@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Press & Collateral · The Piston Powered Ranch</title>
+    <meta
+      name="description"
+      content="Download the one-pagers, teasers and social graphics for The Piston Powered Ranch at Rancho Jaramillo, October 10 2026."
+    />
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root {
+        --bg: #0d1620;
+        --surface: #121d2a;
+        --surface-2: #16222f;
+        --ink: #ffffff;
+        --ink-dim: #c4cbd6;
+        --ink-mute: #8b95a3;
+        --accent: #f8b800;
+        --accent-2: #00d2be;
+        --line: #27384f;
+        --line-soft: #1c2a3d;
+        --radius-s: 10px;
+        --radius-m: 16px;
+        --radius-l: 24px;
+        --gap-2: 10px;
+        --gap-3: 16px;
+        --gap-4: 24px;
+        --gap-5: 36px;
+        --gap-6: 52px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .rule {
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--accent) 0 25%,
+          var(--accent-2) 25% 50%,
+          #005185 50% 75%,
+          #8b95a3 75% 100%
+        );
+      }
+      .wrap {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: var(--gap-5) var(--gap-4) var(--gap-6);
+      }
+      .eyebrow {
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        display: inline-block;
+      }
+      h1 {
+        font-size: clamp(28px, 7vw, 44px);
+        line-height: 1.08;
+        margin: 10px 0 0;
+        letter-spacing: -0.02em;
+      }
+      h1 .accent {
+        color: var(--accent);
+      }
+      .lede {
+        color: var(--ink-dim);
+        font-size: 17px;
+        margin: 14px 0 0;
+        max-width: 62ch;
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: var(--radius-m);
+        padding: var(--gap-4);
+      }
+      .howto {
+        margin-top: var(--gap-5);
+      }
+      .howto h2 {
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        margin: 0 0 var(--gap-3);
+      }
+      .howto dl {
+        margin: 0;
+        display: grid;
+        gap: var(--gap-3);
+      }
+      .howto dt {
+        font-weight: 650;
+        color: var(--ink);
+      }
+      .howto dt .tag {
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 2px 7px;
+        border-radius: 999px;
+        margin-left: 8px;
+        vertical-align: 1px;
+      }
+      .tag.screen {
+        background: rgba(0, 210, 190, 0.14);
+        color: var(--accent-2);
+        border: 1px solid rgba(0, 210, 190, 0.3);
+      }
+      .tag.print {
+        background: rgba(248, 184, 0, 0.14);
+        color: var(--accent);
+        border: 1px solid rgba(248, 184, 0, 0.32);
+      }
+      .howto dd {
+        margin: 3px 0 0;
+        color: var(--ink-dim);
+      }
+      .fedex {
+        margin-top: var(--gap-3);
+        padding: var(--gap-3);
+        border-radius: var(--radius-s);
+        background: rgba(248, 184, 0, 0.07);
+        border: 1px solid rgba(248, 184, 0, 0.24);
+        color: var(--ink-dim);
+        font-size: 14px;
+      }
+      .fedex b {
+        color: var(--accent);
+      }
+      section.group {
+        margin-top: var(--gap-6);
+      }
+      .sec-label {
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+      }
+      .grid {
+        margin-top: var(--gap-3);
+        display: grid;
+        gap: var(--gap-3);
+      }
+      .row {
+        background: var(--surface);
+        border: 1px solid var(--line-soft);
+        border-radius: var(--radius-m);
+        padding: var(--gap-3) var(--gap-4);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-3);
+        align-items: center;
+        justify-content: space-between;
+      }
+      .row .who {
+        min-width: 220px;
+        flex: 1 1 260px;
+      }
+      .row .who b {
+        display: block;
+        font-size: 16px;
+      }
+      .row .who span {
+        color: var(--ink-mute);
+        font-size: 13.5px;
+      }
+      .dl {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        text-decoration: none;
+        border-radius: 999px;
+        padding: 9px 15px;
+        font-size: 13.5px;
+        font-weight: 600;
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: var(--surface-2);
+        transition: transform 0.12s ease;
+      }
+      a.btn:hover {
+        transform: translateY(-1px);
+      }
+      a.btn.screen {
+        border-color: rgba(0, 210, 190, 0.4);
+        color: var(--accent-2);
+      }
+      a.btn.print {
+        border-color: rgba(248, 184, 0, 0.42);
+        color: var(--accent);
+      }
+      a.btn small {
+        font-weight: 400;
+        opacity: 0.7;
+      }
+      .missing {
+        border-style: dashed;
+        border-color: var(--line);
+        opacity: 0.62;
+      }
+      .missing .dl span {
+        font-size: 13px;
+        color: var(--ink-mute);
+      }
+      footer {
+        margin-top: var(--gap-6);
+        padding-top: var(--gap-4);
+        border-top: 1px solid var(--line-soft);
+        color: var(--ink-mute);
+        font-size: 13px;
+      }
+      footer a {
+        color: var(--ink-dim);
+      }
+      .status {
+        margin-top: var(--gap-3);
+        font-size: 13.5px;
+        color: var(--ink-mute);
+      }
+      @media (max-width: 560px) {
+        .row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="eyebrow"><span class="dot"></span>Press &amp; Collateral</div>
+      <h1>The Piston<br /><span class="accent">Powered Ranch</span></h1>
+      <p class="lede">
+        Everything you need to share the event. Rancho Jaramillo, Unionville TN, Saturday October 10
+        2026, 9:00 AM to 3:00 PM. Benefiting Community Elementary School.
+      </p>
+
+      <div class="card howto">
+        <h2>Two versions of every document</h2>
+        <dl>
+          <div>
+            <dt>Standard <span class="tag screen">Text &amp; email</span></dt>
+            <dd>
+              Plain 8.5 × 11. Send these by iMessage, email, or AirDrop. They open on any phone and
+              look right without anyone doing anything.
+            </dd>
+          </div>
+          <div>
+            <dt>Print <span class="tag print">FedEx Office</span></dt>
+            <dd>
+              Full bleed, meaning the artwork runs past the page edge so there is no white border
+              after trimming. These are for the counter, not for texting.
+            </dd>
+          </div>
+        </dl>
+        <p class="fedex">
+          <b>What to tell the FedEx Office counter:</b> print the <b>_PRINT</b> files, trim to 8.5 ×
+          11, and <b>do not scale or "fit to page"</b>. Fit-to-page shrinks the artwork and leaves a
+          white edge, which defeats the bleed.
+        </p>
+      </div>
+
+      <div id="groups"></div>
+      <p class="status" id="status">Loading files…</p>
+
+      <footer>
+        Questions or a file that will not open, reply to the thread that sent you this link.
+        <br />Assets are for promoting this event only.
+      </footer>
+    </div>
+
+    <script>
+      // Every deliverable that should exist. Anything missing from the manifest
+      // still renders, greyed out, so a gap is visible rather than silent.
+      var EXPECTED = [
+        ["One-Pager", "Sponsors", "General sponsorship pitch.", 1],
+        [
+          "One-Pager",
+          "Title Sponsor — 111 Motorcars",
+          "Named pitch for the Franklin dealership.",
+          1,
+        ],
+        ["One-Pager", "Vendors", "Booth pitch, $250 rate.", 1],
+        ["One-Pager", "Car Community", "Announcement for the enthusiast crowd.", 1],
+        ["Teaser", "Sponsors", "Short-form sponsorship teaser.", 2],
+        ["Teaser", "Title Sponsor — 111 Motorcars", "Short-form named teaser.", 2],
+        ["Teaser", "Vendors", "Short-form vendor teaser.", 2],
+        ["Teaser", "Car Community", "Short-form community teaser.", 2],
+        ["Social Graphic", "Square 1080x1080", "Feed post.", 3],
+        ["Social Graphic", "Story 1080x1920", "Stories and Reels.", 3],
+      ];
+
+      function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+
+      fetch("files/manifest.json", { cache: "no-store" })
+        .then(function (r) {
+          if (!r.ok) throw new Error("no manifest");
+          return r.json();
+        })
+        .catch(function () {
+          return { items: [] };
+        })
+        .then(function (data) {
+          var items = data.items || [];
+          var byKey = {};
+          items.forEach(function (it) {
+            var k = it.kind + "|" + it.audience;
+            (byKey[k] = byKey[k] || []).push(it);
+          });
+
+          var groups = {};
+          EXPECTED.forEach(function (e) {
+            (groups[e[0]] = groups[e[0]] || []).push(e);
+          });
+
+          var html = "";
+          var have = 0;
+          Object.keys(groups).forEach(function (kind) {
+            html +=
+              '<section class="group"><span class="sec-label">' +
+              esc(kind) +
+              's</span><div class="grid">';
+            groups[kind].forEach(function (e) {
+              var found = byKey[e[0] + "|" + e[1]] || [];
+              have += found.length;
+              var links = found
+                .map(function (f) {
+                  var cls = f.variant === "print" ? "print" : "screen";
+                  var label =
+                    f.variant === "print"
+                      ? "Print version"
+                      : f.ext === "PNG"
+                        ? "Download PNG"
+                        : "Text / email version";
+                  return (
+                    '<a class="btn ' +
+                    cls +
+                    '" href="files/' +
+                    encodeURIComponent(f.name) +
+                    '" download>' +
+                    esc(label) +
+                    " <small>" +
+                    esc(f.ext) +
+                    " · " +
+                    esc(f.sizeLabel) +
+                    "</small></a>"
+                  );
+                })
+                .join("");
+              html +=
+                '<div class="row' +
+                (found.length ? "" : " missing") +
+                '"><div class="who"><b>' +
+                esc(e[1]) +
+                "</b><span>" +
+                esc(e[2]) +
+                '</span></div><div class="dl">' +
+                (links || "<span>Not uploaded yet</span>") +
+                "</div></div>";
+            });
+            html += "</div></section>";
+          });
+
+          document.getElementById("groups").innerHTML = html;
+          var total = items.length;
+          document.getElementById("status").textContent =
+            total === 0
+              ? "No files have been uploaded yet."
+              : total + " file" + (total === 1 ? "" : "s") + " available for download.";
+        });
+    </script>
+  </body>
+</html>
