@@ -2449,6 +2449,82 @@
                   <option value="">Select a category…</option>
                 </select>
               </div>
+              <div id="vendorFields" style="display: none">
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fVendorOffering">What you'll be selling or serving</label>
+                  <input id="fVendorOffering" placeholder="Wood-fired tacos, plus aguas frescas" />
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fVendorSpace">Space needed</label>
+                  <select id="fVendorSpace">
+                    <option value="">Select…</option>
+                    <option>10x10 booth</option>
+                    <option>10x20 booth</option>
+                    <option>20x20 booth</option>
+                    <option>Food truck or trailer</option>
+                    <option>Other / not sure yet</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fVendorPower">Power required</label>
+                  <select id="fVendorPower">
+                    <option value="">Select…</option>
+                    <option>None</option>
+                    <option>110V standard</option>
+                    <option>220V</option>
+                    <option>Bringing my own generator</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fVendorSite"
+                    >Website or social
+                    <span style="opacity: 0.6; font-weight: 400">(optional)</span></label
+                  >
+                  <input type="url" id="fVendorSite" placeholder="https://" />
+                </div>
+                <p class="field-error" style="color: var(--ink-3, #8a8f98)">
+                  Attach your certificate of insurance and any permits under Documents below.
+                </p>
+              </div>
+              <div id="sponsorFields" style="display: none">
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fSponsorLevel">Sponsorship level you have in mind</label>
+                  <select id="fSponsorLevel">
+                    <option value="">Select…</option>
+                    <option>Title</option>
+                    <option>Presenting</option>
+                    <option>Supporting</option>
+                    <option>In-kind / product</option>
+                    <option>Not sure — let's talk</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fSponsorGoals">What you'd want out of it</label>
+                  <input
+                    id="fSponsorGoals"
+                    placeholder="Brand visibility, test drives, client hosting…"
+                  />
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fSponsorActivation">On-site activation space</label>
+                  <select id="fSponsorActivation">
+                    <option value="">Select…</option>
+                    <option>No, brand presence only</option>
+                    <option>Yes, display or booth</option>
+                    <option>Yes, vehicle display</option>
+                    <option>Not sure yet</option>
+                  </select>
+                </div>
+                <div class="field" style="margin-bottom: 12px">
+                  <label for="fSponsorSite"
+                    >Website <span style="opacity: 0.6; font-weight: 400">(optional)</span></label
+                  >
+                  <input type="url" id="fSponsorSite" placeholder="https://" />
+                </div>
+                <p class="field-error" style="color: var(--ink-3, #8a8f98)">
+                  Attach your logo (vector preferred) under Documents below.
+                </p>
+              </div>
               <div class="field" style="margin-bottom: 12px">
                 <label for="fSubmitEmail">Email</label>
                 <input
@@ -4113,6 +4189,39 @@
                   i(a.details.category) +
                   "</span></div>"
                 : "") +
+              (function () {
+                var d2 = a.details || {},
+                  rows =
+                    "vendor" === a.type
+                      ? [
+                          ["Selling", d2.offering],
+                          ["Space", d2.space_needed],
+                          ["Power", d2.power],
+                          ["Website", d2.website],
+                        ]
+                      : "sponsor" === a.type
+                        ? [
+                            ["Level", d2.sponsorship_level],
+                            ["Goals", d2.goals],
+                            ["Activation", d2.activation],
+                            ["Website", d2.website],
+                          ]
+                        : [];
+                return rows
+                  .filter(function (r) {
+                    return r[1];
+                  })
+                  .map(function (r) {
+                    return (
+                      '<div class="line-item"><span class="li-l">' +
+                      r[0] +
+                      '</span><span class="li-v">' +
+                      i(String(r[1])) +
+                      "</span></div>"
+                    );
+                  })
+                  .join("");
+              })() +
               (a.media_link
                 ? '<div class="line-item"><span class="li-l">Media link</span><span class="li-v"><a href="' +
                   i(a.media_link) +
@@ -4380,8 +4489,12 @@
             var a = document.getElementById("vendorCategoryField");
             a && (a.style.display = "vendor" === t ? "" : "none");
             var o = document.getElementById("ownerNameField"),
-              c = document.getElementById("fNameLabel");
+              c = document.getElementById("fNameLabel"),
+              vf = document.getElementById("vendorFields"),
+              sf = document.getElementById("sponsorFields");
             (o && (o.style.display = "vehicle" === t ? "" : "none"),
+              vf && (vf.style.display = "vendor" === t ? "" : "none"),
+              sf && (sf.style.display = "sponsor" === t ? "" : "none"),
               c && (c.textContent = "vehicle" === t ? "Point of contact" : "Full name"));
           });
         });
@@ -4825,6 +4938,10 @@
         })();
         var ne = document.getElementById("submitForm"),
           ae = document.getElementById("submitConfirm");
+        function val(id) {
+          var el = document.getElementById(id);
+          return el ? (el.value || "").trim() : "";
+        }
         function ie(e, t) {
           var n = document.getElementById(e);
           n && (n.textContent = t || "");
@@ -4870,8 +4987,21 @@
                               owner_is_contact: !pocOwner,
                             }
                           : "vendor" === t
-                            ? { business: s, category: d }
-                            : { company: s },
+                            ? {
+                                business: s,
+                                category: d,
+                                offering: val("fVendorOffering"),
+                                space_needed: val("fVendorSpace"),
+                                power: val("fVendorPower"),
+                                website: val("fVendorSite"),
+                              }
+                            : {
+                                company: s,
+                                sponsorship_level: val("fSponsorLevel"),
+                                goals: val("fSponsorGoals"),
+                                activation: val("fSponsorActivation"),
+                                website: val("fSponsorSite"),
+                              },
                       u = document.getElementById("submitBtn");
                     ((c.media = pprMedia),
                       (c.media_counts = {
@@ -4954,12 +5084,25 @@
                       (document.getElementById("submitDynInput").placeholder = N.vehicle.ph));
                     var e = document.getElementById("vendorCategoryField");
                     (e && (e.style.display = "none"),
-                      ["fName", "submitDynInput", "fSubmitEmail", "fPhone", "fMediaLink"].forEach(
-                        function (e) {
-                          var t = document.getElementById(e);
-                          t && (t.value = "");
-                        },
-                      ));
+                      [
+                        "fName",
+                        "submitDynInput",
+                        "fSubmitEmail",
+                        "fPhone",
+                        "fMediaLink",
+                        "fOwnerName",
+                        "fVendorOffering",
+                        "fVendorSpace",
+                        "fVendorPower",
+                        "fVendorSite",
+                        "fSponsorLevel",
+                        "fSponsorGoals",
+                        "fSponsorActivation",
+                        "fSponsorSite",
+                      ].forEach(function (e) {
+                        var t = document.getElementById(e);
+                        t && (t.value = "");
+                      }));
                     var t = document.getElementById("fVendorCategory");
                     (t && (t.value = ""), ie("submitError", ""));
                   })());
