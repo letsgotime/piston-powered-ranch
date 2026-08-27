@@ -1,2 +1,4 @@
 .vercel
 HANDOFF.local.md
+.env*
+node_modules

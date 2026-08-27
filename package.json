@@ -1,0 +1,10 @@
+{
+  "name": "piston-powered-ranch",
+  "private": true,
+  "description": "Event console for The Piston Powered Ranch. Static index.html plus serverless upload endpoints — deliberately no build step.",
+  "dependencies": {
+    "@vercel/blob": "^2.0.0",
+    "jose": "^6.2.10"
+  },
+  "type": "module"
+}

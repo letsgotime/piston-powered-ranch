@@ -2423,12 +2423,21 @@
             </div>
             <div class="reveal d4 card card-pad">
               <div class="field" style="margin-bottom: 12px">
-                <label for="fName">Full name</label>
+                <label for="fName" id="fNameLabel">Point of contact</label>
                 <input id="fName" placeholder="Jordan Alvarez" />
               </div>
               <div class="field" style="margin-bottom: 12px">
                 <label id="submitDynLabel">Vehicle (year / make / model)</label>
                 <input id="submitDynInput" placeholder="2019 Porsche 911 GT3 RS" />
+              </div>
+              <div class="field" id="ownerNameField" style="margin-bottom: 12px">
+                <label for="fOwnerName"
+                  >Owner's name
+                  <span style="opacity: 0.6; font-weight: 400"
+                    >(if you're submitting for someone else)</span
+                  ></label
+                >
+                <input id="fOwnerName" placeholder="Leave blank if you're the owner" />
               </div>
               <div
                 class="field"
@@ -2467,8 +2476,8 @@
                 />
               </div>
               <p class="field-error" id="mediaLinkNote" style="color: var(--ink-3, #8a8f98)">
-                Drop a link to your photos/video instead of uploading here — the widgets below are a
-                preview of what's coming.
+                Optional. You can upload photos, video, a voice note and documents directly below —
+                a link is only needed if your media lives somewhere else.
               </p>
             </div>
             <div class="reveal d5 media-block">
@@ -3347,6 +3356,8 @@
         createClient,
         SupabaseAuthAdapter,
       } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      import { upload as __blobUpload } from "https://esm.sh/@vercel/blob@2.8.0/client";
+      window.__blobUpload = __blobUpload;
       try {
         ((window.__pgdb = createClient({
           auth: {
@@ -4102,6 +4113,32 @@
                   i(a.media_link) +
                   '" target="_blank" rel="noopener noreferrer">Open ↗</a></span></div>'
                 : "") +
+              ("vehicle" === a.type && a.details && a.details.owner_name
+                ? '<div class="line-item"><span class="li-l">Owner</span><span class="li-v">' +
+                  i(a.details.owner_name) +
+                  (a.details.owner_is_contact ? " (same as contact)" : "") +
+                  "</span></div>"
+                : "") +
+              (function () {
+                var m = a.details && a.details.media;
+                if (!m) return "";
+                var n2 =
+                  (m.photo || []).length +
+                  (m.video || []).length +
+                  (m.voice || []).length +
+                  (m.doc || []).length;
+                if (!n2) return "";
+                window.PPR && (PPR.manifests[String(a.id)] = m);
+                return (
+                  '<div class="line-item"><span class="li-l">Media</span><span class="li-v">' +
+                  n2 +
+                  " file" +
+                  (1 === n2 ? "" : "s") +
+                  '</span></div><div class="ppr-media" data-sub="' +
+                  a.id +
+                  '" style="margin-top:10px"></div>'
+                );
+              })() +
               '<div class="line-item"><span class="li-l">Submitted</span><span class="li-v">' +
               i(s(a.created_at)) +
               '</span></div><div class="line-item"><span class="li-l">Status</span><span class="li-v">' +
@@ -4337,86 +4374,385 @@
               (document.getElementById("submitDynInput").placeholder = n.ph));
             var a = document.getElementById("vendorCategoryField");
             a && (a.style.display = "vendor" === t ? "" : "none");
+            var o = document.getElementById("ownerNameField"),
+              c = document.getElementById("fNameLabel");
+            (o && (o.style.display = "vehicle" === t ? "" : "none"),
+              c && (c.textContent = "vehicle" === t ? "Point of contact" : "Full name"));
           });
         });
-        var F = document.getElementById("photoGrid"),
-          H = document.getElementById("photoAdd"),
-          R = document.getElementById("photoCount"),
-          O = 0;
-        H.addEventListener("click", function () {
-          if (!(O >= 50)) {
-            O++;
-            var e = document.createElement("div");
-            ((e.className = "phototile filled"),
-              (e.innerHTML = '<div class="fill"></div><div class="rm">×</div>'),
-              e.addEventListener("click", function () {
-                (e.remove(), O--, (R.textContent = O + " / 50"));
-              }),
-              F.insertBefore(e, H),
-              (R.textContent = O + " / 50"));
+        /* ---------- Real media capture + upload (private Vercel Blob store) ----------
+           Replaces the former UI-only mocks. Files go straight from the browser to
+           Blob using a short-lived token minted by /api/upload; only the resulting
+           manifest is written to submissions.details on submit. */
+        var PPR = {
+          MAX_PHOTOS: 50,
+          MIN_PHOTOS_VEHICLE: 5,
+          MAX_VIDEO_SEC: 300,
+          MAX_VOICE_SEC: 300,
+          media: { photo: [], video: [], voice: [], doc: [] },
+        };
+        window.PPR = PPR;
+        PPR.draftId = (function () {
+          var k = "ppr_draft_id",
+            gen = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          try {
+            var v = sessionStorage.getItem(k);
+            if (!v) sessionStorage.setItem(k, (v = gen));
+            return v;
+          } catch (e) {
+            return gen;
           }
-        });
-        var $ = 0;
-        document.getElementById("videoRow").addEventListener("click", function () {
-          if (!($ >= 300)) {
-            $ = Math.min(300, $ + 27);
-            var e = Math.floor($ / 60),
-              t = $ % 60;
-            ((document.getElementById("videoSub").textContent =
-              e + ":" + (t < 10 ? "0" : "") + t + " used of 5:00"),
-              (document.getElementById("videoTitle").textContent =
-                $ >= 300 ? "Limit reached" : "Add another clip"));
-          }
-        });
-        for (var G = document.getElementById("wave"), U = 0; U < 28; U++) {
-          var j = document.createElement("i");
-          G.appendChild(j);
-        }
-        var W = document.getElementById("recBtn"),
-          z = document.getElementById("recIcon"),
-          Y = document.getElementById("recTime"),
-          K = document.getElementById("voiceRec"),
-          Q = !1,
-          J = 0,
-          X = null;
-        W.addEventListener("click", function () {
-          ((Q = !Q),
-            K.classList.toggle("recording", Q),
-            W.classList.toggle("recording", Q),
-            (z.innerHTML = Q
-              ? '<rect x="8" y="8" width="8" height="8" rx="1.5"/>'
-              : '<rect x="9" y="9" width="6" height="6" rx="1"/>'),
-            Q
-              ? (X = setInterval(function () {
-                  J = Math.min(300, J + 1);
-                  var e = Math.floor(J / 60),
-                    t = J % 60;
-                  ((Y.textContent = e + ":" + (t < 10 ? "0" : "") + t),
-                    J >= 300 &&
-                      ((Q = !1),
-                      K.classList.remove("recording"),
-                      W.classList.remove("recording"),
-                      clearInterval(X)));
-                }, 1e3))
-              : clearInterval(X));
-        });
-        var Z = ["insurance_cert.pdf", "vehicle_title_scan.jpg", "spec_sheet.docx", "w9_form.pdf"],
-          ee = 0,
-          te = document.getElementById("docList");
-        document.getElementById("docRow").addEventListener("click", function () {
-          var e = Z[ee % Z.length];
-          ee++;
-          var t = document.createElement("div");
-          ((t.className = "doc-chip"),
-            (t.innerHTML =
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg><span class="n">' +
-              e +
-              '</span><span class="x">×</span>'),
-            t.querySelector(".x").addEventListener("click", function (e) {
-              (e.stopPropagation(), t.remove());
+        })();
+        PPR.role = function () {
+          var b = document.querySelector("#roleToggle button.active");
+          return b ? b.getAttribute("data-role") : "vehicle";
+        };
+        PPR.fmt = function (s) {
+          var m = Math.floor(s / 60),
+            r = Math.round(s % 60);
+          return m + ":" + (r < 10 ? "0" : "") + r;
+        };
+        PPR.picker = function (accept, multiple) {
+          var i = document.createElement("input");
+          ((i.type = "file"), (i.accept = accept), (i.style.display = "none"));
+          if (multiple) i.multiple = !0;
+          document.body.appendChild(i);
+          return i;
+        };
+        PPR.note = function (msg) {
+          var el = document.getElementById("mediaLinkNote");
+          if (el) el.textContent = msg || "";
+        };
+        PPR.upload = async function (file, kind, onProgress) {
+          if (!window.__blobUpload)
+            throw new Error("Uploader still loading — give it a second and try again.");
+          var safeName = String(file.name || "file")
+            .replace(/[^\w.\-]+/g, "_")
+            .slice(-80);
+          var path = "submissions/" + PPR.role() + "/" + PPR.draftId + "/" + kind + "/" + safeName;
+          var res = await window.__blobUpload(path, file, {
+            access: "private",
+            handleUploadUrl: "/api/upload",
+            clientPayload: JSON.stringify({
+              kind: kind,
+              submissionType: PPR.role(),
+              draftId: PPR.draftId,
             }),
-            te.appendChild(t));
+            onUploadProgress: onProgress
+              ? function (p) {
+                  onProgress(p.percentage);
+                }
+              : void 0,
+          });
+          return {
+            kind: kind,
+            url: res.url,
+            pathname: res.pathname,
+            name: file.name,
+            size: file.size,
+            type: file.type || "",
+          };
+        };
+        PPR.duration = function (file) {
+          return new Promise(function (resolve) {
+            var el = document.createElement(file.type.indexOf("audio") === 0 ? "audio" : "video"),
+              url = URL.createObjectURL(file),
+              done = function (d) {
+                (URL.revokeObjectURL(url), resolve(d));
+              };
+            ((el.preload = "metadata"),
+              (el.onloadedmetadata = function () {
+                done(isFinite(el.duration) ? el.duration : 0);
+              }),
+              (el.onerror = function () {
+                done(0);
+              }),
+              (el.src = url));
+          });
+        };
+
+        /* ---- Photos ---- */
+        var photoGrid = document.getElementById("photoGrid"),
+          photoAdd = document.getElementById("photoAdd"),
+          photoCount = document.getElementById("photoCount"),
+          photoInput = PPR.picker("image/*", !0);
+        function renderPhotoCount() {
+          photoCount.textContent = PPR.media.photo.length + " / " + PPR.MAX_PHOTOS;
+        }
+        photoAdd.addEventListener("click", function () {
+          if (PPR.media.photo.length >= PPR.MAX_PHOTOS)
+            return void PPR.note("Photo limit reached (" + PPR.MAX_PHOTOS + ").");
+          photoInput.click();
         });
+        photoInput.addEventListener("change", async function () {
+          var files = Array.prototype.slice.call(photoInput.files || []);
+          photoInput.value = "";
+          var room = PPR.MAX_PHOTOS - PPR.media.photo.length;
+          if (files.length > room) {
+            PPR.note(
+              "Only the first " + room + " photos were added — limit is " + PPR.MAX_PHOTOS + ".",
+            );
+            files = files.slice(0, room);
+          }
+          for (var i = 0; i < files.length; i++) await addPhoto(files[i]);
+        });
+        async function addPhoto(file) {
+          var tile = document.createElement("div");
+          ((tile.className = "phototile filled"),
+            (tile.innerHTML =
+              '<div class="fill"></div><div class="rm">×</div><div class="up" style="position:absolute;inset:auto 0 0 0;height:3px;background:var(--accent,#f8b800);width:0%;transition:width .2s"></div>'),
+            (tile.style.position = "relative"));
+          var fill = tile.querySelector(".fill"),
+            bar = tile.querySelector(".up"),
+            objUrl = URL.createObjectURL(file);
+          ((fill.style.backgroundImage = "url(" + objUrl + ")"),
+            (fill.style.backgroundSize = "cover"),
+            (fill.style.backgroundPosition = "center"),
+            photoGrid.insertBefore(tile, photoAdd));
+          try {
+            var rec = await PPR.upload(file, "photo", function (pct) {
+              bar.style.width = pct + "%";
+            });
+            (PPR.media.photo.push(rec), (bar.style.width = "100%"), (bar.style.opacity = "0"));
+            tile.querySelector(".rm").addEventListener("click", function () {
+              var ix = PPR.media.photo.indexOf(rec);
+              (ix > -1 && PPR.media.photo.splice(ix, 1),
+                URL.revokeObjectURL(objUrl),
+                tile.remove(),
+                renderPhotoCount());
+            });
+            renderPhotoCount();
+          } catch (err) {
+            (tile.remove(),
+              URL.revokeObjectURL(objUrl),
+              PPR.note(err.message || "Photo upload failed."));
+          }
+        }
+
+        /* ---- Video ---- */
+        var videoSecs = 0,
+          videoInput = PPR.picker("video/*", !0);
+        document.getElementById("videoRow").addEventListener("click", function () {
+          if (videoSecs >= PPR.MAX_VIDEO_SEC) return void PPR.note("Video limit reached (5:00).");
+          videoInput.click();
+        });
+        videoInput.addEventListener("change", async function () {
+          var files = Array.prototype.slice.call(videoInput.files || []);
+          videoInput.value = "";
+          var title = document.getElementById("videoTitle"),
+            sub = document.getElementById("videoSub");
+          for (var i = 0; i < files.length; i++) {
+            var dur = await PPR.duration(files[i]);
+            if (videoSecs + dur > PPR.MAX_VIDEO_SEC) {
+              PPR.note("That clip would exceed the 5:00 total — skipped.");
+              continue;
+            }
+            title.textContent = "Uploading " + files[i].name + "…";
+            try {
+              var rec = await PPR.upload(files[i], "video", function (pct) {
+                sub.textContent = Math.round(pct) + "% uploaded";
+              });
+              ((rec.durationSec = Math.round(dur)),
+                PPR.media.video.push(rec),
+                (videoSecs += dur),
+                (sub.textContent = PPR.fmt(videoSecs) + " used of 5:00"),
+                (title.textContent =
+                  videoSecs >= PPR.MAX_VIDEO_SEC ? "Limit reached" : "Add another clip"));
+            } catch (err) {
+              ((title.textContent = "Add a clip"), PPR.note(err.message || "Video upload failed."));
+            }
+          }
+        });
+
+        for (var waveEl = document.getElementById("wave"), wi = 0; wi < 28; wi++) {
+          waveEl.appendChild(document.createElement("i"));
+        }
+
+        /* ---- Voice note (real MediaRecorder) ---- */
+        var recBtn = document.getElementById("recBtn"),
+          recIcon = document.getElementById("recIcon"),
+          recTime = document.getElementById("recTime"),
+          voiceRec = document.getElementById("voiceRec"),
+          recording = !1,
+          recSecs = 0,
+          recTimer = null,
+          mediaRec = null,
+          chunks = [];
+        function setRecUI(on) {
+          (voiceRec.classList.toggle("recording", on),
+            recBtn.classList.toggle("recording", on),
+            (recIcon.innerHTML = on
+              ? '<rect x="8" y="8" width="8" height="8" rx="1.5"/>'
+              : '<rect x="9" y="9" width="6" height="6" rx="1"/>'));
+        }
+        async function stopRecording() {
+          (clearInterval(recTimer), (recording = !1), setRecUI(!1));
+          if (mediaRec && mediaRec.state !== "inactive") mediaRec.stop();
+        }
+        recBtn.addEventListener("click", async function () {
+          if (recording) return void stopRecording();
+          if (!navigator.mediaDevices || !window.MediaRecorder)
+            return void PPR.note("This browser can't record audio — attach an audio file instead.");
+          try {
+            var stream = await navigator.mediaDevices.getUserMedia({ audio: !0 });
+            ((chunks = []), (mediaRec = new MediaRecorder(stream)));
+            mediaRec.ondataavailable = function (e) {
+              if (e.data && e.data.size) chunks.push(e.data);
+            };
+            mediaRec.onstop = async function () {
+              stream.getTracks().forEach(function (t) {
+                t.stop();
+              });
+              var blob = new Blob(chunks, { type: mediaRec.mimeType || "audio/webm" }),
+                ext = (blob.type.split("/")[1] || "webm").split(";")[0],
+                file = new File([blob], "voice-note-" + Date.now() + "." + ext, {
+                  type: blob.type,
+                });
+              recTime.textContent = "Uploading…";
+              try {
+                var rec = await PPR.upload(file, "voice");
+                ((rec.durationSec = recSecs),
+                  PPR.media.voice.push(rec),
+                  (recTime.textContent = PPR.fmt(recSecs) + " saved"));
+              } catch (err) {
+                ((recTime.textContent = "0:00"), PPR.note(err.message || "Voice upload failed."));
+              }
+              recSecs = 0;
+            };
+            (mediaRec.start(), (recording = !0), (recSecs = 0), setRecUI(!0));
+            recTimer = setInterval(function () {
+              ((recSecs = Math.min(PPR.MAX_VOICE_SEC, recSecs + 1)),
+                (recTime.textContent = PPR.fmt(recSecs)),
+                recSecs >= PPR.MAX_VOICE_SEC && stopRecording());
+            }, 1e3);
+          } catch (err) {
+            PPR.note("Microphone permission denied — attach an audio file instead.");
+          }
+        });
+
+        /* ---- Documents ---- */
+        var docList = document.getElementById("docList"),
+          docInput = PPR.picker("", !0);
+        document.getElementById("docRow").addEventListener("click", function () {
+          docInput.click();
+        });
+        docInput.addEventListener("change", async function () {
+          var files = Array.prototype.slice.call(docInput.files || []);
+          docInput.value = "";
+          for (var i = 0; i < files.length; i++) await addDoc(files[i]);
+        });
+        async function addDoc(file) {
+          var chip = document.createElement("div");
+          ((chip.className = "doc-chip"),
+            (chip.innerHTML =
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/></svg><span class="n"></span><span class="x">×</span>'),
+            (chip.querySelector(".n").textContent = file.name + " · uploading…"),
+            docList.appendChild(chip));
+          try {
+            var rec = await PPR.upload(file, "doc");
+            (PPR.media.doc.push(rec), (chip.querySelector(".n").textContent = file.name));
+            chip.querySelector(".x").addEventListener("click", function (e) {
+              e.stopPropagation();
+              var ix = PPR.media.doc.indexOf(rec);
+              (ix > -1 && PPR.media.doc.splice(ix, 1), chip.remove());
+            });
+          } catch (err) {
+            (chip.remove(), PPR.note(err.message || "Document upload failed."));
+          }
+        }
+        renderPhotoCount();
+        /* ---- Staff-side media review (private blobs need signed, short-lived URLs) ---- */
+        PPR.manifests = {};
+        PPR.signMedia = async function (pathnames) {
+          var db = window.__pgdb;
+          if (!db) throw new Error("Not connected");
+          var sess = await db.auth.getSession(),
+            s = sess && sess.data && sess.data.session,
+            token = s && (s.access_token || s.accessToken);
+          if (!token) throw new Error("Staff sign-in required");
+          var res = await fetch("/api/media", {
+            method: "POST",
+            headers: { "content-type": "application/json", authorization: "Bearer " + token },
+            body: JSON.stringify({ pathnames: pathnames }),
+          });
+          var j = await res.json().catch(function () {
+            return {};
+          });
+          if (!res.ok) throw new Error(j.error || "Could not load media");
+          return j.urls || [];
+        };
+        PPR.hydrateMedia = async function (el) {
+          if (el.__pprDone) return;
+          el.__pprDone = !0;
+          var man = PPR.manifests[el.getAttribute("data-sub")];
+          if (!man) return;
+          var all = []
+            .concat(man.photo || [], man.video || [], man.voice || [], man.doc || [])
+            .filter(function (m) {
+              return m && m.pathname;
+            });
+          if (!all.length) return;
+          el.innerHTML = '<p class="note">Loading media…</p>';
+          try {
+            var urls = await PPR.signMedia(
+                all.map(function (m) {
+                  return m.pathname;
+                }),
+              ),
+              by = {};
+            urls.forEach(function (u) {
+              if (u.url) by[u.pathname] = u.url;
+            });
+            var html = "";
+            (man.photo || []).forEach(function (m) {
+              if (by[m.pathname])
+                html +=
+                  '<a href="' +
+                  by[m.pathname] +
+                  '" target="_blank" rel="noopener noreferrer"><img src="' +
+                  by[m.pathname] +
+                  '" alt="" loading="lazy" style="width:78px;height:78px;object-fit:cover;border-radius:8px;margin:0 6px 6px 0"></a>';
+            });
+            (man.video || []).forEach(function (m) {
+              if (by[m.pathname])
+                html +=
+                  '<video controls preload="metadata" src="' +
+                  by[m.pathname] +
+                  '" style="width:100%;max-width:320px;border-radius:8px;margin:0 0 8px"></video>';
+            });
+            (man.voice || []).forEach(function (m) {
+              if (by[m.pathname])
+                html +=
+                  '<audio controls preload="metadata" src="' +
+                  by[m.pathname] +
+                  '" style="width:100%;margin:0 0 8px"></audio>';
+            });
+            (man.doc || []).forEach(function (m) {
+              if (by[m.pathname])
+                html +=
+                  '<div class="line-item"><span class="li-l">Document</span><span class="li-v"><a href="' +
+                  by[m.pathname] +
+                  '" target="_blank" rel="noopener noreferrer">' +
+                  (m.name || "file") +
+                  " ↗</a></span></div>";
+            });
+            el.innerHTML =
+              '<p class="note" style="margin-bottom:8px">Submitted media — links expire in 10 minutes.</p>' +
+              (html || '<p class="note">Nothing readable.</p>');
+          } catch (err) {
+            el.innerHTML =
+              '<p class="note">Media unavailable: ' + (err.message || "error") + "</p>";
+          }
+        };
+        (function () {
+          var scan = function () {
+            document.querySelectorAll(".ppr-media[data-sub]").forEach(function (el) {
+              PPR.hydrateMedia(el);
+            });
+          };
+          new MutationObserver(scan).observe(document.body, { childList: !0, subtree: !0 });
+          scan();
+        })();
         var ne = document.getElementById("submitForm"),
           ae = document.getElementById("submitConfirm");
         function ie(e, t) {
@@ -4432,33 +4768,62 @@
             o = (document.getElementById("fPhone").value || "").trim(),
             l = (document.getElementById("fMediaLink").value || "").trim(),
             d = (document.getElementById("fVendorCategory").value || "").trim();
+          if ("vehicle" === t && window.PPR && PPR.media.photo.length < PPR.MIN_PHOTOS_VEHICLE)
+            return void ie(
+              "submitError",
+              "Vehicle submissions need at least " +
+                PPR.MIN_PHOTOS_VEHICLE +
+                " photos — you've added " +
+                PPR.media.photo.length +
+                ".",
+            );
           if ((ie("submitError", ""), i))
             if (r && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r))
               if (s)
                 if ("vendor" !== t || d)
                   if (!l || /^https?:\/\//i.test(l)) {
-                    var c =
+                    var pocOwner = (
+                        (document.getElementById("fOwnerName") || {}).value || ""
+                      ).trim(),
+                      pprMedia = (window.PPR && PPR.media) || {
+                        photo: [],
+                        video: [],
+                        voice: [],
+                        doc: [],
+                      },
+                      c =
                         "vehicle" === t
-                          ? { vehicle: s }
+                          ? {
+                              vehicle: s,
+                              point_of_contact: i,
+                              owner_name: pocOwner || i,
+                              owner_is_contact: !pocOwner,
+                            }
                           : "vendor" === t
                             ? { business: s, category: d }
                             : { company: s },
                       u = document.getElementById("submitBtn");
+                    ((c.media = pprMedia),
+                      (c.media_counts = {
+                        photo: pprMedia.photo.length,
+                        video: pprMedia.video.length,
+                        voice: pprMedia.voice.length,
+                        doc: pprMedia.doc.length,
+                      }),
+                      (c.draft_id = window.PPR ? PPR.draftId : null));
                     ((u.disabled = !0),
                       (u.textContent = "Submitting…"),
                       (async function () {
                         try {
                           await a();
-                          var e = await n
-                            .from("submissions")
-                            .insert({
-                              type: t,
-                              applicant_name: i,
-                              email: r,
-                              phone: o || null,
-                              details: c,
-                              media_link: l || null,
-                            });
+                          var e = await n.from("submissions").insert({
+                            type: t,
+                            applicant_name: i,
+                            email: r,
+                            phone: o || null,
+                            details: c,
+                            media_link: l || null,
+                          });
                           if (((u.disabled = !1), (u.textContent = "Submit for review"), e.error))
                             return void ie(
                               "submitError",
