@@ -57,9 +57,40 @@ once it grew past a certain size, and repeatedly broke production. Deploy from
 disk via git push or the Vercel CLI, which upload bytes directly. This
 constraint is why the project moved to local tooling.
 
+## Media uploads (built — vehicle path)
+
+Submitted media goes to a **private** Vercel Blob store. This is not a
+preference; submitted vehicle photos routinely show plates and VINs in the
+pixels, and a public store makes every one of them readable by URL forever.
+An unauthenticated fetch of a blob URL returns 403.
+
+- `api/upload.js` mints short-lived, scoped upload tokens. The Submit form is
+  public by requirement, so all limits are server-side: per-kind content-type
+  allowlists, per-kind size caps, and a pathname that must sit under the
+  caller's own `submissions/<type>/<draft>/<kind>/` prefix.
+- `api/media.js` returns 10-minute signed read URLs, gated on a verified Neon
+  Auth JWT whose email is on the same three-address staff allowlist that
+  `is_staff()` enforces in Postgres. Two independent checks: RLS protects the
+  rows, this protects the pixels.
+- The media manifest rides in `submissions.details` (jsonb) — no schema
+  migration, no new RLS policy.
+- Vehicle form takes point of contact first, owner's name below it (brokers
+  submit on an owner's behalf), and requires at least 5 photos.
+
+`package.json` exists only to give those two functions their dependencies.
+There is still **no build step** — framework and buildCommand stay null, and
+`index.html` is still served as a static file. Don't add a build script.
+
 ## Still to build
 
-1. **Unified media handler** for the Submit form (vendor / sponsor / vehicle):
+0. **Abuse gate on uploads (do this before promoting the form).** The Submit
+   form is public and now accepts real files, so anyone can push photos and
+   video at the store repeatedly and you pay for it. Content-type and size
+   caps are enforced, but there is no rate limit or human check yet.
+   Cloudflare Turnstile is the natural fit.
+1. **Vendor and sponsor media paths.** The upload plumbing is shared and
+   already works for all three types; what's missing is the vendor/sponsor
+   form fields and their own review rendering:
    up to 50 photos, up to 5 min video, up to 5 min voice memo, any document
    type, working identically across iPhone, Android, tablet, and desktop via
    native file and camera pickers. The current photo/video/voice/document
