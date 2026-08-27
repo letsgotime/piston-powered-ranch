@@ -18,6 +18,15 @@ const THUMBS = join(DIR, "thumbs");
  *  person made it. `aud` drives the filter chips. */
 const CATALOG = [
   {
+    base: "PPR_Logo_PG_transparent",
+    title: "PG Logo",
+    aud: "community",
+    group: "Brand",
+    blurb: "The PaddockGavin mark on a transparent background. Drops onto anything.",
+    imageOnly: true,
+    shape: "sq",
+  },
+  {
     base: "PPR_Proposal_RanchoJaramillo",
     title: "Venue Proposal",
     aud: "ranch",
@@ -96,6 +105,7 @@ const CATALOG = [
     group: "Social",
     blurb: "1080 × 1080. Feed posts.",
     imageOnly: true,
+    shape: "sq",
   },
   {
     base: "PPR_Social_Story_1080x1920",
@@ -104,6 +114,7 @@ const CATALOG = [
     group: "Social",
     blurb: "1080 × 1920. Stories and Reels.",
     imageOnly: true,
+    shape: "tall",
   },
   {
     base: "PPR_Social_Captions",
@@ -201,9 +212,8 @@ for (const [group, items] of groups) {
     cards +=
       `\n            <article class="card" data-aud="${it.aud}" data-name="${esc((it.title + " " + it.blurb).toLowerCase())}">` +
       (it.thumb
-        ? `<button class="thumb" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
-          `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>`
-        : `<div class="thumb noimg"></div>`) +
+        ? `<button class="thumb ${it.shape || ""}" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
+          `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>` : ``) +
       `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">${btns}</div>` +
       `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
       `</div></article>`;
