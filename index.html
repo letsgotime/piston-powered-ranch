@@ -2129,6 +2129,104 @@
         color: var(--ink-mute);
         margin: 14px 0 6px;
       }
+      .site-footer {
+        margin-top: var(--gap-6);
+        border-top: 1px solid var(--line-soft);
+        background: color-mix(in srgb, var(--panel-2, #0d1620) 55%, transparent);
+        padding: var(--gap-5) var(--gap-4) calc(var(--gap-5) + var(--safe-b));
+        font-size: 13px;
+      }
+      .site-footer .f-top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-5);
+        justify-content: space-between;
+        margin-bottom: var(--gap-4);
+      }
+      .site-footer .f-brand {
+        max-width: 250px;
+      }
+      .site-footer .f-brand img {
+        height: 34px;
+        width: auto;
+        margin-bottom: 10px;
+      }
+      .site-footer .f-brand p {
+        margin: 0;
+        color: var(--ink-mute);
+        line-height: 1.6;
+      }
+      .site-footer .f-col p.f-label {
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+        opacity: 0.7;
+        margin: 0 0 6px;
+        font-weight: 700;
+      }
+      .site-footer .f-col a {
+        display: flex;
+        align-items: center;
+        min-height: 34px;
+        color: var(--ink-dim);
+        text-decoration: none;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .site-footer .f-col a:hover {
+        color: var(--ink);
+      }
+      .site-footer .f-band {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--gap-4) var(--gap-5);
+        padding: var(--gap-4) 0;
+        border-top: 1px solid var(--line-soft);
+        border-bottom: 1px solid var(--line-soft);
+        margin-bottom: var(--gap-3);
+      }
+      .site-footer .f-band a,
+      .site-footer .f-band span.v {
+        display: block;
+        color: var(--ink-dim);
+        text-decoration: none;
+        font-size: 13px;
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 500;
+        line-height: 1.8;
+      }
+      .site-footer .f-bottom {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+        align-items: center;
+        color: var(--ink-mute);
+      }
+      .site-footer .f-live {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .site-footer .f-live .dot2 {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent-2);
+        box-shadow: 0 0 6px var(--accent-2);
+      }
+      .site-footer .f-fine {
+        margin: 14px 0 0;
+        color: var(--ink-mute);
+        opacity: 0.75;
+        font-size: 11.5px;
+        line-height: 1.7;
+        max-width: 560px;
+      }
       .protoctl {
         position: fixed;
         left: 50%;
@@ -3529,6 +3627,82 @@
           </div>
         </section>
       </div>
+      <footer class="site-footer">
+        <div class="f-top">
+          <div class="f-brand">
+            <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+            <p>
+              A private-collector car show at Rancho Jaramillo. One curated field of cars under fall
+              color. Unionville, TN.
+            </p>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Event</p>
+            <a href="/">Console home</a>
+            <a href="/collateral/">Collateral kit</a>
+            <a href="/collateral/captions.html">Caption pack</a>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Community</p>
+            <a
+              href="https://www.instagram.com/gotimemotorsports/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Instagram</a
+            >
+            <a
+              href="https://www.youtube.com/@gotimemotorsports"
+              target="_blank"
+              rel="noopener noreferrer"
+              >YouTube</a
+            >
+            <a
+              href="https://www.tiktok.com/@go_time_motorsports"
+              target="_blank"
+              rel="noopener noreferrer"
+              >TikTok</a
+            >
+            <a
+              href="https://www.facebook.com/GoTimeMotorsports/"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Facebook</a
+            >
+          </div>
+        </div>
+        <div class="f-band">
+          <div class="f-col">
+            <p class="f-label">When</p>
+            <span class="v">Saturday, October 10, 2026<br />9:00 AM to 3:00 PM</span>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Where</p>
+            <span class="v">Rancho Jaramillo<br />179 Enon Church Rd, Unionville, TN 37180</span>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Contact</p>
+            <a href="mailto:gavin@paddock20.com" style="text-transform: none; letter-spacing: 0"
+              >gavin@paddock20.com</a
+            >
+            <a href="mailto:bekah@paddock20.com" style="text-transform: none; letter-spacing: 0"
+              >bekah@paddock20.com</a
+            >
+          </div>
+          <div class="f-col">
+            <p class="f-label">Benefiting</p>
+            <span class="v">Community Elementary School<br />Unionville, Tennessee</span>
+          </div>
+        </div>
+        <div class="f-bottom">
+          <span>© 2026 PaddockGavin. All rights reserved.</span>
+          <span class="f-live"><span class="dot2"></span>Submissions open</span>
+        </div>
+        <p class="f-fine">
+          The Piston Powered Ranch is a PaddockGavin production, part of the Paddock20 family.
+          Vehicle entries are subject to approval. Event details may adjust as planning is finalized
+          with the venue.
+        </p>
+      </footer>
     </div>
     <div class="sheet-scrim" id="sheetScrim"></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true">

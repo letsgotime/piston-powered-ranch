@@ -315,6 +315,16 @@
       a.dl.print .k {
         color: var(--accent);
       }
+      a.dl.page {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      a.dl.page .k {
+        color: #151000;
+      }
+      a.dl.page .s {
+        color: rgba(21, 16, 0, 0.65);
+      }
       a.dl:hover {
         transform: translateY(-1px);
       }
@@ -339,13 +349,19 @@
         margin-top: 28px;
         color: var(--ink-mute);
       }
-      footer {
-        margin-top: 52px;
-        padding-top: 20px;
-        border-top: 1px solid var(--line-soft);
-        color: var(--ink-mute);
-        font-size: 13px;
-      }
+      footer.pfoot{margin-top:52px;padding-top:26px;border-top:1px solid var(--line-soft);color:var(--ink-mute);font-size:13px}
+      .pf-top{display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;margin-bottom:22px}
+      .pf-brand{max-width:250px}
+      .pf-brand img{height:34px;width:auto;margin-bottom:10px}
+      .pf-brand p{margin:0;color:var(--ink-mute);line-height:1.6}
+      .pf-label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-mute);opacity:.7;margin:0 0 6px;font-weight:700}
+      .pf-col a{display:flex;align-items:center;min-height:32px;color:var(--ink-dim);text-decoration:none;font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+      .pf-col a.lc{text-transform:none;letter-spacing:0}
+      .pf-col a:hover{color:var(--ink)}
+      .pf-bottom{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--line-soft)}
+      .pf-live{display:flex;align-items:center;gap:7px}
+      .pfdot{width:7px;height:7px;border-radius:50%;background:var(--accent-2);box-shadow:0 0 6px var(--accent-2)}
+      .pf-fine{margin:14px 0 0;opacity:.75;font-size:11.5px;line-height:1.7;max-width:560px}
       dialog.lb {
         border: 0;
         padding: 0;
@@ -444,9 +460,40 @@
         Nothing matches that. Try a different word or tap Everything.
       </p>
 
-      <footer>
-        Assets are for promoting this event. Questions, or a file that will not open, reply to the
-        thread that sent you this link.
+      <footer class="pfoot">
+        <div class="pf-top">
+          <div class="pf-brand">
+            <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+            <p>A private-collector car show at Rancho Jaramillo. One curated field of cars under fall color. Unionville, TN.</p>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Event</p>
+            <a href="/">Console home</a>
+            <a href="/collateral/">Collateral kit</a>
+            <a href="/collateral/captions.html">Caption pack</a>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Community</p>
+            <a href="https://www.instagram.com/gotimemotorsports/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.youtube.com/@gotimemotorsports" target="_blank" rel="noopener noreferrer">YouTube</a>
+            <a href="https://www.tiktok.com/@go_time_motorsports" target="_blank" rel="noopener noreferrer">TikTok</a>
+            <a href="https://www.facebook.com/GoTimeMotorsports/" target="_blank" rel="noopener noreferrer">Facebook</a>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Contact</p>
+            <a href="mailto:gavin@paddock20.com" class="lc">gavin@paddock20.com</a>
+            <a href="mailto:bekah@paddock20.com" class="lc">bekah@paddock20.com</a>
+          </div>
+        </div>
+        <div class="pf-bottom">
+          <span>© 2026 PaddockGavin. All rights reserved.</span>
+          <span class="pf-live"><span class="pfdot"></span>Submissions open</span>
+        </div>
+        <p class="pf-fine">
+          The Piston Powered Ranch is a PaddockGavin production, part of the Paddock20 family.
+          Assets on this page are for promoting this event. Questions, or a file that will not
+          open, reply to the thread that sent you this link.
+        </p>
       </footer>
     </div>
 

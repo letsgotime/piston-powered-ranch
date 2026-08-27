@@ -122,6 +122,8 @@ const CATALOG = [
     aud: "community",
     group: "Social",
     blurb: "Written captions for Instagram, Facebook and stories. Copy, paste, post.",
+    pageHref: "captions.html",
+    pageLabel: "Open the captions",
     textOnly: true,
   },
 ];
@@ -214,7 +216,11 @@ for (const [group, items] of groups) {
       (it.thumb
         ? `<button class="thumb ${it.shape || ""}" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
           `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>` : ``) +
-      `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">${btns}</div>` +
+      `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">` +
+      (it.pageHref
+        ? `<a class="dl page" href="${esc(it.pageHref)}"><span class="k">${esc(it.pageLabel)}</span><span class="s">Copy per platform</span></a>`
+        : "") +
+      `${btns}</div>` +
       `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
       `</div></article>`;
   }
