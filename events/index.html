@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>PaddockGavin Events</title>
+    <meta
+      name="description"
+      content="Curated automotive gatherings in Middle Tennessee. The Piston Powered Ranch at Rancho Jaramillo, October 10, 2026, and what comes after."
+    />
+    <meta property="og:title" content="PaddockGavin Events" />
+    <meta
+      property="og:description"
+      content="Curated automotive gatherings in Middle Tennessee. Next: The Piston Powered Ranch, October 10, 2026."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://piston-powered-ranch.vercel.app/events/" />
+    <meta property="og:image" content="https://piston-powered-ranch.vercel.app/og/ppr-og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <style>
+      :root {
+        --bg: #0d1620;
+        --surface: #121d2a;
+        --surface2: #16222f;
+        --ink: #fff;
+        --dim: #c4cbd6;
+        --mute: #8b95a3;
+        --amber: #f8b800;
+        --teal: #00d2be;
+        --blue: #005185;
+        --line: #27384f;
+        --line-soft: #1c2a3d;
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+      }
+      img { max-width: 100%; display: block; }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .rule {
+        height: 4px; position: relative; z-index: 5;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, var(--blue) 50% 75%, var(--mute) 75% 100%);
+      }
+      /* ---- hero ---- */
+      .hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; overflow: hidden; }
+      .hero .bg {
+        position: absolute; inset: -4%; background: url("img/hero.jpg") center 35% / cover no-repeat;
+        animation: kenburns 26s var(--ease) infinite alternate;
+      }
+      @keyframes kenburns {
+        from { transform: scale(1) translateY(0); }
+        to { transform: scale(1.08) translateY(-1.6%); }
+      }
+      .hero .scrim {
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(13, 22, 32, 0.25) 0%, rgba(13, 22, 32, 0.05) 34%, rgba(13, 22, 32, 0.62) 72%, var(--bg) 100%);
+      }
+      .hero-inner { position: relative; z-index: 2; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px 9vh; }
+      .eyebrow {
+        font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
+        color: var(--teal); display: flex; align-items: center; gap: 9px;
+      }
+      .eyebrow::before { content: ""; width: 26px; height: 2px; background: var(--teal); }
+      h1 {
+        margin: 14px 0 0; font-size: clamp(44px, 9vw, 96px); line-height: 0.98; letter-spacing: -0.02em;
+        text-wrap: balance; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
+      }
+      h1 .a { color: var(--amber); }
+      .hero p {
+        margin: 20px 0 0; font-size: clamp(17px, 2.2vw, 21px); color: var(--dim); max-width: 54ch;
+        text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+      }
+      .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+        font-weight: 700; font-size: 15px; border-radius: 999px; padding: 14px 26px;
+        transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+      }
+      .btn:hover { transform: translateY(-2px); }
+      .btn-amber { background: var(--amber); color: #151000; box-shadow: 0 10px 34px -12px rgba(248, 184, 0, 0.55); }
+      .btn-ghost { border: 1px solid rgba(255, 255, 255, 0.35); color: var(--ink); background: rgba(13, 22, 32, 0.35); backdrop-filter: blur(6px); }
+      .tick {
+        position: absolute; top: 22px; right: 26px; z-index: 3; display: flex; align-items: center; gap: 8px;
+        font-size: 12.5px; font-weight: 650; color: var(--dim); background: rgba(13, 22, 32, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px; padding: 7px 14px; backdrop-filter: blur(8px);
+      }
+      .tick .d { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: pulse 2.4s infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+      .hero .mark { height: 52px; width: auto; margin-bottom: 22px; filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.5)); }
+      /* ---- sections ---- */
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+      section { padding: 84px 0 0; }
+      .sec-eyebrow {
+        font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); font-weight: 700;
+      }
+      h2 { margin: 10px 0 0; font-size: clamp(28px, 4.6vw, 44px); line-height: 1.06; letter-spacing: -0.02em; }
+      h2 .a { color: var(--amber); }
+      .sub { color: var(--dim); max-width: 62ch; margin: 14px 0 0; font-size: 17px; }
+      /* featured event */
+      .feature {
+        margin-top: 34px; border: 1px solid var(--line-soft); border-radius: 22px; overflow: hidden;
+        background: var(--surface); display: grid; grid-template-columns: 1.15fr 1fr;
+      }
+      .feature .ph { position: relative; min-height: 340px; overflow: hidden; }
+      .feature .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+      .feature:hover .ph img { transform: scale(1.045); }
+      .feature .body { padding: 34px 34px 30px; display: flex; flex-direction: column; gap: 12px; }
+      .pill {
+        align-self: flex-start; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 800;
+        color: #151000; background: var(--amber); border-radius: 999px; padding: 4px 12px;
+      }
+      .feature h3 { margin: 4px 0 0; font-size: 30px; line-height: 1.05; letter-spacing: -0.015em; }
+      .meta { color: var(--teal); font-weight: 650; font-size: 14px; }
+      .feature p { margin: 0; color: var(--dim); font-size: 15px; flex: 1; }
+      .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+      .links a {
+        text-decoration: none; font-size: 13.5px; font-weight: 700; color: var(--ink);
+        border: 1px solid var(--line); border-radius: 999px; padding: 9px 18px; transition: border-color 0.2s, transform 0.18s var(--ease);
+      }
+      .links a:hover { border-color: var(--amber); transform: translateY(-1px); }
+      .links a.primary { background: var(--amber); border-color: var(--amber); color: #151000; }
+      /* timeline */
+      .timeline { margin-top: 36px; border-left: 2px solid var(--line-soft); padding-left: 28px; display: flex; flex-direction: column; gap: 30px; }
+      .tl { position: relative; }
+      .tl::before {
+        content: ""; position: absolute; left: -35px; top: 6px; width: 12px; height: 12px; border-radius: 50%;
+        background: var(--bg); border: 3px solid var(--mute);
+      }
+      .tl.now::before { border-color: var(--amber); box-shadow: 0 0 0 5px rgba(248, 184, 0, 0.15); }
+      .tl.next::before { border-color: var(--teal); }
+      .tl .when { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 750; color: var(--mute); }
+      .tl.now .when { color: var(--amber); }
+      .tl.next .when { color: var(--teal); }
+      .tl h3 { margin: 4px 0 0; font-size: 20px; }
+      .tl p { margin: 6px 0 0; color: var(--dim); font-size: 14.5px; max-width: 62ch; }
+      /* photo band */
+      .band { margin-top: 84px; position: relative; height: 46vh; min-height: 300px; overflow: hidden; }
+      .band img { width: 100%; height: 120%; object-fit: cover; object-position: center 40%; will-change: transform; }
+      .band .cap {
+        position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 24px;
+        background: linear-gradient(180deg, transparent, rgba(13, 22, 32, 0.85));
+        font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--dim); text-align: center;
+      }
+      /* stats strip */
+      .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 34px; }
+      .stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 16px; padding: 22px; }
+      .stat .v { font-family: "Arial Black", Helvetica, sans-serif; font-size: 30px; color: var(--amber); font-variant-numeric: tabular-nums; }
+      .stat .l { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); font-weight: 700; margin-top: 4px; }
+      /* reveal motion */
+      .rv { opacity: 0; transform: translateY(26px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+      .rv.in { opacity: 1; transform: none; }
+      /* footer */
+      footer { margin-top: 96px; border-top: 1px solid var(--line-soft); padding: 34px 0 60px; }
+      .pf-top { display: flex; flex-wrap: wrap; gap: 34px; justify-content: space-between; margin-bottom: 24px; }
+      .pf-brand { max-width: 260px; }
+      .pf-brand img { height: 36px; width: auto; margin-bottom: 10px; }
+      .pf-brand p { margin: 0; color: var(--mute); font-size: 13px; line-height: 1.6; }
+      .pf-label { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--mute); opacity: 0.7; margin: 0 0 6px; font-weight: 700; }
+      .pf-col a {
+        display: flex; align-items: center; min-height: 32px; color: var(--dim); text-decoration: none;
+        font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+      }
+      .pf-col a.lc { text-transform: none; letter-spacing: 0; }
+      .pf-col a:hover { color: var(--ink); }
+      .pf-bottom {
+        display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+        padding-top: 16px; border-top: 1px solid var(--line-soft); color: var(--mute); font-size: 13px;
+      }
+      .pf-live { display: flex; align-items: center; gap: 7px; }
+      .pfdot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px var(--teal); }
+      .pf-fine { margin: 14px 0 0; color: var(--mute); opacity: 0.75; font-size: 11.5px; line-height: 1.7; max-width: 560px; }
+      @media (max-width: 760px) {
+        .feature { grid-template-columns: 1fr; }
+        .feature .ph { min-height: 240px; }
+        .hero { min-height: 86vh; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .hero .bg { animation: none; }
+        .tick .d { animation: none; }
+        .rv { opacity: 1; transform: none; transition: none; }
+        .band img { transform: none !important; }
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <header class="hero">
+      <div class="bg" aria-hidden="true"></div>
+      <div class="scrim" aria-hidden="true"></div>
+      <div class="tick"><span class="d"></span>Submissions open for October 10</div>
+      <div class="hero-inner">
+        <img class="mark" src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="eyebrow">PaddockGavin Events</div>
+        <h1 class="display">The good cars<br /><span class="a">come outside</span></h1>
+        <p>
+          Curated automotive gatherings in Middle Tennessee: one field at a time, every car
+          approved before it gets a pass, and every event giving something back to the county it
+          runs in.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-amber" href="/#submit">Submit your car</a>
+          <a class="btn btn-ghost" href="/#event">The Piston Powered Ranch</a>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <div class="wrap rv">
+        <div class="sec-eyebrow">Now boarding</div>
+        <h2 class="display">One field. <span class="a">300 cars.</span></h2>
+        <div class="feature">
+          <div class="ph"><img src="img/ranch.jpg" alt="A scarlet supercar on pasture grass at sunrise beside a ranch fence" /></div>
+          <div class="body">
+            <span class="pill">Saturday · Oct 10 · 2026</span>
+            <h3 class="display">The Piston Powered Ranch</h3>
+            <span class="meta">Rancho Jaramillo · Unionville, TN · 9 AM to 3 PM</span>
+            <p>
+              A private-collector show in the spirit of Monterey Car Week: three hundred curated
+              cars on a working ranch under fall color, open-fire cooking from Cítrico Grill, and
+              awards at 1:30. Entry is by approval, and the day benefits Community Elementary
+              School in Unionville.
+            </p>
+            <div class="links">
+              <a class="primary" href="/#submit">Submit for approval</a>
+              <a href="/#event">Event info</a>
+              <a href="/rancho">Collateral kit</a>
+            </div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="v" data-count="300">0</div><div class="l">Curated cars</div></div>
+          <div class="stat"><div class="v" data-count="600">0</div><div class="l">Acres of ranch</div></div>
+          <div class="stat"><div class="v" data-count="20">0</div><div class="l">VIP passes, total</div></div>
+          <div class="stat"><div class="v" id="daysOut">0</div><div class="l">Days to show day</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="band rv" id="band1">
+      <img src="img/walk.jpg" alt="Guests strolling between rows of collector cars under fall oaks" />
+      <div class="cap">Gallery-walk pace · every car approved before it receives a pass</div>
+    </div>
+
+    <section>
+      <div class="wrap rv">
+        <div class="sec-eyebrow">The road so far</div>
+        <h2 class="display">Where this <span class="a">comes from</span></h2>
+        <p class="sub">
+          PaddockGavin events grew out of a simple standard: fewer cars, better cars, and a day
+          worth dressing for.
+        </p>
+        <div class="timeline">
+          <div class="tl">
+            <div class="when">Through August 2026</div>
+            <h3>Donuts with duPont</h3>
+            <p>
+              The monthly Nashville gathering that set the curation standard. August 2026 is its
+              final month, and everything it taught rolls forward into what comes next.
+            </p>
+          </div>
+          <div class="tl now">
+            <div class="when">October 10, 2026 · now boarding</div>
+            <h3>The Piston Powered Ranch</h3>
+            <p>
+              The first full-scale PaddockGavin event: 300 curated cars at Rancho Jaramillo,
+              vendors and VIP hospitality on the field, and 30 to 50 percent of net event revenue
+              targeted to Community Elementary School.
+            </p>
+          </div>
+          <div class="tl next">
+            <div class="when">In scoping</div>
+            <h3>Encanto Blossom Orchard</h3>
+            <p>
+              Collector cars among the apple rows of a U-Pick orchard in Shelbyville, Tennessee.
+              Early conversations only; nothing is booked yet.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="band rv" id="band2">
+      <img src="img/dusk.jpg" alt="String lights glowing between white event tents on a pasture at dusk" />
+      <div class="cap">Every event gives back to the county it runs in</div>
+    </div>
+
+    <footer>
+      <div class="wrap">
+        <div class="pf-top">
+          <div class="pf-brand">
+            <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+            <p>Curated automotive gatherings in Middle Tennessee. Part of the Paddock20 family.</p>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Event</p>
+            <a href="/">Console home</a>
+            <a href="/collateral/">Collateral kit</a>
+            <a href="/collateral/captions.html">Caption pack</a>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Community</p>
+            <a href="https://www.instagram.com/gotimemotorsports/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.youtube.com/@gotimemotorsports" target="_blank" rel="noopener noreferrer">YouTube</a>
+            <a href="https://www.tiktok.com/@go_time_motorsports" target="_blank" rel="noopener noreferrer">TikTok</a>
+            <a href="https://www.facebook.com/GoTimeMotorsports/" target="_blank" rel="noopener noreferrer">Facebook</a>
+          </div>
+          <div class="pf-col">
+            <p class="pf-label">Contact</p>
+            <a href="mailto:gavin@paddock20.com" class="lc">gavin@paddock20.com</a>
+            <a href="mailto:bekah@paddock20.com" class="lc">bekah@paddock20.com</a>
+          </div>
+        </div>
+        <div class="pf-bottom">
+          <span>© 2026 PaddockGavin. All rights reserved.</span>
+          <span class="pf-live"><span class="pfdot"></span>Submissions open</span>
+        </div>
+        <p class="pf-fine">
+          PaddockGavin Events is a Paddock20 family production. Photography on this page is
+          concept imagery of the event style. Vehicle entries are subject to approval; event
+          details may adjust as planning is finalized with each venue.
+        </p>
+      </div>
+    </footer>
+
+    <script>
+      (function () {
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        // reveal on scroll
+        var io = new IntersectionObserver(
+          function (es) {
+            es.forEach(function (e) {
+              e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target));
+            });
+          },
+          { threshold: 0.12 },
+        );
+        document.querySelectorAll(".rv").forEach(function (el) { io.observe(el); });
+        // live days-out counter (real date math, ticks over midnight)
+        function days() {
+          var d = Math.max(0, Math.ceil((new Date("2026-10-10T09:00:00-05:00") - Date.now()) / 864e5));
+          var el = document.getElementById("daysOut");
+          el && (el.textContent = String(d));
+        }
+        days();
+        setInterval(days, 6e4);
+        // count-up stats when visible
+        var so = new IntersectionObserver(
+          function (es) {
+            es.forEach(function (e) {
+              if (!e.isIntersecting) return;
+              so.unobserve(e.target);
+              var el = e.target,
+                to = parseInt(el.getAttribute("data-count"), 10);
+              if (reduce || !isFinite(to)) { el.textContent = String(to || el.textContent); return; }
+              var t0 = performance.now();
+              (function step(now) {
+                var k = Math.min(1, (now - t0) / 900),
+                  ease = 1 - Math.pow(1 - k, 3);
+                el.textContent = String(Math.round(to * ease));
+                k < 1 && requestAnimationFrame(step);
+              })(t0);
+            });
+          },
+          { threshold: 0.5 },
+        );
+        document.querySelectorAll("[data-count]").forEach(function (el) { so.observe(el); });
+        // gentle parallax on the photo bands
+        if (!reduce) {
+          var bands = [].slice.call(document.querySelectorAll(".band img"));
+          var ticking = false;
+          window.addEventListener("scroll", function () {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+              bands.forEach(function (im) {
+                var r = im.parentElement.getBoundingClientRect();
+                if (r.bottom < 0 || r.top > innerHeight) return;
+                var p = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
+                im.style.transform = "translateY(" + p * -34 + "px)";
+              });
+              ticking = false;
+            });
+          }, { passive: true });
+        }
+      })();
+    </script>
+  </body>
+</html>

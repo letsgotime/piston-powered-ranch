@@ -4068,10 +4068,11 @@
                           n.from("budget_items")
                             .update({ qty: e })
                             .eq("id", a)
+                            .select("id")
                             .then(function (e) {
-                              e.error
-                                ? (t.style.outline = "1px solid var(--crit)")
-                                : (t.style.outline = "");
+                              !e.error && e.data && e.data.length
+                                ? (t.style.outline = "")
+                                : (t.style.outline = "1px solid var(--crit)");
                             });
                         }, 500)));
                     });
@@ -4566,6 +4567,7 @@
           },
         };
         async function I(e) {
+          dcsFlush();
           var t = document.getElementById("sheetScrim"),
             n = document.getElementById("sheet");
           if (t && n) {
@@ -4803,6 +4805,7 @@
             k && (k.textContent = d + " confirmed · $250/booth");
             var dcs = await n.from("open_decisions").select("status"),
               dEl = document.getElementById("ocDecisions");
+            dEl && (dcs.error || !dcs.data) && (dEl.textContent = "Unavailable right now");
             if (dEl && dcs && dcs.data) {
               var openN = dcs.data.filter(function (r) {
                   return "open" === r.status;
@@ -4822,9 +4825,16 @@
               if (pend && pend.data) {
                 var pn = pend.data.length;
                 if (pn) {
-                  var oldest = Math.floor(
-                    (Date.now() - new Date(pend.data[0].created_at).getTime()) / 864e5,
-                  );
+                  var d0 = new Date(pend.data[0].created_at),
+                    today = new Date(),
+                    oldest = Math.max(
+                      0,
+                      Math.round(
+                        (new Date(today.getFullYear(), today.getMonth(), today.getDate()) -
+                          new Date(d0.getFullYear(), d0.getMonth(), d0.getDate())) /
+                          864e5,
+                      ),
+                    );
                   items.push([
                     pn + " submission" + (1 === pn ? "" : "s") + " waiting",
                     oldest
@@ -4839,15 +4849,29 @@
                 }).length;
                 items.push(
                   oN
-                    ? [oN + " decisions still open", "work the Decision Desk below"]
+                    ? [
+                        oN + (1 === oN ? " decision" : " decisions") + " still open",
+                        "work the Decision Desk below",
+                      ]
                     : ["Every tracked decision is settled", ""],
                 );
               }
-              var days = Math.ceil((new Date("2026-10-10T09:00:00-05:00") - Date.now()) / 864e5),
-                mdays = Math.ceil((new Date("2026-08-30T09:00:00-05:00") - Date.now()) / 864e5);
+              var days = Math.max(
+                  0,
+                  Math.ceil((new Date("2026-10-10T09:00:00-05:00") - Date.now()) / 864e5),
+                ),
+                mdays = Math.max(
+                  0,
+                  Math.ceil((new Date("2026-08-30T09:00:00-05:00") - Date.now()) / 864e5),
+                ),
+                dayWord = function (k) {
+                  return k + (1 === k ? " day" : " days");
+                };
               items.push([
-                days + " days to show day",
-                mdays > 0 ? mdays + " days to the marketing launch" : "marketing launch is live",
+                days ? dayWord(days) + " to show day" : "Show day is here",
+                mdays > 0
+                  ? dayWord(mdays) + " to the marketing launch"
+                  : "marketing launch is live",
               ]);
               rows.innerHTML = items
                 .map(function (it) {
@@ -4863,53 +4887,89 @@
             }
           } catch (e) {}
         }
-        var dcsTimers = {};
+        var dcsTimers = {},
+          dcsChain = {},
+          dcsLatest = {};
         function dcsState(id, msg, ok) {
           var el = document.querySelector('.dcs-state[data-id="' + id + '"]');
           el &&
             ((el.textContent = msg),
             (el.style.color = ok ? "var(--accent-2)" : "var(--crit,#e5484d)"));
         }
+        function dcsSend(id) {
+          // serialize per id: each save waits for the prior one and always
+          // sends the latest captured value, so responses cannot reorder.
+          var v = dcsLatest[id];
+          if (void 0 === v) return;
+          delete dcsLatest[id];
+          dcsChain[id] = (dcsChain[id] || Promise.resolve()).then(function () {
+            dcsState(id, "Saving…", !0);
+            return n
+              .from("open_decisions")
+              .update({ notes: v })
+              .eq("id", id)
+              .select("id")
+              .then(function (r) {
+                r.error
+                  ? dcsState(id, "Could not save: " + (r.error.message || "error"), !1)
+                  : r.data && r.data.length
+                    ? void 0 === dcsLatest[id] && dcsState(id, "Saved", !0)
+                    : dcsState(id, "Not saved. Sign in as staff and try again.", !1);
+              });
+          });
+        }
+        function dcsFlush() {
+          Object.keys(dcsTimers).forEach(function (id) {
+            (clearTimeout(dcsTimers[id]), delete dcsTimers[id], dcsSend(id));
+          });
+        }
         document.addEventListener("click", function (e) {
           var b = e.target.closest(".dcs-status");
-          if (!b) return;
+          if (!b || b.disabled) return;
           var id = b.getAttribute("data-id"),
             toOpen = "Decided" === b.textContent.trim(),
-            next = toOpen ? "open" : "decided";
-          ((b.textContent = toOpen ? "Open" : "Decided"),
+            next = toOpen ? "open" : "decided",
+            prevColor = toOpen ? "var(--accent-2)" : "var(--accent)";
+          ((b.disabled = !0),
+            (b.style.opacity = "0.6"),
+            (b.textContent = toOpen ? "Open" : "Decided"),
             (b.style.color = toOpen ? "var(--accent)" : "var(--accent-2)"),
             (b.style.borderColor = b.style.color),
             n
               .from("open_decisions")
               .update({ status: next })
               .eq("id", id)
+              .select("id")
               .then(function (r) {
-                r.error
-                  ? ((b.textContent = toOpen ? "Decided" : "Open"),
-                    dcsState(id, "Could not save: " + (r.error.message || "error"), !1))
-                  : dcsState(id, "Saved", !0);
+                ((b.disabled = !1), (b.style.opacity = ""));
+                var ok = !r.error && r.data && r.data.length;
+                ok
+                  ? dcsState(id, "Saved", !0)
+                  : ((b.textContent = toOpen ? "Decided" : "Open"),
+                    (b.style.color = prevColor),
+                    (b.style.borderColor = prevColor),
+                    dcsState(
+                      id,
+                      r.error
+                        ? "Could not save: " + (r.error.message || "error")
+                        : "Not saved. Sign in as staff and try again.",
+                      !1,
+                    ));
               }));
         });
         document.addEventListener("input", function (e) {
           var t = e.target.closest(".dcs-notes");
           if (!t) return;
           var id = t.getAttribute("data-id");
-          (dcsState(id, "Typing…", !0),
+          ((dcsLatest[id] = t.value),
+            dcsState(id, "Typing…", !0),
             clearTimeout(dcsTimers[id]),
             (dcsTimers[id] = setTimeout(function () {
-              (dcsState(id, "Saving…", !0),
-                n
-                  .from("open_decisions")
-                  .update({ notes: t.value })
-                  .eq("id", id)
-                  .then(function (r) {
-                    r.error
-                      ? dcsState(id, "Could not save: " + (r.error.message || "error"), !1)
-                      : dcsState(id, "Saved", !0);
-                  }));
+              (delete dcsTimers[id], dcsSend(id));
             }, 700)));
         });
         function T() {
+          dcsFlush();
           var e = document.getElementById("sheetScrim"),
             t = document.getElementById("sheet");
           (e && e.classList.remove("open"), t && t.classList.remove("open"));
