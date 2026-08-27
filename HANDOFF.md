@@ -83,14 +83,36 @@ There is still **no build step** — framework and buildCommand stay null, and
 
 ## Still to build
 
-0. **Abuse gate on uploads (do this before promoting the form).** The Submit
-   form is public and now accepts real files, so anyone can push photos and
-   video at the store repeatedly and you pay for it. Content-type and size
-   caps are enforced, but there is no rate limit or human check yet.
-   Cloudflare Turnstile is the natural fit.
-1. **Vendor and sponsor media paths.** The upload plumbing is shared and
-   already works for all three types; what's missing is the vendor/sponsor
-   form fields and their own review rendering:
+0. **Turn the Turnstile gate ON.** The code is built and deployed but
+   deliberately inert — with `TURNSTILE_SECRET` unset, `/api/upload-session`
+   reports `enforced:false`, the widget does not render, and uploads behave
+   exactly as they did before. Enabling it is configuration, not code:
+
+   1. Cloudflare dash → Turnstile → **Add widget**. Mode: Managed. Hostnames:
+      the production hostnames only — do NOT add `localhost` to a widget whose
+      secret is used in production.
+   2. Copy the **sitekey** (public) into `PPR.TURNSTILE_SITEKEY` in
+      `index.html`. Copy the **secret** into Vercel:
+      `vercel env add TURNSTILE_SECRET production`
+   3. Add the hostname allowlist, comma separated, matching what siteverify
+      will return: `vercel env add TURNSTILE_HOSTNAMES production`
+   4. Redeploy, then confirm `/api/upload-session` returns `enforced:true`
+      and that a real upload still succeeds through the widget.
+
+   The widget action is `submit-media`; the server checks it, so the widget
+   must be rendered with that action or every verification fails closed.
+
+   Why a session rather than a token per file: Turnstile tokens are single-use
+   at siteverify, and one submission is up to 50 photos plus video, voice and
+   documents — each its own `/api/upload` call. Verifying per file fails on
+   the second with `timeout-or-duplicate`. The human is checked once and the
+   result is an HMAC-signed 30-minute session scoped to that draft id.
+1. **Sponsor field set is a stand-in, not your template.** Vendor and sponsor
+   forms are built and live (vendor: offering, space, power, website; sponsor:
+   level, goals, activation, website), and staff review renders both. But the
+   sponsor set is a sensible standard one — no existing template was found,
+   and the standing instruction was to ask rather than guess. Swap it if you
+   have a real one. Original notes for reference:
    up to 50 photos, up to 5 min video, up to 5 min voice memo, any document
    type, working identically across iPhone, Android, tablet, and desktop via
    native file and camera pickers. The current photo/video/voice/document
