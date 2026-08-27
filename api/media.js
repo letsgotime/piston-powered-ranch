@@ -11,11 +11,7 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
  * second, independent check: RLS protects the rows, this protects the pixels.
  */
 
-const STAFF = new Set([
-  "paddock20auto@gmail.com",
-  "gavin@paddock20.com",
-  "bekah@paddock20.com",
-]);
+const STAFF = new Set(["paddock20auto@gmail.com", "gavin@paddock20.com", "bekah@paddock20.com"]);
 
 const JWKS = createRemoteJWKSet(
   new URL(
@@ -48,7 +44,8 @@ export default async function handler(request, response) {
     return response.status(403).json({ error: "Not authorised for submitted media" });
   }
 
-  const body = typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
+  const body =
+    typeof request.body === "string" ? JSON.parse(request.body || "{}") : request.body || {};
   const pathnames = Array.isArray(body.pathnames) ? body.pathnames : [];
   if (!pathnames.length) return response.status(400).json({ error: "No pathnames given" });
   if (pathnames.length > MAX_PER_REQUEST) {

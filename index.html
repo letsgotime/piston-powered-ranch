@@ -2551,6 +2551,11 @@
               </div>
               <div class="doclist" id="docList"></div>
             </div>
+            <div
+              class="reveal d7"
+              id="turnstileMount"
+              style="display: none; margin-top: var(--gap-4)"
+            ></div>
             <button
               class="btn btn-primary btn-block reveal d7"
               id="submitBtn"
@@ -4392,6 +4397,46 @@
           media: { photo: [], video: [], voice: [], doc: [] },
         };
         window.PPR = PPR;
+        /* Cloudflare Turnstile sitekey. Public value — safe in source. While it
+           is empty the widget does not render and uploads are unguarded, which
+           matches the server: /api/upload only enforces once TURNSTILE_SECRET
+           is set. Fill both in together. */
+        PPR.TURNSTILE_SITEKEY = "";
+        PPR.tsWidgetId = null;
+        PPR._session = null;
+        PPR.ensureSession = async function () {
+          if (PPR._session && PPR._session.exp > Date.now()) return PPR._session.value;
+          var token = null;
+          if (PPR.TURNSTILE_SITEKEY) {
+            if (!window.turnstile || PPR.tsWidgetId === null)
+              throw new Error("Verification is still loading — try again in a moment.");
+            token = window.turnstile.getResponse(PPR.tsWidgetId) || null;
+            if (!token) throw new Error("Complete the human check above before adding files.");
+          }
+          var res = await fetch("/api/upload-session", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({
+              token: token,
+              draftId: PPR.draftId,
+              submissionType: PPR.role(),
+            }),
+          });
+          var j = await res.json().catch(function () {
+            return {};
+          });
+          if (!res.ok) {
+            if (window.turnstile && PPR.tsWidgetId !== null) window.turnstile.reset(PPR.tsWidgetId);
+            throw new Error(j.error || "Verification failed — try again.");
+          }
+          if (!j.enforced) {
+            PPR._session = { value: null, exp: Date.now() + 25 * 60 * 1000 };
+            return null;
+          }
+          PPR._session = { value: j.session, exp: Date.now() + (j.expiresIn || 0) - 60000 };
+          if (window.turnstile && PPR.tsWidgetId !== null) window.turnstile.reset(PPR.tsWidgetId);
+          return j.session;
+        };
         PPR.draftId = (function () {
           var k = "ppr_draft_id",
             gen = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
@@ -4430,6 +4475,7 @@
             .replace(/[^\w.\-]+/g, "_")
             .slice(-80);
           var path = "submissions/" + PPR.role() + "/" + PPR.draftId + "/" + kind + "/" + safeName;
+          var session = await PPR.ensureSession();
           var res = await window.__blobUpload(path, file, {
             access: "private",
             handleUploadUrl: "/api/upload",
@@ -4437,6 +4483,7 @@
               kind: kind,
               submissionType: PPR.role(),
               draftId: PPR.draftId,
+              session: session,
             }),
             onUploadProgress: onProgress
               ? function (p) {
@@ -4661,6 +4708,29 @@
           }
         }
         renderPhotoCount();
+        (function () {
+          if (!PPR.TURNSTILE_SITEKEY) return;
+          var mount = document.getElementById("turnstileMount");
+          if (!mount) return;
+          mount.style.display = "";
+          window.__pprTurnstileReady = function () {
+            try {
+              PPR.tsWidgetId = window.turnstile.render(mount, {
+                sitekey: PPR.TURNSTILE_SITEKEY,
+                action: "submit-media",
+                theme: "dark",
+              });
+            } catch (e) {
+              PPR.note("Verification widget failed to load.");
+            }
+          };
+          var sc = document.createElement("script");
+          ((sc.src =
+            "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=__pprTurnstileReady&render=explicit"),
+            (sc.async = !0),
+            (sc.defer = !0),
+            document.head.appendChild(sc));
+        })();
         /* ---- Staff-side media review (private blobs need signed, short-lived URLs) ---- */
         PPR.manifests = {};
         PPR.signMedia = async function (pathnames) {

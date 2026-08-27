@@ -1,4 +1,5 @@
 import { handleUpload } from "@vercel/blob/client";
+import { verifySession, sessionSecret } from "./upload-session.js";
 
 /**
  * Mints short-lived, scoped upload tokens for the public Submit form.
@@ -65,6 +66,17 @@ export default async function handler(request, response) {
 
         const kind = KINDS[payload.kind];
         if (!kind) throw new Error("Unknown upload kind");
+
+        // Bot gate. Enforced only once TURNSTILE_SECRET exists, so this ships
+        // inert and turns on with configuration rather than a code change.
+        const gateOn = Boolean(process.env.TURNSTILE_SECRET);
+        if (gateOn) {
+          const session = verifySession(payload.session, sessionSecret());
+          if (!session) throw new Error("Verification required — refresh the form and try again");
+          if (session.d !== String(payload.draftId || "")) {
+            throw new Error("Session does not match this submission");
+          }
+        }
 
         const submissionType = SUBMISSION_TYPES.has(payload.submissionType)
           ? payload.submissionType
