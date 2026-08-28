@@ -23,6 +23,7 @@
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
       }
       * { box-sizing: border-box; }
+      :root { --sab: env(safe-area-inset-bottom, 0px); }
       html, body { height: 100%; }
       body {
         margin: 0; color: var(--ink); background: var(--bg);
@@ -170,6 +171,7 @@
       /* field bottom sheet */
       .fsheet {
         position: fixed; z-index: 41; left: 50%; bottom: 0; transform: translate(-50%, calc(100% - var(--peek, 122px)));
+        --peek: calc(122px + env(safe-area-inset-bottom, 0px));
         width: min(100vw, 560px); height: 86vh; height: 86dvh;
         border-radius: 24px 24px 0 0; overflow: hidden; display: none; flex-direction: column;
         background: var(--glass2);
@@ -196,6 +198,8 @@
       .ent-rule { height: 2px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin-top: 5px; overflow: hidden; }
       .ent-rule i { display: block; height: 100%; width: 0; background: var(--amber); transition: width 0.8s var(--ease); }
       .fbody { flex: 1; overflow: auto; padding: 2px 20px calc(26px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+      /* at the index snap 46% of the sheet hangs off-screen; pad so all content scrolls into the visible band */
+      .fsheet.snap-index .fbody { padding-bottom: calc(46vh + 40px); }
       .fsec-eye { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; color: var(--mute); margin: 16px 0 8px; }
       /* light schedule bar */
       .lightbar { position: relative; height: 26px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);
@@ -1238,8 +1242,9 @@
             var fly = reduce ? "fitBounds" : "flyToBounds";
             FIELD.map[fly](bs, { paddingTopLeft: [30, 90], paddingBottomRight: [30, Math.round(window.innerHeight * 0.42)] });
           } else {
+            var cp = FIELD.centroid(f);
             var fly2 = reduce ? "setView" : "flyTo";
-            FIELD.map[fly2]([f.geometry.coords[0], f.geometry.coords[1]], 17);
+            FIELD.map[fly2]([cp[0], cp[1]], 17);
           }
         }
         FIELD.showDetail(f);
@@ -1405,16 +1410,21 @@
         if (s === "full") fsheet.classList.add("snap-full");
       }
       (function sheetDrag() {
-        var startY = null, startT = 0, moved = false;
+        var startY = null, startT = 0, moved = false, dragOff = null;
         var fhead = document.getElementById("fhead");
+        function peekPx() {
+          var sab = 0;
+          try { sab = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sab")) || 0; } catch (e) {}
+          return 122 + sab;
+        }
         function currentOffset() {
           var h = fsheet.getBoundingClientRect().height;
           if (snapState === "full") return 0;
           if (snapState === "index") return h * 0.46;
-          return h - 122;
+          return h - peekPx();
         }
         fhead.addEventListener("touchstart", function (e) {
-          startY = e.touches[0].clientY; startT = currentOffset(); moved = false;
+          startY = e.touches[0].clientY; startT = currentOffset(); moved = false; dragOff = null;
           fsheet.classList.add("dragging");
         }, { passive: true });
         fhead.addEventListener("touchmove", function (e) {
@@ -1422,8 +1432,8 @@
           var dy = e.touches[0].clientY - startY;
           if (Math.abs(dy) > 6) moved = true;
           var h = fsheet.getBoundingClientRect().height;
-          var off = Math.max(0, Math.min(h - 90, startT + dy));
-          fsheet.style.transform = "translate(-50%," + off + "px)";
+          dragOff = Math.max(0, Math.min(h - 90, startT + dy));
+          fsheet.style.transform = "translate(-50%," + dragOff + "px)";
         }, { passive: true });
         var lastTouchEnd = 0;
         function cycleSnap() {
@@ -1434,14 +1444,19 @@
           if (startY == null) return;
           lastTouchEnd = Date.now();
           var h = fsheet.getBoundingClientRect().height;
-          var off = 0;
-          try { off = new DOMMatrixReadOnly(getComputedStyle(fsheet).transform).m42; } catch (e) {}
+          var off = dragOff != null ? dragOff : startT;
           fsheet.style.transform = "";
           startY = null;
           if (!moved) { cycleSnap(); return; }
-          var cands = [["full", 0], ["index", h * 0.46], ["peek", h - 122]];
+          var cands = [["full", 0], ["index", h * 0.46], ["peek", h - peekPx()]];
           cands.sort(function (a, b3) { return Math.abs(a[1] - off) - Math.abs(b3[1] - off); });
           setSnap(cands[0][0]);
+        });
+        fhead.addEventListener("touchcancel", function () {
+          fsheet.classList.remove("dragging");
+          fsheet.style.transform = "";
+          startY = null; dragOff = null; moved = false;
+          setSnap(snapState);
         });
         fhead.addEventListener("click", function () {
           if (moved || Date.now() - lastTouchEnd < 600) return;
