@@ -172,7 +172,8 @@
       };
       var ORIGIN = location.origin;
       var staff = false;
-      var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null, spectators: null, clubs: null };
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null, spectators: null, clubs: null, features: null };
 
       /* ---------- the map model: every node declares its own panel ---------- */
       var LANES = [
@@ -225,6 +226,7 @@
             { t: "Console: Ops and Decision Desk", d: "Saves as you type.", panel: "console", pill: function () { return LIVE.decisions && LIVE.decisions.filter(function (x) { return x.status === "open"; }).length; } },
             { t: "One sheet per submission", d: "Approve, decline, copy the notice.", panel: "review" },
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
+            { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
           ] },
       ];
 
@@ -299,17 +301,6 @@
             "<p>Approving a block spawns an individual submission per roster car, so every car still carries its own pass and status link. Approval lives in the console pipeline.</p>" +
             (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : lock()) };
         },
-        function pipeline(rows) {
-          var order = [["committed","Committed"],["warm","Warm"],["named","Named, not asked"],["open","Open"]];
-          var out = "";
-          order.forEach(function (st) {
-            var g = rows.filter(function (x) { return x.pipeline_stage === st[0]; });
-            if (!g.length) return;
-            out += '<p style="margin:10px 0 4px"><b>' + st[1] + "</b> &middot; " + g.length + "</p><p style='color:var(--mute);font-size:13px;line-height:1.7;margin:0'>" +
-              g.map(function (x) { return esc(x.category || x.company); }).join(" &middot; ") + "</p>";
-          });
-          return out;
-        }
         vendorapply: function () {
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "vendor"; }) : null;
           return { e: "Vendors", t: "Vendor applications", body:
@@ -366,7 +357,47 @@
             (LIVE.payments ? stat("Ledger rows", LIVE.payments.length, true) : "") +
             (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : "") };
         },
+        grounds: function () {
+          var f = LIVE.features;
+          var zones = f ? f.filter(function (x) { return x.kind === "zone"; }) : null;
+          var acres = zones ? zones.reduce(function (a, z) { return a + zoneAcres(z); }, 0) : 0;
+          var settled = zones ? zones.filter(function (z) { return z.status !== "draft"; }).length : 0;
+          return { e: "Staff", t: "Grounds and site plan", body:
+            "<p>One layout feeds both surfaces. Edit a zone in the database and the map and the print sheet both move; nothing is re-exported by hand.</p>" +
+            (zones
+              ? stat("Zones laid out", zones.length, true) + stat("Acres in use", acres.toFixed(1), true) +
+                stat("Points of interest", f.filter(function (x) { return x.kind === "poi"; }).length, true) +
+                stat("Signed off by the venue", settled + " of " + zones.length)
+              : "") +
+            acts('<a class="primary" href="/map/" target="_blank" rel="noopener">Open the map</a>' +
+              '<a href="/site-plan/" target="_blank" rel="noopener">Print the site plan</a>' +
+              copyBtn("Copy site plan link", ORIGIN + "/site-plan/")) };
+        },
       };
+      function pipeline(rows) {
+        var order = [["committed", "Committed"], ["warm", "Warm"], ["named", "Named, not asked"], ["open", "Open"]];
+        var out = "";
+        order.forEach(function (st) {
+          var g = rows.filter(function (x) { return x.pipeline_stage === st[0]; });
+          if (!g.length) return;
+          out += '<p style="margin:10px 0 4px"><b>' + st[1] + "</b> &middot; " + g.length +
+            "</p><p style=\"color:var(--mute);font-size:13px;line-height:1.7;margin:0\">" +
+            g.map(function (x) { return esc(x.category || x.company); }).join(" &middot; ") + "</p>";
+        });
+        return out;
+      }
+      function zoneAcres(z) {
+        var ring = z.geometry && z.geometry.coords;
+        if (!ring || z.geometry.type !== "polygon" || ring.length < 3) return 0;
+        var lat0 = ring.reduce(function (a, p) { return a + p[0]; }, 0) / ring.length;
+        var k = Math.cos((lat0 * Math.PI) / 180), s = 0;
+        var pts = ring.map(function (p) { return [p[1] * 111320 * k, p[0] * 110540]; });
+        for (var i = 0; i < pts.length; i++) {
+          var a = pts[i], b = pts[(i + 1) % pts.length];
+          s += a[0] * b[1] - b[0] * a[1];
+        }
+        return Math.abs(s) / 2 / 4046.86;
+      }
       function stat(l, v, t) { return '<div class="stat-line"><span class="l">' + l + '</span><span class="v' + (t ? " t" : "") + '">' + v + "</span></div>"; }
       function acts(inner) { return '<div class="acts">' + inner + "</div>"; }
       function lock() { return '<div class="lock">Live admin numbers unlock automatically when you are signed in at the <a href="/" target="_blank" rel="noopener">console</a> on this device.</div>'; }
@@ -435,6 +466,10 @@
           var r = await db.rpc("public_stats", {});
           var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
           if (row) LIVE.stats = row;
+        } catch (e) {}
+        try {
+          var mf = await db.from("map_features").select("kind,status,geometry").eq("event_id", EVENT_ID);
+          mf.error || (LIVE.features = mf.data);
         } catch (e) {}
       }
       var STAFF_EMAILS = ["paddock20auto@gmail.com", "gavin@paddock20.com", "bekah@paddock20.com", "bekahstallard@gmail.com"];
