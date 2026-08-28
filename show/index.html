@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>The Piston Powered Ranch</title>
+    <meta
+      name="description"
+      content="A private-collector car show in the spirit of Monterey Car Week: 300 curated cars at Rancho Jaramillo near Nashville, Saturday October 10, 2026. RSVP free."
+    />
+    <meta property="og:title" content="The Piston Powered Ranch" />
+    <meta
+      property="og:description"
+      content="300 curated collector cars on a Tennessee ranch. Monterey Car Week spirit, Nashville soil. Saturday, October 10, 2026. RSVP free."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://piston-powered-ranch.vercel.app/show/" />
+    <meta property="og:image" content="https://piston-powered-ranch.vercel.app/og/ppr-og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <style>
+      :root {
+        --bg: #0d1620; --glass: rgba(15, 24, 36, 0.55); --glass-2: rgba(20, 31, 45, 0.65);
+        --gline: rgba(255, 255, 255, 0.1); --gline-2: rgba(255, 255, 255, 0.16);
+        --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
+        --amber: #f8b800; --teal: #00d2be; --blue: #005185; --crit: #e5484d;
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.38); --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+      }
+      body::after {
+        content: ""; position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      img { max-width: 100%; display: block; }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .rule { height: 4px; position: relative; z-index: 70;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, var(--blue) 50% 75%, var(--mute) 75% 100%); }
+      /* ground */
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly {
+        position: absolute; inset: -3%; background-size: cover; background-position: center 36%;
+        opacity: 0; transition: opacity 1.6s var(--ease);
+        animation: slowdrift 36s var(--ease) infinite alternate;
+      }
+      @keyframes slowdrift { from { transform: scale(1.02); } to { transform: scale(1.09) translateY(-1.2%); } }
+      .ground .ly.on { opacity: 1; }
+      .ground .veil {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(120% 50% at 50% -5%, rgba(248, 184, 0, 0.08), transparent 55%),
+          linear-gradient(180deg, rgba(13, 22, 32, 0.5), rgba(13, 22, 32, 0.42) 42%, rgba(13, 22, 32, 0.74));
+      }
+      main { position: relative; z-index: 1; }
+      /* glass primitive */
+      .glass {
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+        border: 1px solid var(--gline); border-radius: 20px; box-shadow: var(--e1);
+      }
+      /* top chip bar */
+      .bar {
+        position: sticky; top: 10px; z-index: 50; margin: 12px auto 0; width: calc(100% - 28px);
+        max-width: 1100px; display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+        border-radius: 999px; background: rgba(13, 20, 30, 0.55);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline); box-shadow: var(--e1);
+      }
+      .bar img { height: 26px; width: auto; }
+      .bar .live { display: flex; align-items: center; gap: 7px; font-size: 11.5px; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+      .bar .live .d { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: pulse 2.2s infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+      .bar a.cta {
+        margin-left: auto; text-decoration: none; font-size: 12.5px; font-weight: 800; letter-spacing: 0.06em;
+        text-transform: uppercase; color: #151000; background: var(--amber); border-radius: 999px; padding: 9px 18px;
+        transition: transform 0.18s var(--ease);
+      }
+      .bar a.cta:hover { transform: translateY(-1px); }
+      /* hero */
+      .hero { min-height: 92vh; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 20px 26px; }
+      .hero-card { max-width: 1100px; margin: 0 auto; width: 100%; padding: 34px 38px 28px; border-radius: 26px; box-shadow: var(--e2); }
+      .eyebrow { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--teal);
+        display: flex; align-items: center; gap: 10px; }
+      .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--teal); }
+      h1 { margin: 12px 0 0; font-size: clamp(44px, 8.6vw, 104px); line-height: 0.94; letter-spacing: -0.025em; }
+      h1 span.w { display: inline-block; opacity: 0; transform: translateY(0.35em); animation: wordup 0.7s var(--ease) forwards; }
+      h1 .a { color: var(--amber); }
+      @keyframes wordup { to { opacity: 1; transform: none; } }
+      .hero-sub { margin: 16px 0 0; font-size: clamp(16px, 2vw, 19px); color: var(--dim); max-width: 62ch; }
+      .hero-sub b { color: var(--ink); }
+      /* countdown */
+      .count { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+      .cunit {
+        min-width: 86px; padding: 12px 14px 10px; text-align: center; border-radius: 16px;
+        background: var(--glass-2);
+        -webkit-backdrop-filter: blur(16px) saturate(1.35); backdrop-filter: blur(16px) saturate(1.35);
+        border: 1px solid var(--gline);
+      }
+      .cunit .v { font-family: "Arial Black", Helvetica, sans-serif; font-size: clamp(26px, 4vw, 38px);
+        font-variant-numeric: tabular-nums; line-height: 1; }
+      .cunit .l { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); font-weight: 700; margin-top: 5px; }
+      .cunit.sec .v { color: var(--amber); }
+      /* ticker */
+      .ticker { position: relative; z-index: 5; overflow: hidden; border-top: 1px solid var(--gline); border-bottom: 1px solid var(--gline);
+        background: rgba(13, 20, 30, 0.5); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); margin-top: 26px; }
+      .ticker .track { display: flex; gap: 0; width: max-content; animation: tick 36s linear infinite; }
+      .ticker:hover .track { animation-play-state: paused; }
+      @keyframes tick { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      .ticker span { display: inline-flex; align-items: center; gap: 10px; padding: 12px 26px; font-size: 12.5px;
+        letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: var(--dim); white-space: nowrap; }
+      .ticker span::after { content: "◆"; color: var(--amber); font-size: 9px; margin-left: 26px; }
+      /* sections */
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+      section { padding: 76px 0 0; }
+      h2.sec {
+        font-family: "Arial Black", Helvetica, sans-serif; font-size: clamp(26px, 4.4vw, 42px);
+        letter-spacing: -0.02em; line-height: 1.04; margin: 0 0 8px;
+      }
+      h2.sec .a { color: var(--amber); }
+      .sec-sub { color: var(--dim); max-width: 60ch; margin: 0 0 26px; font-size: 16px; }
+      /* telemetry grid */
+      .tele { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+      .tcard { padding: 20px 22px 18px; position: relative; overflow: hidden; }
+      .tcard .tv { font-family: "Arial Black", Helvetica, sans-serif; font-size: 38px; line-height: 1;
+        font-variant-numeric: tabular-nums; color: var(--ink); }
+      .tcard .tv .u { font-size: 16px; color: var(--mute); }
+      .tcard .tl2 { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute); font-weight: 700; margin-top: 7px; }
+      .tcard .spark { position: absolute; right: -8px; bottom: -8px; width: 74px; height: 74px; border-radius: 50%;
+        border: 2px solid rgba(248, 184, 0, 0.16); }
+      .tcard .spark::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; border: 2px solid rgba(0, 210, 190, 0.14);
+        animation: spin 9s linear infinite; border-top-color: rgba(0, 210, 190, 0.55); }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .tbar { height: 5px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); margin-top: 12px; overflow: hidden; }
+      .tbar .f { display: block; height: 100%; width: 0; border-radius: 999px;
+        background: linear-gradient(90deg, var(--blue), var(--teal)); transition: width 1.2s var(--ease); }
+      /* reels */
+      .reels { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+      .reel {
+        position: relative; aspect-ratio: 9 / 16; border-radius: 22px; overflow: hidden;
+        border: 1px solid var(--gline); box-shadow: var(--e1); background: var(--glass-2);
+        -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+        transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+      }
+      .reel:hover { transform: translateY(-6px); box-shadow: var(--e2); }
+      .reel video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .reel .ph {
+        position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: 12px; text-align: center; padding: 22px;
+      }
+      .reel .ph .cam { width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--gline-2);
+        display: flex; align-items: center; justify-content: center; position: relative; }
+      .reel .ph .cam::after { content: ""; position: absolute; inset: -7px; border-radius: 50%;
+        border: 1px solid rgba(248, 184, 0, 0.35); animation: ringpulse 2.6s var(--ease) infinite; }
+      @keyframes ringpulse { 0% { transform: scale(0.9); opacity: 1; } 100% { transform: scale(1.25); opacity: 0; } }
+      .reel .ph b { font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .reel .ph p { margin: 0; font-size: 12.5px; color: var(--mute); }
+      .reel .shimmer { position: absolute; inset: 0; background: linear-gradient(110deg, transparent 42%, rgba(255, 255, 255, 0.05) 50%, transparent 58%);
+        background-size: 240% 100%; animation: shim 3.2s linear infinite; }
+      @keyframes shim { from { background-position: 200% 0; } to { background-position: -40% 0; } }
+      .reel .tag { position: absolute; top: 12px; left: 12px; z-index: 2; font-size: 10px; font-weight: 800;
+        letter-spacing: 0.14em; text-transform: uppercase; color: #151000; background: var(--amber);
+        border-radius: 999px; padding: 4px 10px; }
+      /* rsvp */
+      .rsvp-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: stretch; }
+      @media (max-width: 760px) { .rsvp-grid { grid-template-columns: 1fr; } }
+      .rsvp-card { padding: 28px 30px; border-radius: 24px; }
+      .rsvp-card h3 { font-family: "Arial Black", Helvetica, sans-serif; margin: 0; font-size: 24px; letter-spacing: -0.015em; }
+      .rsvp-card h3 .a { color: var(--amber); }
+      .rsvp-card p { color: var(--dim); font-size: 14.5px; margin: 10px 0 0; }
+      form.rs { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+      form.rs input, form.rs select {
+        width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+        background: rgba(255, 255, 255, 0.06); border: 1px solid var(--gline); border-radius: 12px; padding: 12px 15px;
+      }
+      form.rs input::placeholder { color: var(--mute); }
+      form.rs input:focus, form.rs select:focus { outline: none; border-color: rgba(248, 184, 0, 0.55); }
+      form.rs button {
+        font: inherit; font-weight: 800; font-size: 15px; color: #151000; background: var(--amber);
+        border: 0; border-radius: 999px; padding: 14px 22px; cursor: pointer;
+        box-shadow: 0 10px 34px -12px rgba(248, 184, 0, 0.55); transition: transform 0.18s var(--ease);
+      }
+      form.rs button:hover { transform: translateY(-2px); }
+      form.rs button[disabled] { opacity: 0.55; pointer-events: none; }
+      .rs-err { color: var(--crit); font-size: 13px; display: none; }
+      .rs-done { display: none; color: var(--dim); font-size: 15px; margin-top: 16px; }
+      .rs-done b { color: var(--teal); }
+      /* experience card */
+      .xp { padding: 28px 30px; border-radius: 24px; display: flex; flex-direction: column; }
+      .xp .k { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 800; color: var(--teal); }
+      .xp h3 { font-family: "Arial Black", Helvetica, sans-serif; margin: 8px 0 0; font-size: 24px; letter-spacing: -0.015em; }
+      .xp p { color: var(--dim); font-size: 14.5px; margin: 10px 0 0; flex: 1; }
+      .xp .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+      .xp .links a { text-decoration: none; font-size: 13.5px; font-weight: 700; color: var(--ink);
+        border: 1px solid var(--gline-2); border-radius: 999px; padding: 11px 20px; transition: border-color 0.2s, transform 0.18s var(--ease); }
+      .xp .links a:hover { border-color: var(--amber); transform: translateY(-1px); }
+      .xp .links a.primary { background: var(--amber); border-color: var(--amber); color: #151000; }
+      .xp .fine2 { font-size: 11.5px; color: var(--mute); margin-top: 14px; }
+      /* footer */
+      footer { margin-top: 90px; padding: 0 20px 56px; }
+      .f-card { max-width: 1100px; margin: 0 auto; padding: 28px 30px 22px; border-radius: 24px; box-shadow: var(--e2); }
+      .f-top { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; margin-bottom: 20px; }
+      .f-brand { max-width: 250px; }
+      .f-brand img { height: 34px; width: auto; margin-bottom: 10px; }
+      .f-brand p { margin: 0; color: var(--mute); font-size: 12.5px; line-height: 1.6; }
+      .f-label { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--mute); opacity: 0.75; margin: 0 0 5px; font-weight: 700; }
+      .f-col a { display: flex; align-items: center; min-height: 30px; color: var(--dim); text-decoration: none;
+        font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+      .f-col a.lc { text-transform: none; letter-spacing: 0; }
+      .f-col a:hover { color: var(--ink); }
+      .f-bottom { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;
+        padding-top: 14px; border-top: 1px solid var(--gline); color: var(--mute); font-size: 12.5px; }
+      .f-live { display: flex; align-items: center; gap: 7px; }
+      .fdot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 6px var(--teal); }
+      .f-fine { margin: 12px 0 0; color: var(--mute); opacity: 0.75; font-size: 11px; line-height: 1.7; max-width: 640px; }
+      /* motion base */
+      .rv { opacity: 0; transform: translateY(26px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
+      .rv.in { opacity: 1; transform: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .ground .ly { animation: none; }
+        .ticker .track { animation: none; }
+        .tcard .spark::before, .reel .shimmer, .reel .ph .cam::after, .bar .live .d { animation: none; }
+        h1 span.w { animation: none; opacity: 1; transform: none; }
+        .rv { opacity: 1; transform: none; transition: none; }
+        html { scroll-behavior: auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="ground" aria-hidden="true">
+      <div class="ly on" id="gA" style="background-image: url(/events/img/hero.jpg)"></div>
+      <div class="ly" id="gB" style="background-image: url(/events/img/walk.jpg)"></div>
+      <div class="ly" id="gC" style="background-image: url(/events/img/dusk.jpg)"></div>
+      <div class="veil"></div>
+    </div>
+    <main>
+      <div class="bar">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <span class="live"><span class="d"></span><span id="liveWord">Submissions open</span></span>
+        <a class="cta" href="#rsvp">RSVP free</a>
+      </div>
+
+      <header class="hero" data-g="gA">
+        <div class="hero-card glass">
+          <div class="eyebrow">Monterey Car Week spirit · Nashville soil</div>
+          <h1 class="display" id="heroTitle" aria-label="The Piston Powered Ranch">
+            <span class="w" style="animation-delay: 0.05s">The</span>
+            <span class="w" style="animation-delay: 0.16s">Piston</span><br />
+            <span class="w a" style="animation-delay: 0.3s">Powered</span>
+            <span class="w a" style="animation-delay: 0.44s">Ranch</span>
+          </h1>
+          <p class="hero-sub">
+            <b>Saturday, October 10, 2026 · Rancho Jaramillo · Unionville, TN.</b>
+            Three hundred curated collector cars on six hundred acres of working ranch, under
+            fall color, at a gallery-walk pace. Entry by approval. Spectating free.
+            The day benefits Community Elementary School.
+          </p>
+          <div class="count" id="count" aria-label="Countdown to show day">
+            <div class="cunit"><div class="v" id="cd">00</div><div class="l">Days</div></div>
+            <div class="cunit"><div class="v" id="ch">00</div><div class="l">Hours</div></div>
+            <div class="cunit"><div class="v" id="cm">00</div><div class="l">Minutes</div></div>
+            <div class="cunit sec"><div class="v" id="cs">00</div><div class="l">Seconds</div></div>
+          </div>
+        </div>
+        <div class="ticker" aria-hidden="true">
+          <div class="track" id="tickerTrack"></div>
+        </div>
+      </header>
+
+      <section data-g="gB">
+        <div class="wrap rv">
+          <h2 class="sec display">The field, <span class="a">live</span></h2>
+          <p class="sec-sub">
+            Real numbers from the console database that runs this event. They move as the field
+            fills.
+          </p>
+          <div class="tele">
+            <div class="tcard glass"><span class="spark"></span>
+              <div class="tv"><span data-count-to="300">0</span></div>
+              <div class="tl2">Curated cars, target</div>
+              <div class="tbar"><span class="f" data-fill="100"></span></div>
+            </div>
+            <div class="tcard glass"><span class="spark"></span>
+              <div class="tv" id="tRsvp"><span>0</span></div>
+              <div class="tl2">Spectators on the list</div>
+              <div class="tbar"><span class="f" id="tRsvpBar" data-fill="4"></span></div>
+            </div>
+            <div class="tcard glass"><span class="spark"></span>
+              <div class="tv" id="tSubs"><span>0</span></div>
+              <div class="tl2">Cars submitted</div>
+              <div class="tbar"><span class="f" id="tSubsBar" data-fill="2"></span></div>
+            </div>
+            <div class="tcard glass"><span class="spark"></span>
+              <div class="tv"><span id="tBooths">30</span><span class="u"> to </span><span>45</span></div>
+              <div class="tl2">Vendor booths planned</div>
+              <div class="tbar"><span class="f" data-fill="67"></span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-g="gB">
+        <div class="wrap rv">
+          <h2 class="sec display">From the <span class="a">ranch</span></h2>
+          <p class="sec-sub">
+            We are on the property filming now. Reels drop here the moment they cut.
+          </p>
+          <div class="reels" id="reels">
+            <div class="reel" data-src="/show/reels/reel-1.mp4">
+              <span class="tag">Reel 01</span>
+              <div class="shimmer"></div>
+              <div class="ph">
+                <div class="cam">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c4cbd6" stroke-width="1.8">
+                    <rect x="3" y="7" width="13" height="10" rx="2" /><path d="M16 10.5 21 8v8l-5-2.5" />
+                  </svg>
+                </div>
+                <b>Filming today</b>
+                <p>The first pass over the field, golden hour on the pasture.</p>
+              </div>
+            </div>
+            <div class="reel" data-src="/show/reels/reel-2.mp4">
+              <span class="tag">Reel 02</span>
+              <div class="shimmer"></div>
+              <div class="ph">
+                <div class="cam">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c4cbd6" stroke-width="1.8">
+                    <rect x="3" y="7" width="13" height="10" rx="2" /><path d="M16 10.5 21 8v8l-5-2.5" />
+                  </svg>
+                </div>
+                <b>Filming today</b>
+                <p>Rancho Jaramillo up close: the fences, the oaks, the ground the cars sit on.</p>
+              </div>
+            </div>
+            <div class="reel" data-src="/show/reels/reel-3.mp4">
+              <span class="tag">Reel 03</span>
+              <div class="shimmer"></div>
+              <div class="ph">
+                <div class="cam">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c4cbd6" stroke-width="1.8">
+                    <rect x="3" y="7" width="13" height="10" rx="2" /><path d="M16 10.5 21 8v8l-5-2.5" />
+                  </svg>
+                </div>
+                <b>Filming today</b>
+                <p>The promo cut: what October 10 is going to feel like.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="rsvp" data-g="gC">
+        <div class="wrap rv">
+          <h2 class="sec display">Be there when <span class="a">the gates open</span></h2>
+          <p class="sec-sub">Two ways in. Pick your lane.</p>
+          <div class="rsvp-grid">
+            <div class="rsvp-card glass">
+              <h3>Spectate. <span class="a">Free.</span></h3>
+              <p>
+                RSVP and you are on the update list: parking details, schedule drops, and
+                up-to-the-minute plans straight from the team. One RSVP covers your whole group.
+              </p>
+              <form class="rs" id="rs" novalidate>
+                <input id="rName" autocomplete="name" placeholder="Your name" maxlength="120" required />
+                <input id="rEmail" type="email" autocomplete="email" placeholder="you@email.com" maxlength="200" required />
+                <select id="rParty">
+                  <option value="1">Just me</option>
+                  <option value="2" selected>2 people</option>
+                  <option value="4">3 to 4 people</option>
+                  <option value="6">5 to 6 people</option>
+                  <option value="10">7 or more</option>
+                </select>
+                <span class="rs-err" id="rsErr"></span>
+                <button id="rsGo" type="submit">RSVP and get updates</button>
+              </form>
+              <p class="rs-done" id="rsDone">
+                <b>You are on the list.</b> Updates land in your inbox as plans firm up. Gates
+                open 9 AM, October 10.
+              </p>
+            </div>
+            <div class="xp glass">
+              <span class="k">Bring a car · Powered by Paddock Experience</span>
+              <h3>The field is<br />by approval</h3>
+              <p>
+                Every car on the pasture is approved through Paddock Experience, the PaddockGavin
+                curation and pass tool. Submit with up to 50 photos, video, even a voice note.
+                Track your status any time with a private link, no login, no phone calls.
+              </p>
+              <div class="links">
+                <a class="primary" href="/#submit">Submit your car</a>
+                <a href="/status/">Check status</a>
+                <a href="/clubs/">Bring your club</a>
+              </div>
+              <p class="fine2">
+                Owners and brokers welcome. Approval is curation, never first-come-first-served.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer data-g="gC">
+      <div class="f-card glass rv">
+        <div class="f-top">
+          <div class="f-brand">
+            <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+            <p>Curated automotive gatherings in Middle Tennessee. Part of the Paddock20 family.</p>
+          </div>
+          <div class="f-col">
+            <p class="f-label">The Show</p>
+            <a href="/spectate/?utm_source=show_footer">Spectate RSVP</a>
+            <a href="/#submit">Submit a car</a>
+            <a href="/clubs/">Car clubs</a>
+            <a href="/events/?utm_source=show_footer">PaddockGavin Events</a>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Community</p>
+            <a href="https://www.instagram.com/gotimemotorsports/" target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a href="https://www.youtube.com/@gotimemotorsports" target="_blank" rel="noopener noreferrer">YouTube</a>
+            <a href="https://www.tiktok.com/@go_time_motorsports" target="_blank" rel="noopener noreferrer">TikTok</a>
+            <a href="https://www.facebook.com/GoTimeMotorsports/" target="_blank" rel="noopener noreferrer">Facebook</a>
+          </div>
+          <div class="f-col">
+            <p class="f-label">Contact</p>
+            <a href="mailto:gavin@paddock20.com" class="lc">gavin@paddock20.com</a>
+            <a href="mailto:bekah@paddock20.com" class="lc">bekah@paddock20.com</a>
+          </div>
+        </div>
+        <div class="f-bottom">
+          <span>© 2026 PaddockGavin. All rights reserved.</span>
+          <span class="f-live"><span class="fdot"></span>Benefiting Community Elementary School</span>
+        </div>
+        <p class="f-fine">
+          The Piston Powered Ranch is a PaddockGavin production, part of the Paddock20 family.
+          Paddock Experience is a PaddockGavin tool. Vehicle entries are subject to approval.
+          Photography is concept imagery until the ranch footage lands.
+        </p>
+      </div>
+    </footer>
+
+    <script type="module">
+      import {
+        createClient,
+        SupabaseAuthAdapter,
+      } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var db = null;
+      try {
+        db = createClient({
+          auth: {
+            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+            allowAnonymous: true,
+            adapter: SupabaseAuthAdapter(),
+          },
+          dataApi: {
+            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
+          },
+        });
+      } catch (e) {}
+
+      /* countdown, ticks every second */
+      var SHOW = new Date("2026-10-10T09:00:00-05:00").getTime();
+      function two(n) { return String(n).padStart(2, "0"); }
+      function tickCount() {
+        var left = Math.max(0, SHOW - Date.now());
+        var d = Math.floor(left / 864e5),
+          h = Math.floor((left % 864e5) / 36e5),
+          m = Math.floor((left % 36e5) / 6e4),
+          s2 = Math.floor((left % 6e4) / 1e3);
+        document.getElementById("cd").textContent = two(d);
+        document.getElementById("ch").textContent = two(h);
+        document.getElementById("cm").textContent = two(m);
+        document.getElementById("cs").textContent = two(s2);
+        if (!left) document.getElementById("liveWord").textContent = "Show day";
+      }
+      tickCount();
+      setInterval(tickCount, 1000);
+
+      /* schedule ticker, duplicated for a seamless loop */
+      var ITEMS = [
+        "Gates 9:00 AM", "Mimosa bar 9 to 12", "Cítrico Grill open fire 11 to 1",
+        "Awards 1:30", "300 curated cars", "Rancho Jaramillo · Unionville TN",
+        "Benefiting Community Elementary", "Spectating free with RSVP",
+      ];
+      var track = document.getElementById("tickerTrack");
+      track.innerHTML = ITEMS.concat(ITEMS).map(function (t) { return "<span>" + t + "</span>"; }).join("");
+
+      /* reveals */
+      var io = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target)); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll(".rv").forEach(function (el) { io.observe(el); });
+
+      /* ground crossfade */
+      var lys = { gA: document.getElementById("gA"), gB: document.getElementById("gB"), gC: document.getElementById("gC") };
+      var go2 = new IntersectionObserver(function (es) {
+        es.forEach(function (en) {
+          if (!en.isIntersecting) return;
+          var k = en.target.getAttribute("data-g");
+          Object.keys(lys).forEach(function (id) { lys[id].classList.toggle("on", id === k); });
+        });
+      }, { rootMargin: "-40% 0px -40% 0px" });
+      document.querySelectorAll("[data-g]").forEach(function (el) { go2.observe(el); });
+
+      /* count-up when visible */
+      function countUp(el, to, suffix) {
+        if (reduce) { el.textContent = to + (suffix || ""); return; }
+        var t0 = performance.now();
+        (function step(now) {
+          var k = Math.min(1, (now - t0) / 1100), ease = 1 - Math.pow(1 - k, 3);
+          el.textContent = Math.round(to * ease) + (suffix || "");
+          k < 1 && requestAnimationFrame(step);
+        })(t0);
+      }
+      var co = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          co.unobserve(e.target);
+          countUp(e.target, parseInt(e.target.getAttribute("data-count-to"), 10) || 0);
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll("[data-count-to]").forEach(function (el) { co.observe(el); });
+      document.querySelectorAll(".tbar .f").forEach(function (f) {
+        setTimeout(function () { f.style.width = (parseFloat(f.getAttribute("data-fill")) || 0) + "%"; }, 400);
+      });
+
+      /* live public stats, refreshed every 45s: real numbers only */
+      async function stats() {
+        if (!db) return;
+        try {
+          var r = await db.rpc("public_stats", {});
+          var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
+          if (!row) return;
+          var rs2 = Number(row.party_headcount) || 0,
+            vs = Number(row.vehicle_submissions) || 0;
+          countUp(document.querySelector("#tRsvp span"), rs2);
+          countUp(document.querySelector("#tSubs span"), vs);
+          document.getElementById("tRsvpBar").style.width = Math.min(100, (rs2 / 1500) * 100) + "%";
+          document.getElementById("tSubsBar").style.width = Math.min(100, (vs / 300) * 100) + "%";
+        } catch (e) {}
+      }
+      stats();
+      setInterval(function () { document.hidden || stats(); }, 45e3);
+
+      /* event facts from the live events table */
+      (async function () {
+        if (!db) return;
+        try {
+          var r = await db.from("event_meta").select("target_vendor_booths_low,target_vendor_booths_high,target_cars").eq("id", 1).single();
+          if (r && r.data) {
+            r.data.target_vendor_booths_low && (document.getElementById("tBooths").textContent = r.data.target_vendor_booths_low);
+          }
+        } catch (e) {}
+      })();
+
+      /* reels: play real files when they exist, placeholder until then */
+      document.querySelectorAll(".reel").forEach(function (r) {
+        var src = r.getAttribute("data-src");
+        var v = document.createElement("video");
+        v.muted = true; v.loop = true; v.playsInline = true; v.preload = "metadata";
+        v.addEventListener("loadeddata", function () {
+          r.querySelector(".ph").style.display = "none";
+          r.querySelector(".shimmer").style.display = "none";
+          r.appendChild(v);
+          reduce || v.play().catch(function () {});
+          r.addEventListener("click", function () {
+            v.muted = !v.muted;
+          });
+        });
+        v.addEventListener("error", function () {});
+        v.src = src;
+      });
+
+      /* rsvp inline */
+      var rs = document.getElementById("rs"), rsErr = document.getElementById("rsErr"), rsGo = document.getElementById("rsGo");
+      function rfail(m) {
+        rsErr.textContent = m; rsErr.style.display = "block";
+        rsGo.disabled = false; rsGo.textContent = "RSVP and get updates";
+      }
+      rs.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        rsErr.style.display = "none";
+        var name = document.getElementById("rName").value.trim(),
+          email = document.getElementById("rEmail").value.trim(),
+          party = parseInt(document.getElementById("rParty").value, 10) || 1;
+        if (!name) return rfail("Add your name so we know who to expect.");
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return rfail("That email does not look complete.");
+        if (!db) return rfail("Could not reach the list. Try again in a minute.");
+        rsGo.disabled = true; rsGo.textContent = "Adding you…";
+        var source = "show_page";
+        try {
+          var u = new URLSearchParams(location.search).get("utm_source");
+          if (u) source = u;
+        } catch (e2) {}
+        var r = await db.from("spectators").insert({
+          event_id: EVENT_ID, name: name, email: email,
+          party_size: Math.min(20, Math.max(1, party)), source: source,
+        });
+        if (r.error) return rfail("Could not save your RSVP. Try again in a minute.");
+        rs.style.display = "none";
+        document.getElementById("rsDone").style.display = "block";
+        stats();
+      });
+    </script>
+  </body>
+</html>

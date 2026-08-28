@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Submission Status · The Piston Powered Ranch</title>
+    <meta name="description" content="Check the status of your Piston Powered Ranch submission." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <style>
+      :root {
+        --bg: #0d1620; --glass: rgba(16, 26, 38, 0.6); --gline: rgba(255, 255, 255, 0.1);
+        --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3; --amber: #f8b800; --teal: #00d2be;
+        --crit: #e5484d; --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink); min-height: 100vh;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly { position: absolute; inset: 0; background: url(/events/img/ranch.jpg) center 40% / cover no-repeat; transform: scale(1.04); }
+      .ground .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13, 22, 32, 0.6), rgba(13, 22, 32, 0.5) 40%, rgba(13, 22, 32, 0.74)); }
+      .rule { height: 4px; position: relative; z-index: 2; background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--mute) 75% 100%); }
+      main { position: relative; z-index: 1; min-height: calc(100vh - 4px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+      .card {
+        width: 100%; max-width: 520px; padding: 32px 34px 30px; border-radius: 24px;
+        background: var(--glass); -webkit-backdrop-filter: blur(18px) saturate(1.35);
+        backdrop-filter: blur(18px) saturate(1.35); border: 1px solid var(--gline); box-shadow: var(--e2);
+      }
+      .card img.mark { height: 38px; width: auto; margin-bottom: 16px; }
+      .eyebrow { font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--teal); }
+      h1 { font-family: "Arial Black", Helvetica, Arial, sans-serif; margin: 8px 0 0; font-size: clamp(26px, 5.5vw, 34px); line-height: 1.05; letter-spacing: -0.02em; }
+      h1 .a { color: var(--amber); }
+      .who { margin: 14px 0 0; color: var(--dim); font-size: 15px; }
+      .who b { color: var(--ink); }
+      .steps { margin: 22px 0 0; border-left: 2px solid var(--gline); padding-left: 22px; display: flex; flex-direction: column; gap: 16px; }
+      .st { position: relative; color: var(--mute); font-size: 14.5px; }
+      .st::before { content: ""; position: absolute; left: -29px; top: 5px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 2.5px solid var(--mute); }
+      .st.done { color: var(--dim); }
+      .st.done::before { background: var(--teal); border-color: var(--teal); }
+      .st.now { color: var(--ink); font-weight: 650; }
+      .st.now::before { border-color: var(--amber); background: var(--bg); box-shadow: 0 0 0 4px rgba(248, 184, 0, 0.18); }
+      .st.bad::before { border-color: var(--crit); background: var(--crit); }
+      .verdict { margin: 20px 0 0; padding: 14px 18px; border-radius: 12px; font-size: 14.5px; color: var(--dim);
+        background: rgba(255, 255, 255, 0.05); border: 1px solid var(--gline); }
+      .verdict.approved { border-color: rgba(0, 210, 190, 0.4); }
+      .verdict.declined { border-color: rgba(229, 72, 77, 0.4); }
+      .fine { margin: 16px 0 0; font-size: 12.5px; color: var(--mute); }
+      .fine a { color: var(--dim); }
+      #ask { display: none; }
+      #ask input { width: 100%; font: inherit; font-size: 15px; color: var(--ink); background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--gline); border-radius: 12px; padding: 12px 15px; margin-top: 14px; }
+      .err { color: var(--crit); font-size: 13.5px; margin-top: 10px; display: none; }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
+    <main>
+      <div class="card">
+        <img class="mark" src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div id="view">
+          <div class="eyebrow">Submission Status</div>
+          <h1>Checking<br /><span class="a">the list…</span></h1>
+          <p class="who" id="who"></p>
+          <div class="steps" id="steps" style="display: none">
+            <div class="st" id="s1">Submitted</div>
+            <div class="st" id="s2">In review with the selection team</div>
+            <div class="st" id="s3">Decision</div>
+          </div>
+          <div class="verdict" id="verdict" style="display: none"></div>
+          <div id="ask">
+            <p class="who">
+              Paste the status link you were given when you submitted, or the code at the end of
+              it. Lost it? Email
+              <a href="mailto:gavin@paddock20.com" style="color: var(--dim)">gavin@paddock20.com</a>
+              from the address you applied with.
+            </p>
+            <input id="tok" placeholder="Your status code" maxlength="80" />
+            <span class="err" id="err"></span>
+          </div>
+          <p class="fine">
+            The Piston Powered Ranch · Rancho Jaramillo · Saturday, October 10, 2026 ·
+            <a href="/events/?utm_source=status_page">PaddockGavin Events</a>
+          </p>
+        </div>
+      </div>
+    </main>
+    <script type="module">
+      import {
+        createClient,
+        SupabaseAuthAdapter,
+      } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      var db = null;
+      try {
+        db = createClient({
+          auth: {
+            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+            allowAnonymous: true,
+            adapter: SupabaseAuthAdapter(),
+          },
+          dataApi: {
+            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
+          },
+        });
+      } catch (e) {}
+      var h1 = document.querySelector("h1");
+      function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      function askMode(msg) {
+        h1.innerHTML = 'Find your<br /><span class="a">submission</span>';
+        document.getElementById("ask").style.display = "block";
+        if (msg) {
+          var e = document.getElementById("err");
+          e.textContent = msg;
+          e.style.display = "block";
+        }
+      }
+      async function lookup(tok) {
+        if (!db) return askMode("Could not reach the list. Refresh and try again.");
+        var r = await db.rpc("get_submission_status", { p_token: tok });
+        var row = r && r.data && r.data[0];
+        if (r && r.error) return askMode("Could not check right now. Try again in a minute.");
+        if (!row) return askMode("No submission matches that code. Check for missing characters.");
+        var typeWord =
+          row.submission_type === "vehicle"
+            ? "Vehicle"
+            : row.submission_type === "vendor"
+              ? "Vendor"
+              : "Sponsor";
+        document.getElementById("who").innerHTML =
+          "<b>" +
+          esc(typeWord + (row.title ? ": " + row.title : "")) +
+          "</b><br />Submitted by " +
+          esc(row.applicant_name) +
+          " on " +
+          new Date(row.submitted_at).toLocaleDateString([], {
+            month: "long",
+            day: "numeric",
+          });
+        document.getElementById("steps").style.display = "flex";
+        var s1 = document.getElementById("s1"),
+          s2 = document.getElementById("s2"),
+          s3 = document.getElementById("s3"),
+          v = document.getElementById("verdict");
+        s1.classList.add("done");
+        if (row.status === "pending") {
+          s2.classList.add("now");
+          h1.innerHTML = 'In<br /><span class="a">review</span>';
+          s3.textContent = "Decision: on its way";
+        } else {
+          s2.classList.add("done");
+          s3.classList.add("done");
+          v.style.display = "block";
+          if (row.status === "approved") {
+            h1.innerHTML = 'You are<br /><span class="a">in</span>';
+            s3.textContent = "Approved";
+            v.className = "verdict approved";
+            v.innerHTML =
+              "Approved for the field. Watch your email and iMessage for your pass details. Gates open 9 AM, October 10.";
+          } else if (row.status === "waitlisted") {
+            h1.innerHTML = 'On the<br /><span class="a">waitlist</span>';
+            s3.textContent = "Waitlisted";
+            v.innerHTML =
+              "The field is tight and your submission is on the waitlist. If a spot opens you hear from us first.";
+          } else {
+            h1.innerHTML = 'Not this<br /><span class="a">time</span>';
+            s3.textContent = "Not selected";
+            s3.classList.add("bad");
+            v.className = "verdict declined";
+            v.innerHTML =
+              "Not selected for this field. The curation runs tight and it is never personal. There will be more PaddockGavin events.";
+          }
+        }
+      }
+      var tok = null;
+      try {
+        tok = new URLSearchParams(location.search).get("t");
+      } catch (e) {}
+      if (tok && tok.length >= 32) lookup(tok.trim());
+      else askMode();
+      document.getElementById("tok").addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
+        var val = this.value.trim();
+        var m = val.match(/[a-f0-9]{32,}/i);
+        if (!m) {
+          var er = document.getElementById("err");
+          er.textContent = "That does not look like a status code.";
+          er.style.display = "block";
+          return;
+        }
+        location.search = "?t=" + m[0];
+      });
+    </script>
+  </body>
+</html>

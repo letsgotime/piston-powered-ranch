@@ -2855,6 +2855,11 @@
                 <p class="lede">
                   You'll hear back by iMessage first, then email, usually within a few days.
                 </p>
+                <p class="note" id="statusLinkRow" style="display: none; margin-top: 10px">
+                  Track your status any time, no login needed:<br />
+                  <a href="#" style="color: var(--accent-2); word-break: break-all"></a><br />
+                  Save that link. It is the only copy.
+                </p>
               </div>
               <button
                 class="btn btn-ghost btn-block"
@@ -3100,6 +3105,35 @@
               </div>
               <div class="oc-t">Decision Desk</div>
               <div class="oc-s" id="ocDecisions">Loading…</div>
+              <span class="cl-hint"
+                >Details
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M9 18l6-6-6-6" /></svg
+              ></span>
+            </div>
+            <div class="card card-pad clickable ops-card" data-detail="pipeline" tabindex="0">
+              <div class="oc-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M4 6h16M4 12h10M4 18h6" />
+                </svg>
+              </div>
+              <div class="oc-t">Pipeline</div>
+              <div class="oc-s" id="ocPipeline">Loading…</div>
+              <span class="cl-hint"
+                >Details
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                  <path d="M9 18l6-6-6-6" /></svg
+              ></span>
+            </div>
+            <div class="card card-pad clickable ops-card" data-detail="ledger" tabindex="0">
+              <div class="oc-ic">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M3 10h18M7 15h4" />
+                </svg>
+              </div>
+              <div class="oc-t">Payments Ledger</div>
+              <div class="oc-s" id="ocLedger">Loading…</div>
               <span class="cl-hint"
                 >Details
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
@@ -4445,6 +4479,141 @@
               );
             },
           },
+          pipeline: {
+            eyebrow: "CRM · live",
+            title: "Pipeline",
+            render: async function () {
+              var ev = await n.from("events").select("id,name,slug").order("starts_at"),
+                sel = localStorage.getItem("ppr_event") || "",
+                events = (ev && ev.data) || [],
+                cur =
+                  events.find(function (x) {
+                    return x.id === sel;
+                  }) || events[0];
+              if (!cur) return '<p class="note">No events yet.</p>';
+              var accts = await n
+                .from("accounts")
+                .select("*")
+                .eq("event_id", cur.id)
+                .order("created_at", { ascending: !1 });
+              if (accts.error) return L(accts.error);
+              var subs = await n.from("submissions").select("type,status");
+              var rows = accts.data || [],
+                sd = (subs && subs.data) || [];
+              function lane(type, label) {
+                var mine = rows.filter(function (r) {
+                  return r.type === type;
+                });
+                var by = {};
+                mine.forEach(function (r) {
+                  by[r.status] = (by[r.status] || 0) + 1;
+                });
+                return (
+                  '<div class="line-item"><span class="li-l">' +
+                  label +
+                  "<small>" +
+                  ["applied", "approved", "active"]
+                    .map(function (st) {
+                      return (by[st] || 0) + " " + st;
+                    })
+                    .join(" · ") +
+                  '</small></span><span class="li-v">' +
+                  mine.length +
+                  "</span></div>" +
+                  mine
+                    .slice(0, 8)
+                    .map(function (r) {
+                      return (
+                        '<div class="feed-row clickable" data-acct="' +
+                        r.id +
+                        '" style="cursor:pointer"><span class="ft">' +
+                        i(r.company) +
+                        '</span><span class="fs">' +
+                        i(r.status) +
+                        (r.email ? " · " + i(r.email) : "") +
+                        "</span></div>"
+                      );
+                    })
+                    .join("")
+                );
+              }
+              var vFun = {};
+              sd.forEach(function (x) {
+                if ("vehicle" === x.type) vFun[x.status] = (vFun[x.status] || 0) + 1;
+              });
+              var evOpts = events
+                .map(function (x) {
+                  return (
+                    '<option value="' +
+                    x.id +
+                    '"' +
+                    (x.id === cur.id ? " selected" : "") +
+                    ">" +
+                    i(x.name) +
+                    "</option>"
+                  );
+                })
+                .join("");
+              return (
+                '<div class="field" style="margin-bottom:12px"><label>Event</label><select id="crmEventSel">' +
+                evOpts +
+                "</select></div>" +
+                '<div class="line-item"><span class="li-l">Vehicle funnel<small>' +
+                ["pending", "approved", "waitlisted", "declined"]
+                  .map(function (st) {
+                    return (vFun[st] || 0) + " " + st;
+                  })
+                  .join(" · ") +
+                '</small></span><span class="li-v">' +
+                sd.filter(function (x) {
+                  return "vehicle" === x.type;
+                }).length +
+                "</span></div>" +
+                lane("vendor", "Vendors") +
+                lane("sponsor", "Sponsors") +
+                lane("club", "Clubs") +
+                '<p class="note" style="margin-top:12px">Tap an account for its contact timeline. Vehicle detail lives in the activity feed.</p>'
+              );
+            },
+          },
+          ledger: {
+            eyebrow: "CRM · money",
+            title: "Payments Ledger",
+            render: async function () {
+              var r = await n
+                .from("payments")
+                .select("*")
+                .order("created_at", { ascending: !1 })
+                .limit(50);
+              if (r.error) return L(r.error);
+              var rows = r.data || [];
+              if (!rows.length)
+                return '<p class="note">No payments recorded yet. Completed Stripe checkouts land here on their own once the webhook secrets are in Vercel. The sandbox deposit link is in PLATFORM-BUILD-ORDER.md.</p>';
+              var total = 0;
+              var body = rows
+                .map(function (p2) {
+                  "paid" === p2.status && (total += p2.amount_cents || 0);
+                  return (
+                    '<div class="line-item"><span class="li-l">' +
+                    i(p2.kind || "other") +
+                    (p2.payer_email ? "<small>" + i(p2.payer_email) + "</small>" : "") +
+                    '</span><span class="li-v">$' +
+                    ((p2.amount_cents || 0) / 100).toFixed(2) +
+                    (p2.livemode ? "" : " test") +
+                    " · " +
+                    i(p2.status || "") +
+                    "</span></div>"
+                  );
+                })
+                .join("");
+              return (
+                '<div class="line-item total"><span class="li-l">Collected (paid)</span><span class="li-v">$' +
+                (total / 100).toFixed(2) +
+                "</span></div>" +
+                body
+              );
+            },
+          },
           decisions: {
             eyebrow: "Live · saves as you type",
             title: "Decision Desk",
@@ -4708,6 +4877,29 @@
               i(a.status) +
               "</span></div>" +
               (a.staff_notes ? '<p class="note">Staff note: ' + i(a.staff_notes) + "</p>" : "") +
+              (a.status_token
+                ? '<div class="stat-row" style="gap:10px;margin-top:14px;flex-wrap:wrap">' +
+                  '<button class="btn-mini" data-copy-status="' +
+                  i(a.status_token) +
+                  '">Copy status link</button>' +
+                  '<button class="btn-mini" data-copy-notice="' +
+                  a.id +
+                  '" data-ntype="' +
+                  a.type +
+                  '" data-nstat="' +
+                  a.status +
+                  '" data-nname="' +
+                  i(a.applicant_name) +
+                  '" data-ntoken="' +
+                  i(a.status_token) +
+                  '">Copy ' +
+                  ("approved" === a.status
+                    ? "acceptance"
+                    : "declined" === a.status
+                      ? "decline"
+                      : "received") +
+                  " notice</button></div>"
+                : "") +
               ("pending" === a.status
                 ? '<div class="stat-row" style="gap:10px;margin-top:14px;"><button class="btn-mini" data-action="approve" data-id="' +
                   a.id +
@@ -4721,6 +4913,150 @@
             body: o,
           };
         }
+        document.addEventListener("change", function (e) {
+          if ("crmEventSel" !== e.target.id) return;
+          localStorage.setItem("ppr_event", e.target.value);
+          I("pipeline");
+        });
+        document.addEventListener("click", async function (e) {
+          var row = e.target.closest("[data-acct]");
+          if (!row) return;
+          var id = row.getAttribute("data-acct");
+          var acct = await n.from("accounts").select("*").eq("id", id).single();
+          if (acct.error) return;
+          var a2 = acct.data;
+          var notes = await n
+            .from("interactions")
+            .select("*")
+            .eq("account_id", id)
+            .order("created_at", { ascending: !1 })
+            .limit(20);
+          var tl = ((notes && notes.data) || [])
+            .map(function (x) {
+              return (
+                '<div class="line-item"><span class="li-l">' +
+                i(x.kind || "note") +
+                "<small>" +
+                new Date(x.created_at).toLocaleDateString([], { month: "short", day: "numeric" }) +
+                (x.by_user ? " · " + i(x.by_user) : "") +
+                '</small></span><span class="li-v" style="max-width:60%;text-align:right">' +
+                i(x.body || "") +
+                "</span></div>"
+              );
+            })
+            .join("");
+          (P("sheetEyebrow", "Account · " + a2.type),
+            D("sheetTitle", i(a2.company)),
+            D(
+              "sheetBody",
+              '<div class="line-item"><span class="li-l">Contact</span><span class="li-v">' +
+                i(a2.contact_name || "") +
+                "</span></div>" +
+                '<div class="line-item"><span class="li-l">Email</span><span class="li-v">' +
+                i(a2.email || "") +
+                "</span></div>" +
+                '<div class="line-item"><span class="li-l">Status</span><span class="li-v">' +
+                i(a2.status) +
+                "</span></div>" +
+                '<div style="margin:14px 0 6px"><span class="sec-label">Timeline</span></div>' +
+                (tl || '<p class="note">No notes yet.</p>') +
+                '<textarea id="acctNote" rows="2" placeholder="Add a note, saves on Enter" style="width:100%;margin-top:10px;font:inherit;font-size:13.5px;color:var(--ink-dim);background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:10px 12px" data-acct-note="' +
+                a2.id +
+                '"></textarea>',
+            ));
+        });
+        document.addEventListener("keydown", async function (e) {
+          var t = e.target.closest("[data-acct-note]");
+          if (!t || "Enter" !== e.key || e.shiftKey) return;
+          e.preventDefault();
+          var body = t.value.trim();
+          if (!body) return;
+          var who = "";
+          try {
+            var ses = await n.auth.getSession();
+            who =
+              (ses &&
+                ses.data &&
+                ses.data.session &&
+                ses.data.session.user &&
+                ses.data.session.user.email) ||
+              "";
+          } catch (e2) {}
+          var r = await n
+            .from("interactions")
+            .insert({
+              account_id: t.getAttribute("data-acct-note"),
+              kind: "note",
+              body: body,
+              by_user: who,
+            })
+            .select("id");
+          r.error || !r.data || !r.data.length
+            ? (t.style.outline = "1px solid var(--crit)")
+            : ((t.value = ""), (t.style.outline = ""), (t.placeholder = "Saved. Add another?"));
+        });
+        function noticeText(kind, status, name, token) {
+          var link = location.origin + "/status/?t=" + token;
+          var first = (name || "").split(" ")[0] || "there";
+          if ("approved" === status)
+            return (
+              "Hi " +
+              first +
+              ", great news: your " +
+              kind +
+              " submission for The Piston Powered Ranch is approved. " +
+              "Saturday, October 10, gates at 9 AM, Rancho Jaramillo, 179 Enon Church Rd, Unionville TN. " +
+              "Pass details follow soon. Track everything here: " +
+              link +
+              " \u2022 PaddockGavin"
+            );
+          if ("declined" === status)
+            return (
+              "Hi " +
+              first +
+              ", thank you for submitting to The Piston Powered Ranch. " +
+              "The field is tightly curated and we could not fit your " +
+              kind +
+              " entry this time. It is never personal, and there will be more PaddockGavin events. " +
+              "Status page: " +
+              link +
+              " \u2022 PaddockGavin"
+            );
+          return (
+            "Hi " +
+            first +
+            ", your " +
+            kind +
+            " submission for The Piston Powered Ranch is in and under review. " +
+            "You can watch its status any time, no login needed: " +
+            link +
+            " \u2022 PaddockGavin"
+          );
+        }
+        document.addEventListener("click", function (e) {
+          var b1 = e.target.closest("[data-copy-status]");
+          var b2 = e.target.closest("[data-copy-notice]");
+          var btn = b1 || b2;
+          if (!btn || !navigator.clipboard) return;
+          var text = b1
+            ? location.origin + "/status/?t=" + b1.getAttribute("data-copy-status")
+            : noticeText(
+                btn.getAttribute("data-ntype"),
+                btn.getAttribute("data-nstat"),
+                btn.getAttribute("data-nname"),
+                btn.getAttribute("data-ntoken"),
+              );
+          var old = btn.textContent;
+          navigator.clipboard.writeText(text).then(
+            function () {
+              btn.textContent = "Copied";
+              setTimeout(function () {
+                btn.textContent = old;
+              }, 1600);
+            },
+            function () {},
+          );
+        });
         var S = document.getElementById("sheetBody");
         window.__pprRefreshStaff = k;
         async function k() {
@@ -4824,6 +5160,44 @@
                 }).length,
                 doneN = dcs.data.length - openN;
               dEl.textContent = openN + " open · " + doneN + " decided";
+            }
+            var pEl = document.getElementById("ocPipeline");
+            if (pEl) {
+              var acr = await n.from("accounts").select("type,status");
+              if (acr && acr.data) {
+                var ac = acr.data;
+                pEl.textContent =
+                  ac.filter(function (x) {
+                    return "vendor" === x.type;
+                  }).length +
+                  " vendors · " +
+                  ac.filter(function (x) {
+                    return "sponsor" === x.type;
+                  }).length +
+                  " sponsors · " +
+                  ac.filter(function (x) {
+                    return "club" === x.type;
+                  }).length +
+                  " clubs";
+              } else pEl.textContent = "Unavailable right now";
+            }
+            var lEl = document.getElementById("ocLedger");
+            if (lEl) {
+              var pr = await n.from("payments").select("amount_cents,status");
+              if (pr && pr.data) {
+                var paid = pr.data.filter(function (x) {
+                  return "paid" === x.status;
+                });
+                lEl.textContent = paid.length
+                  ? paid.length +
+                    " paid · $" +
+                    (
+                      paid.reduce(function (a2, b2) {
+                        return a2 + (b2.amount_cents || 0);
+                      }, 0) / 100
+                    ).toFixed(0)
+                  : "No payments yet";
+              } else lEl.textContent = "Unavailable right now";
             }
             var intel = document.getElementById("opsIntel"),
               rows = document.getElementById("opsIntelRows");
@@ -5656,6 +6030,12 @@
                       (async function () {
                         try {
                           await a();
+                          var stok = Array.from(
+                            crypto.getRandomValues(new Uint8Array(24)),
+                            function (b) {
+                              return b.toString(16).padStart(2, "0");
+                            },
+                          ).join("");
                           var e = await n.from("submissions").insert({
                             type: t,
                             applicant_name: i,
@@ -5663,12 +6043,23 @@
                             phone: o || null,
                             details: c,
                             media_link: l || null,
+                            status_token: stok,
                           });
                           if (((u.disabled = !1), (u.textContent = "Submit for review"), e.error))
                             return void ie(
                               "submitError",
                               e.error.message || "Could not submit. Try again.",
                             );
+                          var slEl = document.getElementById("statusLinkRow");
+                          if (slEl && stok) {
+                            var surl = location.origin + "/status/?t=" + stok;
+                            ((slEl.style.display = ""),
+                              (slEl.querySelector("a").href = surl),
+                              (slEl.querySelector("a").textContent = surl.replace(
+                                /^https?:\/\//,
+                                "",
+                              )));
+                          }
                           ((ne.style.display = "none"),
                             ae.classList.add("visible"),
                             requestAnimationFrame(function () {
