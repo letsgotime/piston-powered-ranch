@@ -197,6 +197,17 @@
       a {
         color: var(--accent);
       }
+      .ground::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url("/events/img/hero.jpg") center 30% / cover no-repeat;
+        opacity: 0.14;
+        filter: saturate(1.1);
+      }
+      [data-brand="encanto"] .ground::before {
+        background-image: url("/events/img/walk.jpg");
+      }
       .ground {
         position: fixed;
         inset: 0;

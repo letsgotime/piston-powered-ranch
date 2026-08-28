@@ -14,6 +14,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
     <style>
       :root {
+        --glass:rgba(16,26,38,0.58); --gline:rgba(255,255,255,0.1);
+        --e1:0 10px 34px rgba(0,0,0,0.38); --e2:0 24px 70px rgba(0,0,0,0.5);
         --bg: #0d1620;
         --surface: #121d2a;
         --surface-2: #16222f;
@@ -31,6 +33,16 @@
       html {
         scroll-behavior: smooth;
       }
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly {
+        position: absolute; inset: 0;
+        background: url(/events/img/hero.jpg) center 32% / cover no-repeat;
+      }
+      .ground .veil {
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(13, 22, 32, 0.68), rgba(13, 22, 32, 0.6) 40%, rgba(13, 22, 32, 0.8));
+      }
+      .wrap { position: relative; z-index: 1; }
       body {
         margin: 0;
         background: var(--bg);
@@ -106,8 +118,11 @@
       }
       .howto {
         margin-top: 26px;
-        background: var(--surface);
-        border: 1px solid var(--line-soft);
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35);
+        backdrop-filter: blur(18px) saturate(1.35);
+        box-shadow: var(--e1);
+        border: 1px solid var(--gline);
         border-radius: 16px;
         padding: 18px 20px;
       }
@@ -170,11 +185,18 @@
       }
       .controls {
         position: sticky;
-        top: 0;
+        top: 10px;
         z-index: 20;
         margin-top: 30px;
         padding: 12px 0;
-        background: linear-gradient(180deg, var(--bg) 72%, rgba(13, 22, 32, 0));
+        background: rgba(13, 20, 30, 0.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline);
+        border-radius: 22px;
+        box-shadow: var(--e1);
+        padding-left: 12px;
+        padding-right: 12px;
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
@@ -231,8 +253,11 @@
         grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
       }
       .card {
-        background: var(--surface);
-        border: 1px solid var(--line-soft);
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35);
+        backdrop-filter: blur(18px) saturate(1.35);
+        box-shadow: var(--e1);
+        border: 1px solid var(--gline);
         border-radius: 16px;
         overflow: hidden;
         display: flex;
@@ -400,6 +425,7 @@
   </head>
   <body>
     <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
     <div class="wrap">
       <img
         src="/brand/pg-mark.png"

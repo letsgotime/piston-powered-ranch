@@ -34,6 +34,17 @@
         --line: #27384f;
         --line-soft: #1c2a3d;
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+        --glass: rgba(16, 26, 38, 0.58);
+        --gline: rgba(255, 255, 255, 0.1);
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.38);
+        --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+      }
+      .glass {
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35);
+        backdrop-filter: blur(18px) saturate(1.35);
+        border: 1px solid var(--gline);
+        box-shadow: var(--e1);
       }
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
@@ -48,21 +59,24 @@
         height: 4px; position: relative; z-index: 5;
         background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, var(--blue) 50% 75%, var(--mute) 75% 100%);
       }
-      /* ---- hero ---- */
-      .hero { position: relative; min-height: 92vh; display: flex; align-items: flex-end; overflow: hidden; }
-      .hero .bg {
-        position: absolute; inset: -4%; background: url("img/hero.jpg") center 35% / cover no-repeat;
-        animation: kenburns 26s var(--ease) infinite alternate;
+      /* ---- full-bleed editorial ground ---- */
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly {
+        position: absolute; inset: 0; background-size: cover; background-position: center 38%;
+        opacity: 0; transition: opacity 1.4s var(--ease); transform: scale(1.04);
       }
-      @keyframes kenburns {
-        from { transform: scale(1) translateY(0); }
-        to { transform: scale(1.08) translateY(-1.6%); }
-      }
-      .hero .scrim {
+      .ground .ly.on { opacity: 1; }
+      .ground .veil {
         position: absolute; inset: 0;
-        background: linear-gradient(180deg, rgba(13, 22, 32, 0.25) 0%, rgba(13, 22, 32, 0.05) 34%, rgba(13, 22, 32, 0.62) 72%, var(--bg) 100%);
+        background: linear-gradient(180deg, rgba(13, 22, 32, 0.5), rgba(13, 22, 32, 0.42) 40%, rgba(13, 22, 32, 0.68));
       }
-      .hero-inner { position: relative; z-index: 2; width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 24px 9vh; }
+      main.site { position: relative; z-index: 1; }
+      /* ---- hero ---- */
+      .hero { position: relative; min-height: 88vh; display: flex; align-items: flex-end; }
+      .hero-inner {
+        position: relative; z-index: 2; width: 100%; max-width: 940px; margin: 0 auto 7vh;
+        padding: 34px 38px 30px; border-radius: 26px; box-shadow: var(--e2);
+      }
       .eyebrow {
         font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700;
         color: var(--teal); display: flex; align-items: center; gap: 9px;
@@ -105,8 +119,8 @@
       .sub { color: var(--dim); max-width: 62ch; margin: 14px 0 0; font-size: 17px; }
       /* featured event */
       .feature {
-        margin-top: 34px; border: 1px solid var(--line-soft); border-radius: 22px; overflow: hidden;
-        background: var(--surface); display: grid; grid-template-columns: 1.15fr 1fr;
+        margin-top: 34px; border-radius: 22px; overflow: hidden;
+        display: grid; grid-template-columns: 1.15fr 1fr;
       }
       .feature .ph { position: relative; min-height: 340px; overflow: hidden; }
       .feature .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
@@ -140,20 +154,19 @@
       .tl.next .when { color: var(--teal); }
       .tl h3 { margin: 4px 0 0; font-size: 20px; }
       .tl p { margin: 6px 0 0; color: var(--dim); font-size: 14.5px; max-width: 62ch; }
-      /* photo band */
-      .band { margin-top: 84px; position: relative; height: 46vh; min-height: 300px; overflow: hidden; }
-      .band img { width: 100%; height: 120%; object-fit: cover; object-position: center 40%; will-change: transform; }
-      .band .cap {
-        position: absolute; left: 0; right: 0; bottom: 0; padding: 26px 24px;
-        background: linear-gradient(180deg, transparent, rgba(13, 22, 32, 0.85));
-        font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--dim); text-align: center;
-      }
       /* stats strip */
       .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-top: 34px; }
-      .stat { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 16px; padding: 22px; }
+      .stat { border-radius: 16px; padding: 22px; }
       .stat .v { font-family: "Arial Black", Helvetica, sans-serif; font-size: 30px; color: var(--amber); font-variant-numeric: tabular-nums; }
       .stat .l { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); font-weight: 700; margin-top: 4px; }
       /* reveal motion */
+      .capchip {
+        display: flex; justify-content: center; margin-top: 84px;
+      }
+      .capchip span {
+        padding: 11px 24px; border-radius: 999px; font-size: 12px; letter-spacing: 0.12em;
+        text-transform: uppercase; font-weight: 700; color: var(--dim); text-align: center;
+      }
       .rv { opacity: 0; transform: translateY(26px); transition: opacity 0.8s var(--ease), transform 0.8s var(--ease); }
       .rv.in { opacity: 1; transform: none; }
       /* footer */
@@ -185,18 +198,23 @@
         .hero .bg { animation: none; }
         .tick .d { animation: none; }
         .rv { opacity: 1; transform: none; transition: none; }
-        .band img { transform: none !important; }
+
         html { scroll-behavior: auto; }
       }
     </style>
   </head>
   <body>
     <div class="rule"></div>
-    <header class="hero">
-      <div class="bg" aria-hidden="true"></div>
-      <div class="scrim" aria-hidden="true"></div>
+    <div class="ground" aria-hidden="true">
+      <div class="ly on" id="lyA" style="background-image: url('img/hero.jpg')"></div>
+      <div class="ly" id="lyB" style="background-image: url('img/walk.jpg')"></div>
+      <div class="ly" id="lyC" style="background-image: url('img/dusk.jpg')"></div>
+      <div class="veil"></div>
+    </div>
+    <main class="site">
+    <header class="hero" data-ly="lyA">
       <div class="tick"><span class="d"></span>Submissions open for October 10</div>
-      <div class="hero-inner">
+      <div class="hero-inner glass">
         <img class="mark" src="/brand/pg-mark.png" alt="PaddockGavin" />
         <div class="eyebrow">PaddockGavin Events</div>
         <h1 class="display">The good cars<br /><span class="a">come outside</span></h1>
@@ -212,11 +230,11 @@
       </div>
     </header>
 
-    <section>
+    <section data-ly="lyA">
       <div class="wrap rv">
         <div class="sec-eyebrow">Now boarding</div>
         <h2 class="display">One field. <span class="a">300 cars.</span></h2>
-        <div class="feature">
+        <div class="feature glass">
           <div class="ph"><img src="img/ranch.jpg" alt="A scarlet supercar on pasture grass at sunrise beside a ranch fence" /></div>
           <div class="body">
             <span class="pill">Saturday · Oct 10 · 2026</span>
@@ -236,20 +254,17 @@
           </div>
         </div>
         <div class="stats">
-          <div class="stat"><div class="v" data-count="300">0</div><div class="l">Curated cars</div></div>
-          <div class="stat"><div class="v" data-count="600">0</div><div class="l">Acres of ranch</div></div>
-          <div class="stat"><div class="v" data-count="20">0</div><div class="l">VIP passes, total</div></div>
-          <div class="stat"><div class="v" id="daysOut">0</div><div class="l">Days to show day</div></div>
+          <div class="stat glass"><div class="v" data-count="300">0</div><div class="l">Curated cars</div></div>
+          <div class="stat glass"><div class="v" data-count="600">0</div><div class="l">Acres of ranch</div></div>
+          <div class="stat glass"><div class="v" data-count="20">0</div><div class="l">VIP passes, total</div></div>
+          <div class="stat glass"><div class="v" id="daysOut">0</div><div class="l">Days to show day</div></div>
         </div>
       </div>
     </section>
 
-    <div class="band rv" id="band1">
-      <img src="img/walk.jpg" alt="Guests strolling between rows of collector cars under fall oaks" />
-      <div class="cap">Gallery-walk pace · every car approved before it receives a pass</div>
-    </div>
+    <div class="capchip rv"><span class="glass">Gallery-walk pace · every car approved before it receives a pass</span></div>
 
-    <section>
+    <section data-ly="lyB">
       <div class="wrap rv">
         <div class="sec-eyebrow">The road so far</div>
         <h2 class="display">Where this <span class="a">comes from</span></h2>
@@ -257,7 +272,7 @@
           PaddockGavin events grew out of a simple standard: fewer cars, better cars, and a day
           worth dressing for.
         </p>
-        <div class="timeline">
+        <div class="timeline glass" style="padding: 26px 30px 26px 44px; border-radius: 22px">
           <div class="tl">
             <div class="when">Through August 2026</div>
             <h3>Donuts with duPont</h3>
@@ -287,13 +302,10 @@
       </div>
     </section>
 
-    <div class="band rv" id="band2">
-      <img src="img/dusk.jpg" alt="String lights glowing between white event tents on a pasture at dusk" />
-      <div class="cap">Every event gives back to the county it runs in</div>
-    </div>
+    <div class="capchip rv" data-ly="lyC"><span class="glass">Every event gives back to the county it runs in</span></div>
 
-    <footer>
-      <div class="wrap">
+    <footer data-ly="lyC">
+      <div class="wrap glass" style="border-radius: 24px; padding: 30px 30px 24px; max-width: 1032px">
         <div class="pf-top">
           <div class="pf-brand">
             <img src="/brand/pg-mark.png" alt="PaddockGavin" />
@@ -329,6 +341,7 @@
         </p>
       </div>
     </footer>
+    </main>
 
     <script>
       (function () {
@@ -372,24 +385,17 @@
           { threshold: 0.5 },
         );
         document.querySelectorAll("[data-count]").forEach(function (el) { so.observe(el); });
-        // gentle parallax on the photo bands
-        if (!reduce) {
-          var bands = [].slice.call(document.querySelectorAll(".band img"));
-          var ticking = false;
-          window.addEventListener("scroll", function () {
-            if (ticking) return;
-            ticking = true;
-            requestAnimationFrame(function () {
-              bands.forEach(function (im) {
-                var r = im.parentElement.getBoundingClientRect();
-                if (r.bottom < 0 || r.top > innerHeight) return;
-                var p = (r.top + r.height / 2 - innerHeight / 2) / innerHeight;
-                im.style.transform = "translateY(" + p * -34 + "px)";
-              });
-              ticking = false;
-            });
-          }, { passive: true });
-        }
+        // full-bleed ground crossfade by section
+        var lys = {};
+        ["lyA", "lyB", "lyC"].forEach(function (k) { lys[k] = document.getElementById(k); });
+        var lo = new IntersectionObserver(function (es) {
+          es.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            var k = en.target.getAttribute("data-ly");
+            Object.keys(lys).forEach(function (id) { lys[id].classList.toggle("on", id === k); });
+          });
+        }, { rootMargin: "-40% 0px -40% 0px" });
+        document.querySelectorAll("[data-ly]").forEach(function (el) { lo.observe(el); });
       })();
     </script>
   </body>

@@ -10,7 +10,11 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
     <style>
-      :root{--bg:#0d1620;--surface:#121d2a;--surface-2:#16222f;--ink:#fff;--ink-dim:#c4cbd6;--ink-mute:#8b95a3;--accent:#f8b800;--accent-2:#00d2be;--line:#27384f;--line-soft:#1c2a3d}
+      :root{--bg:#0d1620;--surface:#121d2a;--surface-2:#16222f;--ink:#fff;--ink-dim:#c4cbd6;--ink-mute:#8b95a3;--accent:#f8b800;--accent-2:#00d2be;--line:#27384f;--line-soft:#1c2a3d;--glass:rgba(16,26,38,0.58);--gline:rgba(255,255,255,0.1);--e1:0 10px 34px rgba(0,0,0,0.38)}
+      .ground{position:fixed;inset:0;z-index:0}
+      .ground .ly{position:absolute;inset:0;background:url(/events/img/walk.jpg) center 40%/cover no-repeat;transform:scale(1.04)}
+      .ground .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,22,32,.64),rgba(13,22,32,.56) 40%,rgba(13,22,32,.76))}
+      .wrap{position:relative;z-index:1}
       *{box-sizing:border-box}
       body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
       .rule{height:3px;background:linear-gradient(90deg,var(--accent) 0 25%,var(--accent-2) 25% 50%,#005185 50% 75%,#8b95a3 75% 100%)}
@@ -21,7 +25,7 @@
       h1 .accent{color:var(--accent)}
       .lede{color:var(--ink-dim);font-size:16.5px;margin:14px 0 0;max-width:56ch}
       .back{display:inline-flex;align-items:center;gap:6px;margin-top:16px;color:var(--accent-2);text-decoration:none;font-size:13.5px;font-weight:600}
-      .cap{background:var(--surface);border:1px solid var(--line-soft);border-radius:16px;padding:20px 22px;margin-top:20px}
+      .cap{background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.35);backdrop-filter:blur(18px) saturate(1.35);border:1px solid var(--gline);box-shadow:var(--e1);border-radius:16px;padding:20px 22px;margin-top:20px}
       .cap-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
       .cap h2{font-size:15px;margin:0;letter-spacing:.01em}
       .pair{margin:6px 0 0;color:var(--accent-2);font-size:12.5px}
@@ -33,6 +37,7 @@
   </head>
   <body>
     <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
     <div class="wrap">
       <img src="/brand/pg-mark.png" alt="PaddockGavin" style="height:44px;width:auto;margin-bottom:14px" />
       <div class="eyebrow"><span class="dot"></span>Caption Pack</div>
