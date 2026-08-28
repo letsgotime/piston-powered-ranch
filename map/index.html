@@ -6,10 +6,10 @@
     <title>Ranch Map · The Piston Powered Ranch</title>
     <meta
       name="description"
-      content="Navigate to The Piston Powered Ranch, cruise in with a group from a rendezvous point, and see the live event map. Rancho Jaramillo, Unionville, TN."
+      content="Navigate to The Piston Powered Ranch, cruise in with a group from a rendezvous point, and open the official field program. Rancho Jaramillo, Unionville, TN."
     />
     <meta property="og:title" content="Ranch Map · The Piston Powered Ranch" />
-    <meta property="og:description" content="Route to the ranch, set a rendezvous, cruise in together. October 10, 2026." />
+    <meta property="og:description" content="Route to the ranch, cruise in together, and read the field like a race program. October 10, 2026." />
     <meta property="og:image" content="https://piston-powered-ranch.vercel.app/og/ppr-og.jpg" />
     <meta name="theme-color" content="#0d1620" />
     <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
@@ -18,7 +18,7 @@
       :root {
         --bg: #0a111a; --glass: rgba(14, 23, 34, 0.66); --glass2: rgba(20, 31, 45, 0.78);
         --gline: rgba(255, 255, 255, 0.11); --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
-        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d;
+        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d; --blue: #4da3d8;
         --e1: 0 10px 34px rgba(0, 0, 0, 0.4); --e2: 0 24px 70px rgba(0, 0, 0, 0.55);
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
       }
@@ -68,7 +68,7 @@
       .door .go { margin-left: auto; color: var(--mute); font-size: 18px; }
       .engine { margin-top: 14px; font-size: 11px; color: var(--mute); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
       .engine b { color: var(--teal); }
-      /* bar */
+      /* top bar */
       .bar {
         position: fixed; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
         z-index: 40; width: calc(100% - 24px); max-width: 640px;
@@ -79,32 +79,181 @@
         opacity: 0; pointer-events: none; transition: opacity 0.4s var(--ease);
       }
       .bar.on { opacity: 1; pointer-events: auto; }
+      .bar.gold { border-color: rgba(248, 184, 0, 0.5); }
       .bar img { height: 24px; width: auto; }
-      .bar .t { font-weight: 800; font-size: 13px; letter-spacing: 0.04em; }
+      .bar .t { font-weight: 800; font-size: 13px; letter-spacing: 0.04em; white-space: nowrap; }
+      .bar .t small { display: block; font-size: 8.5px; letter-spacing: 0.16em; color: var(--mute); font-weight: 800; line-height: 1.2; }
       .bar .spacer { flex: 1; }
       .bar button {
         font: inherit; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em;
         text-transform: uppercase; color: var(--dim); background: rgba(255, 255, 255, 0.07);
         border: 1px solid var(--gline); border-radius: 999px; padding: 7px 12px; cursor: pointer;
       }
-      /* telemetry dock (event map mode) */
-      .dock {
-        position: fixed; z-index: 36; top: calc(64px + env(safe-area-inset-top)); left: 50%;
-        transform: translateX(-50%); width: calc(100% - 24px); max-width: 640px;
-        display: none; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
+      .bar button.lit { color: var(--teal); border-color: rgba(0, 210, 190, 0.45); }
+      /* race control ticker */
+      .ticker {
+        position: fixed; z-index: 39; top: calc(64px + env(safe-area-inset-top)); left: 50%;
+        transform: translateX(-50%); width: calc(100% - 44px); max-width: 620px;
+        padding: 7px 14px; border-radius: 999px; overflow: hidden; white-space: nowrap;
+        background: rgba(10, 17, 26, 0.82); border: 1px solid var(--gline);
+        font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--dim); text-overflow: ellipsis; display: none;
       }
-      .dock.on { display: grid; }
-      .chip2 {
-        padding: 10px 13px; border-radius: 14px; background: var(--glass2);
-        -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
-        border: 1px solid var(--gline); box-shadow: var(--e1);
+      .ticker.on { display: block; }
+      .ticker b { color: var(--amber); }
+      .ticker .msg { display: inline-block; animation: tick-in 0.5s var(--ease); }
+      @keyframes tick-in { from { transform: translateY(120%); opacity: 0; } to { transform: none; opacity: 1; } }
+      /* field mode */
+      .fwrap { position: fixed; inset: 0; z-index: 4; display: none; background: var(--bg); }
+      .fwrap.on { display: block; }
+      #fieldMap { position: absolute; inset: 0; }
+      .fwrap.program .leaflet-tile-pane {
+        filter: grayscale(1) brightness(0.44) contrast(1.14);
+        transition: filter 0.45s var(--ease);
       }
-      .chip2 .v { font-family: "Arial Black", Helvetica, sans-serif; font-size: 17px; line-height: 1.1; font-variant-numeric: tabular-nums; }
-      .chip2 .v small { font-size: 11px; color: var(--mute); font-family: inherit; font-weight: 400; }
-      .chip2 .l { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); font-weight: 800; margin-top: 3px; }
-      .chip2 .v .t { color: var(--teal); }
-      .chip2 .v .a2 { color: var(--amber); }
-      /* sheets */
+      .fwrap .leaflet-tile-pane { transition: filter 0.45s var(--ease); }
+      .fvignette {
+        position: absolute; inset: 0; z-index: 500; pointer-events: none;
+        background: radial-gradient(ellipse at 50% 42%, transparent 48%, rgba(5, 8, 12, 0.52) 100%);
+        opacity: 1; transition: opacity 0.45s var(--ease);
+      }
+      .fwrap.aerial .fvignette { opacity: 0.35; }
+      /* program svg states */
+      .fart .base-art { transition: opacity 0.45s var(--ease); }
+      .fwrap.aerial .fart .base-art { opacity: 0.12; }
+      .fart .zn-main { transition: fill-opacity 0.3s; }
+      .fwrap.aerial .fart .zn-main { fill-opacity: 0.03 !important; stroke: rgba(255, 255, 255, 0.65) !important; stroke-width: 1; }
+      .fwrap.aerial .fart .zn-glow, .fwrap.aerial .fart .zn-hatch { display: none; }
+      .fart .zg .zn-glow { display: none; stroke-width: 7; fill: none; opacity: 0.32; }
+      .fart .zg.st-open .zn-glow { display: block; animation: breathe 3.2s ease-in-out infinite; }
+      .fart .zg .zn-hatch { display: none; }
+      .fart .zg.st-full .zn-hatch { display: block; }
+      .fart .zg.st-draft .zn-main { stroke-dasharray: 6 5; fill-opacity: 0.06; }
+      .fart .zg.st-closed .zn-main { fill-opacity: 0.03; stroke: rgba(139, 149, 163, 0.5) !important; }
+      @keyframes breathe { 0%, 100% { opacity: 0.18; } 50% { opacity: 0.4; } }
+      .fart .sig { transition: opacity 0.45s; }
+      .fwrap.aerial .fart .sig { opacity: 0.4; }
+      .fart .sig.draw { animation: drawon 1.4s var(--ease) forwards; }
+      @keyframes drawon { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+      .fart .leader { stroke-dasharray: 7 6; animation: leadflow 1.1s linear infinite; }
+      @keyframes leadflow { to { stroke-dashoffset: -13; } }
+      /* corner badges + poi markers (divIcons, screen sized) */
+      .cb { display: flex; align-items: center; gap: 7px; transform: translate(-17px, -17px); cursor: pointer; }
+      .cb .num {
+        width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(10, 17, 26, 0.88); border: 2px solid var(--amber);
+        color: var(--ink); font-family: "Arial Black", Helvetica, sans-serif; font-size: 13px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, 0.55);
+      }
+      .cb .lab {
+        background: rgba(10, 17, 26, 0.82); border: 1px solid var(--gline); border-radius: 9px;
+        padding: 4px 9px; white-space: nowrap; line-height: 1.15;
+      }
+      .cb .lab b { display: block; font-size: 11px; font-weight: 800; letter-spacing: 0.05em; }
+      .cb .lab i { display: flex; align-items: center; gap: 4px; font-style: normal;
+        font-size: 8px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+      .cb .lab i::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--dot, #8b95a3); }
+      .cb.sel .num { border-color: #fff; background: var(--amber); color: #151000; }
+      .cb.flip .num { animation: flipring 1.2s var(--ease); }
+      @keyframes flipring { 0% { box-shadow: 0 0 0 0 rgba(248, 184, 0, 0.7); } 100% { box-shadow: 0 0 0 26px rgba(248, 184, 0, 0); } }
+      .cb.pop, .pi.pop { animation: popin 0.45s var(--ease) backwards; animation-delay: var(--d, 0ms); }
+      @keyframes popin { from { transform: translate(-17px, -3px); opacity: 0; } to { opacity: 1; } }
+      .pi { transform: translate(-13px, -13px); cursor: pointer; }
+      .pi .disc {
+        width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        background: rgba(10, 17, 26, 0.88); border: 1.5px solid rgba(255, 255, 255, 0.55);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); color: var(--dim);
+      }
+      .pi.sel .disc { border-color: var(--amber); color: var(--amber); }
+      .leaflet-marker-icon.fmk { background: none; border: none; }
+      /* field bottom sheet */
+      .fsheet {
+        position: fixed; z-index: 41; left: 50%; bottom: 0; transform: translate(-50%, calc(100% - var(--peek, 122px)));
+        width: min(100vw, 560px); height: 86vh; height: 86dvh;
+        border-radius: 24px 24px 0 0; overflow: hidden; display: none; flex-direction: column;
+        background: var(--glass2);
+        -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4);
+        border: 1px solid var(--gline); border-bottom: 0; box-shadow: var(--e2);
+        transition: transform 0.42s var(--ease); touch-action: none;
+      }
+      .fsheet.on { display: flex; }
+      .fsheet.snap-index { transform: translate(-50%, 46%); }
+      .fsheet.snap-full { transform: translate(-50%, 0); }
+      .fsheet.dragging { transition: none; }
+      .fhead { padding: 10px 20px 12px; flex-shrink: 0; cursor: grab; }
+      .grab { width: 44px; height: 4px; border-radius: 999px; background: var(--gline); margin: 0 auto 10px; }
+      .cond-eye { display: flex; justify-content: space-between; align-items: baseline; }
+      .cond-eye .eyebrow { color: var(--amber); font-size: 10px; }
+      .cond-eye span:last-child { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 800; color: var(--mute); }
+      .cond-line { font-family: "Arial Black", Helvetica, sans-serif; font-size: 15px; margin-top: 3px;
+        font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .cond-line .sep { color: var(--mute); font-family: inherit; }
+      .ent-row { margin-top: 8px; }
+      .ent-row .txt { display: flex; justify-content: space-between; font-size: 10px; font-weight: 800;
+        letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+      .ent-row .txt b { color: var(--ink); }
+      .ent-rule { height: 2px; background: rgba(255, 255, 255, 0.1); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+      .ent-rule i { display: block; height: 100%; width: 0; background: var(--amber); transition: width 0.8s var(--ease); }
+      .fbody { flex: 1; overflow: auto; padding: 2px 20px calc(26px + env(safe-area-inset-bottom)); -webkit-overflow-scrolling: touch; }
+      .fsec-eye { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; color: var(--mute); margin: 16px 0 8px; }
+      /* light schedule bar */
+      .lightbar { position: relative; height: 26px; border-radius: 8px; background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--gline); overflow: hidden; }
+      .lightbar .band { position: absolute; top: 0; bottom: 0; }
+      .lightbar .band.stage { background: rgba(255, 255, 255, 0.07); }
+      .lightbar .band.show { background: rgba(248, 184, 0, 0.2); border-left: 1px solid rgba(248, 184, 0, 0.5); border-right: 1px solid rgba(248, 184, 0, 0.5); }
+      .lightbar .band.goldb { background: linear-gradient(90deg, rgba(248, 184, 0, 0.12), rgba(248, 184, 0, 0.55)); }
+      .lightbar .sundot { position: absolute; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%;
+        background: var(--amber); box-shadow: 0 0 10px var(--amber); display: none; }
+      .lightlabs { display: flex; justify-content: space-between; font-size: 9px; font-weight: 800;
+        letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); margin-top: 5px; }
+      .lightlabs b { color: var(--dim); }
+      /* corner index */
+      .cix { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: inherit;
+        color: var(--ink); background: rgba(255, 255, 255, 0.045); border: 1px solid var(--gline);
+        border-radius: 14px; padding: 11px 14px; margin-top: 8px; cursor: pointer; }
+      .cix:active { background: rgba(255, 255, 255, 0.09); }
+      .cix .n { font-family: "Arial Black", Helvetica, sans-serif; font-size: 15px; color: var(--amber); width: 26px; flex-shrink: 0; }
+      .cix .n.poi-n { color: var(--teal); font-size: 12px; }
+      .cix .nm { flex: 1; min-width: 0; }
+      .cix .nm b { display: block; font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .cix .nm span { font-size: 11px; color: var(--mute); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+      .cix .lamp { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--dot, #8b95a3); box-shadow: 0 0 8px var(--dot, transparent); }
+      /* zone detail */
+      .zcard .zc-eye { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+      .zcard .zc-eye .eyebrow { color: var(--teal); }
+      .stchip { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+        padding: 4px 11px; border-radius: 999px; border: 1px solid var(--gline); color: var(--dim);
+        display: inline-flex; align-items: center; gap: 6px; }
+      .stchip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--dot, #8b95a3); }
+      .zcard h2 { margin: 6px 0 0; font-family: "Arial Black", Helvetica, sans-serif; font-size: 26px; letter-spacing: -0.01em; line-height: 1.05; }
+      .zcard .blurb { color: var(--dim); font-size: 14px; margin: 10px 0 0; }
+      .zcard .zrow { display: flex; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--mute); }
+      .zcard .zrow b { color: var(--dim); font-weight: 700; }
+      .navrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+      .navrow a {
+        text-decoration: none; text-align: center; font-size: 12.5px; font-weight: 800; color: var(--ink);
+        padding: 12px 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.07);
+        border: 1px solid var(--gline); transition: border-color 0.2s;
+      }
+      .navrow a:hover { border-color: rgba(248, 184, 0, 0.55); }
+      .backln { display: inline-block; margin-top: 16px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--mute); background: none; border: 0; font-family: inherit; cursor: pointer; padding: 0; }
+      /* program spread extras */
+      .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin-top: 4px; }
+      .legend .li { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--dim); }
+      .legend .sw { width: 22px; height: 10px; border-radius: 3px; flex-shrink: 0; border: 1.5px solid; }
+      .rclog { font-size: 12px; color: var(--dim); }
+      .rclog div { padding: 6px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.06); font-variant-numeric: tabular-nums; }
+      .rclog b { color: var(--amber); font-weight: 800; }
+      .colophon { margin-top: 20px; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase;
+        font-weight: 800; color: var(--mute); line-height: 2; }
+      .scalerow { display: flex; align-items: center; gap: 10px; margin-top: 6px; color: var(--mute); font-size: 9.5px;
+        font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+      .scalerow .rulebar { width: 90px; height: 4px; border-left: 1.5px solid var(--mute); border-right: 1.5px solid var(--mute);
+        background: linear-gradient(180deg, transparent 40%, var(--mute) 40%, var(--mute) 60%, transparent 60%); }
+      /* nav-mode sheets (unchanged behavior) */
       .sheet {
         position: fixed; z-index: 40; left: 50%; transform: translate(-50%, 112%);
         bottom: 0; width: min(100vw, 560px); max-height: 66vh; max-height: 66dvh; overflow: auto;
@@ -115,20 +264,13 @@
         transition: transform 0.45s var(--ease);
       }
       .sheet.on { transform: translate(-50%, 0); }
-      .grab { width: 44px; height: 4px; border-radius: 999px; background: var(--gline); margin: 0 auto 12px; }
       .sheet h2 { margin: 0; font-size: 18px; font-family: "Arial Black", Helvetica, sans-serif; letter-spacing: -0.01em; }
       .sheet h2 .a { color: var(--amber); }
       .sheet .sub2 { color: var(--mute); font-size: 12.5px; margin: 4px 0 12px; }
-      .navrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-      .navrow a {
-        text-decoration: none; text-align: center; font-size: 12.5px; font-weight: 800; color: var(--ink);
-        padding: 12px 6px; border-radius: 12px; background: rgba(255, 255, 255, 0.07);
-        border: 1px solid var(--gline); transition: border-color 0.2s;
-      }
-      .navrow a:hover { border-color: rgba(248, 184, 0, 0.55); }
       .rv-list { margin-top: 8px; }
       .rv {
         display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin: 6px -6px 0;
+        width: calc(100% + 12px); text-align: left; font: inherit;
         border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--gline);
         cursor: pointer; font-size: 13.5px; color: var(--dim);
       }
@@ -158,16 +300,14 @@
       .pin-cta {
         position: fixed; z-index: 35; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom));
         transform: translateX(-50%); display: none; padding: 11px 20px; border-radius: 999px;
-        font-size: 13px; font-weight: 700; color: var(--dim); background: var(--glass2);
-        -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+        font-size: 13px; font-weight: 700; color: var(--dim); background: rgba(10, 17, 26, 0.88);
         border: 1px solid var(--gline); box-shadow: var(--e1); white-space: nowrap;
       }
       .pin-cta.on { display: block; }
       .locate {
-        position: fixed; z-index: 36; right: 12px; bottom: calc(110px + env(safe-area-inset-bottom));
+        position: fixed; z-index: 42; right: 12px; bottom: calc(140px + env(safe-area-inset-bottom));
         width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--gline);
-        background: var(--glass2); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-        color: var(--teal); font-size: 19px; cursor: pointer; box-shadow: var(--e1);
+        background: rgba(10, 17, 26, 0.85); color: var(--teal); font-size: 19px; cursor: pointer; box-shadow: var(--e1);
         display: none; align-items: center; justify-content: center;
       }
       .locate.on { display: flex; }
@@ -183,7 +323,6 @@
       .pp .plinks a { font-size: 11.5px; font-weight: 800; text-decoration: none; color: #151000;
         background: var(--amber); border-radius: 999px; padding: 5px 11px; }
       .pp .plinks a.t2 { background: var(--teal); color: #04211d; }
-      /* google infowindow reset */
       .gm-style .gm-style-iw-c { background: var(--glass2) !important; border-radius: 14px !important;
         border: 1px solid var(--gline); box-shadow: var(--e1) !important; color: var(--ink) !important; padding: 12px 16px !important; }
       .gm-style .gm-style-iw-d { overflow: hidden !important; color: var(--ink); }
@@ -193,14 +332,34 @@
       .pac-item { color: var(--dim); border-top: 1px solid var(--gline); padding: 8px 12px; cursor: pointer; }
       .pac-item:hover { background: rgba(255, 255, 255, 0.06); }
       .pac-item-query { color: var(--ink); }
+      /* far zoom: badges compact, poi discs collapse to dots */
+      .fwrap.zfar .pi .disc { width: 12px; height: 12px; }
+      .fwrap.zfar .pi .disc svg { display: none; }
+      .fwrap.zfar .cb .lab i { display: none; }
+      .fwrap.zfar .cb .num { width: 26px; height: 26px; font-size: 11px; }
+      @media (max-width: 430px) {
+        .bar { gap: 6px; padding: 7px 10px; }
+        .bar img { height: 20px; }
+        .bar button { padding: 6px 9px; font-size: 10px; }
+        .bar .t { font-size: 12px; }
+        .cond-line { font-size: 13.5px; }
+      }
       @media (prefers-reduced-motion: reduce) {
         .door:hover, .btn:hover { transform: none; }
-        .sheet, .landing, .bar { transition: none; }
+        .sheet, .landing, .bar, .fsheet { transition: none; }
+        .fart .sig.draw, .cb.pop, .pi.pop, .cb.flip .num, .fart .leader,
+        .fart .zg.st-open .zn-glow, .ticker .msg { animation: none; }
       }
     </style>
   </head>
   <body>
     <div id="theMap"></div>
+
+    <!-- field mode: its own Leaflet world, always filterable -->
+    <div class="fwrap program" id="fwrap">
+      <div id="fieldMap"></div>
+      <div class="fvignette" aria-hidden="true"></div>
+    </div>
 
     <div class="landing" id="landing">
       <div class="land-card">
@@ -209,7 +368,7 @@
         <h1>Roll in<br /><span class="a">like you mean it</span></h1>
         <p class="lede">
           Route straight to the ranch in your maps app, or set a rendezvous and cruise in as a
-          pack. On show day this same page becomes the live event map.
+          pack. Then open the field program and read the grounds like a race weekend.
         </p>
         <button class="door nav" id="doorNav">
           <span class="ic">
@@ -230,8 +389,8 @@
             </svg>
           </span>
           <span style="flex: 1">
-            <b>Event map</b>
-            <span>Live telemetry · the field from above · draft layout</span>
+            <b>The field program</b>
+            <span>Live plan · track conditions · aerial view</span>
           </span>
           <span class="go">›</span>
         </button>
@@ -243,21 +402,34 @@
       <img src="/brand/pg-mark.png" alt="" />
       <span class="t" id="barTitle">Navigate</span>
       <span class="spacer"></span>
-      <button id="trafficBtn" style="display: none">Traffic</button>
+      <button id="aerialBtn" style="display: none" aria-pressed="false">Aerial</button>
+      <button id="trafficBtn" style="display: none" aria-pressed="false">Traffic</button>
       <button id="backBtn">Menu</button>
     </div>
 
-    <div class="dock" id="dock">
-      <div class="chip2"><div class="v" id="wxNow">…</div><div class="l">Ranch right now</div></div>
-      <div class="chip2"><div class="v" id="wxDay">…</div><div class="l" id="wxDayL">Show-day forecast</div></div>
-      <div class="chip2"><div class="v" id="sunChip">…</div><div class="l">Oct 10 light</div></div>
-      <div class="chip2"><div class="v" id="crowdChip">…</div><div class="l">Expected + runs</div></div>
-      <div class="chip2" id="distWrap" style="display: none"><div class="v" id="distChip">…</div><div class="l">You to the gate</div></div>
-    </div>
+    <div class="ticker" id="ticker" aria-live="polite"><span class="msg" id="tickerMsg"></span></div>
 
     <span class="pin-cta" id="pinCta">Tap the map or type the spot below</span>
     <button class="locate" id="locateBtn" aria-label="Show my location">◎</button>
 
+    <!-- field program sheet -->
+    <div class="fsheet" id="fsheet">
+      <div class="fhead" id="fhead">
+        <div class="grab"></div>
+        <div class="cond-eye">
+          <span class="eyebrow">Track conditions</span>
+          <span id="condStamp">Live</span>
+        </div>
+        <div class="cond-line" id="condLine">Reading the ranch…</div>
+        <div class="ent-row">
+          <div class="txt"><span>Entries · <b id="entN">0</b> of 300</span><span><b id="headN">0</b> heads · <b id="runN">0</b> runs</span></div>
+          <div class="ent-rule"><i id="entBar"></i></div>
+        </div>
+      </div>
+      <div class="fbody" id="fbody"></div>
+    </div>
+
+    <!-- nav-mode sheets -->
     <div class="sheet" id="navSheet">
       <div class="grab"></div>
       <h2>To the <span class="a">ranch</span></h2>
@@ -295,7 +467,13 @@
       var PPR = { lat: 35.6309932, lng: -86.5868705 };
       var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
       var SHOW_DAY = "2026-10-10";
-      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      var reduce = reduceMq.matches;
+      try { reduceMq.addEventListener("change", function (e) { reduce = e.matches; }); } catch (e) {}
+      var store = {
+        get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+        set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+      };
       var db = null;
       try {
         db = createClient({
@@ -314,11 +492,23 @@
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
         });
       };
-      function gmaps(lat, lng) { return "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng; }
-      function waze(lat, lng) { return "https://waze.com/ul?ll=" + lat + "," + lng + "&navigate=yes"; }
-      function amaps(lat, lng) { return "https://maps.apple.com/?daddr=" + lat + "," + lng + "&dirflg=d"; }
+      function num2(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+      function gmaps(lat, lng) { return "https://www.google.com/maps/dir/?api=1&destination=" + num2(lat) + "," + num2(lng); }
+      function waze(lat, lng) { return "https://waze.com/ul?ll=" + num2(lat) + "," + num2(lng) + "&navigate=yes"; }
+      function amaps(lat, lng) { return "https://maps.apple.com/?daddr=" + num2(lat) + "," + num2(lng) + "&dirflg=d"; }
       function meetToRanch(lat, lng) {
-        return "https://www.google.com/maps/dir/?api=1&origin=" + lat + "," + lng + "&destination=" + PPR.lat + "," + PPR.lng;
+        return "https://www.google.com/maps/dir/?api=1&origin=" + num2(lat) + "," + num2(lng) + "&destination=" + PPR.lat + "," + PPR.lng;
+      }
+      /* venue-local clock: every show-day comparison runs on ranch time, not viewer time */
+      function ranchToday() {
+        try { return new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); }
+        catch (e) { return new Date().toISOString().slice(0, 10); }
+      }
+      function ranchHourNow() {
+        try {
+          var p = new Date().toLocaleTimeString("en-GB", { timeZone: "America/Chicago", hour12: false }).split(":");
+          return parseInt(p[0], 10) + parseInt(p[1], 10) / 60;
+        } catch (e) { var d = new Date(); return d.getHours() + d.getMinutes() / 60; }
       }
       document.getElementById("gmapsD").href = gmaps(PPR.lat, PPR.lng);
       document.getElementById("wazeD").href = waze(PPR.lat, PPR.lng);
@@ -346,22 +536,9 @@
         );
       }
 
-      /* Draft field layout: provisional zones around the venue pin, clearly
-         labeled DRAFT until the P3 layout is signed off with the ranch. */
-      var ZONES = [
-        { name: "Show Field · DRAFT", color: "#f8b800", pts: [
-          [35.6329, -86.5889], [35.6329, -86.5855], [35.6305, -86.5855], [35.6305, -86.5889]] },
-        { name: "Vendor Row · DRAFT", color: "#00d2be", pts: [
-          [35.6303, -86.5889], [35.6303, -86.5872], [35.6297, -86.5872], [35.6297, -86.5889]] },
-        { name: "VIP Area · DRAFT", color: "#4da3d8", pts: [
-          [35.6303, -86.5870], [35.6303, -86.5858], [35.6297, -86.5858], [35.6297, -86.5870]] },
-        { name: "Spectator Parking · DRAFT", color: "#c4cbd6", pts: [
-          [35.6295, -86.5889], [35.6295, -86.5855], [35.6281, -86.5855], [35.6281, -86.5889]] },
-      ];
-
-      /* ---------- engine adapter: Google when keyed, Leaflet always ready ---------- */
+      /* ---------- nav engine adapter: Google when keyed, Leaflet fallback ---------- */
       var ENGINE = { kind: null, map: null, api: null };
-      var rvLayerItems = [], zoneItems = [], meLayer = null, pinItem = null, routeRenderer = null, trafficLayer = null;
+      var rvLayerItems = [], meLayer = null, pinItem = null, routeRenderer = null, trafficLayer = null;
 
       function engineTag(t) { document.getElementById("engineTag").innerHTML = t; }
 
@@ -372,16 +549,19 @@
           key = c && c.gmapsKey;
         } catch (e) {}
         if (key) {
-          try { await bootGoogle(key); engineTag("Map engine: <b>Google Maps</b> · live traffic ready"); return; }
+          try { await bootGoogle(key); engineTag("Nav engine: <b>Google Maps</b> · live traffic ready"); return; }
           catch (e) { console.warn("google boot failed, falling back", e); }
         }
         await bootLeaflet();
-        engineTag(key ? "Map engine: <b>satellite</b> (Google failed to load)" : "Map engine: <b>satellite</b> · Google upgrade ready for the key");
+        engineTag(key ? "Nav engine: <b>satellite</b> (Google failed to load)" : "Nav engine: <b>satellite</b> · Google upgrade ready for the key");
       }
 
       function bootGoogle(key) {
         return new Promise(function (resolve, reject) {
+          var settled = false;
           window.__gmReady = function () {
+            if (settled) return;
+            settled = true;
             try {
               var g = window.google.maps;
               var map = new g.Map(document.getElementById("theMap"), {
@@ -416,21 +596,6 @@
               ENGINE.remove = function (item) { item && item.setMap && item.setMap(null); };
               ENGINE.setView = function (lat, lng, z) { map.setCenter({ lat: lat, lng: lng }); map.setZoom(z); };
               ENGINE.onClick = function (fn) { map.addListener("click", function (e) { fn(e.latLng.lat(), e.latLng.lng()); }); };
-              ENGINE.addZones = function () {
-                return ZONES.map(function (z2) {
-                  var poly = new g.Polygon({
-                    paths: z2.pts.map(function (p) { return { lat: p[0], lng: p[1] }; }),
-                    strokeColor: z2.color, strokeOpacity: 0.9, strokeWeight: 2,
-                    fillColor: z2.color, fillOpacity: 0.13, map: null,
-                  });
-                  poly.addListener("click", function (e) {
-                    iw.setContent('<div class="pp"><b>' + esc(z2.name) + "</b><span>Provisional. Final layout lands with the venue sign-off.</span></div>");
-                    iw.setPosition(e.latLng); iw.open({ map: map });
-                  });
-                  return poly;
-                });
-              };
-              ENGINE.showZones = function (on) { zoneItems.forEach(function (p) { p.setMap(on ? map : null); }); };
               ENGINE.addMe = function (lat, lng) {
                 return marker(lat, lng, {
                   icon: { path: g.SymbolPath.CIRCLE, scale: 8, fillColor: "#4da3d8", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 },
@@ -462,22 +627,32 @@
                   if (p && p.geometry && p.geometry.location) onPlace(p.geometry.location.lat(), p.geometry.location.lng(), p.name);
                 });
               };
-              document.getElementById("trafficBtn").style.display = "";
+              document.getElementById("trafficBtn").dataset.avail = "1";
               resolve();
             } catch (err) { reject(err); }
           };
           var s2 = document.createElement("script");
           s2.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(key) + "&libraries=places&loading=async&callback=__gmReady";
           s2.async = true;
-          s2.onerror = function () { reject(new Error("gmaps script failed")); };
+          s2.onerror = function () { settled = true; reject(new Error("gmaps script failed")); };
           document.head.appendChild(s2);
-          setTimeout(function () { ENGINE.kind || reject(new Error("gmaps timeout")); }, 9000);
+          setTimeout(function () {
+            if (!ENGINE.kind && !settled) { settled = true; reject(new Error("gmaps timeout")); }
+          }, 9000);
         });
       }
 
+      var leafletMod = null;
+      async function getLeaflet() {
+        if (!leafletMod) {
+          var m = await import("https://esm.sh/leaflet@1.9.4");
+          leafletMod = m.default || m;
+        }
+        return leafletMod;
+      }
+
       async function bootLeaflet() {
-        var Lmod = await import("https://esm.sh/leaflet@1.9.4");
-        var L = Lmod.default || Lmod;
+        var L = await getLeaflet();
         var map = L.map("theMap", { zoomControl: false }).setView([PPR.lat, PPR.lng], 15);
         L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
           { maxZoom: 19, attribution: "Imagery © Esri · © OpenStreetMap contributors" }).addTo(map);
@@ -502,24 +677,92 @@
         ENGINE.remove = function (item) { item && map.removeLayer(item); };
         ENGINE.setView = function (lat, lng, z) { map.setView([lat, lng], z); };
         ENGINE.onClick = function (fn) { map.on("click", function (e) { fn(e.latlng.lat, e.latlng.lng); }); };
-        ENGINE.addZones = function () {
-          return ZONES.map(function (z2) {
-            return L.polygon(z2.pts, { color: z2.color, weight: 2, opacity: 0.9, fillColor: z2.color, fillOpacity: 0.13 })
-              .bindPopup('<div class="pp"><b>' + esc(z2.name) + "</b><span>Provisional. Final layout lands with the venue sign-off.</span></div>");
-          });
-        };
-        ENGINE.showZones = function (on) {
-          zoneItems.forEach(function (p) { on ? p.addTo(map) : map.removeLayer(p); });
-        };
         ENGINE.addMe = function (lat, lng) { return L.marker([lat, lng], { icon: icon(20, "rgba(77,163,216,1)") }).addTo(map); };
         ENGINE.route = null; ENGINE.clearRoute = function () {}; ENGINE.traffic = null; ENGINE.autocomplete = null;
       }
 
-      /* ---------- app state over the adapter ---------- */
+      /* ---------- shared telemetry state ---------- */
+      var TELEM = { tempF: null, windMph: null, rainPct: null, dayHi: null, dayLo: null, dayRain: null, heads: 0, vehicles: 0, runs: 0 };
+      function sunTimes(dateStr, lat, lng) {
+        var d = new Date(dateStr + "T12:00:00Z");
+        var n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5);
+        var lngHour = lng / 15;
+        function calc(rising) {
+          var t = n + ((rising ? 6 : 18) - lngHour) / 24;
+          var M = 0.9856 * t - 3.289;
+          var L2 = M + 1.916 * Math.sin((M * Math.PI) / 180) + 0.02 * Math.sin((2 * M * Math.PI) / 180) + 282.634;
+          L2 = ((L2 % 360) + 360) % 360;
+          var RA = (Math.atan(0.91764 * Math.tan((L2 * Math.PI) / 180)) * 180) / Math.PI;
+          RA = ((RA % 360) + 360) % 360;
+          RA += (Math.floor(L2 / 90) - Math.floor(RA / 90)) * 90;
+          RA /= 15;
+          var sinDec = 0.39782 * Math.sin((L2 * Math.PI) / 180);
+          var cosDec = Math.cos(Math.asin(sinDec));
+          var cosH = (Math.cos((90.833 * Math.PI) / 180) - sinDec * Math.sin((lat * Math.PI) / 180)) /
+            (cosDec * Math.cos((lat * Math.PI) / 180));
+          if (cosH > 1 || cosH < -1) return null;
+          var H = rising ? 360 - (Math.acos(cosH) * 180) / Math.PI : (Math.acos(cosH) * 180) / Math.PI;
+          H /= 15;
+          var T = H + RA - 0.06571 * t - 6.622;
+          var UT = ((T - lngHour) % 24 + 24) % 24;
+          var local = UT - 5;
+          if (local < 0) local += 24;
+          return local;
+        }
+        return { rise: calc(true), set: calc(false) };
+      }
+      function fmtH(h) {
+        if (h == null) return "";
+        var hh = Math.floor(h), mm = Math.round((h - hh) * 60);
+        if (mm === 60) { hh += 1; mm = 0; }
+        var ampm = hh >= 12 ? "PM" : "AM";
+        var h12 = hh % 12 || 12;
+        return h12 + ":" + String(mm).padStart(2, "0") + " " + ampm;
+      }
+      var SUN = sunTimes(SHOW_DAY, PPR.lat, PPR.lng);
+      var GOLD_START = SUN.set != null ? SUN.set - 1 : null;
+
+      async function loadWeather() {
+        try {
+          var u = "https://api.open-meteo.com/v1/forecast?latitude=" + PPR.lat + "&longitude=" + PPR.lng +
+            "&current=temperature_2m,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago";
+          var w = await fetch(u).then(function (r) { return r.ok ? r.json() : null; });
+          if (!w) return;
+          if (w.current) {
+            TELEM.tempF = Math.round(w.current.temperature_2m);
+            TELEM.windMph = Math.round(w.current.wind_speed_10m);
+          }
+          if (w.daily && w.daily.time) {
+            TELEM.rainPct = w.daily.precipitation_probability_max[0];
+            var di = w.daily.time.indexOf(SHOW_DAY);
+            if (di >= 0) {
+              TELEM.dayHi = Math.round(w.daily.temperature_2m_max[di]);
+              TELEM.dayLo = Math.round(w.daily.temperature_2m_min[di]);
+              TELEM.dayRain = w.daily.precipitation_probability_max[di];
+            }
+          }
+          FIELD.renderTelemetry();
+        } catch (e) {}
+      }
+      async function loadStats() {
+        if (!db) return;
+        try {
+          var r = await db.rpc("public_stats", {});
+          var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
+          if (row) {
+            TELEM.heads = Number(row.party_headcount) || 0;
+            TELEM.vehicles = Number(row.vehicle_submissions) || 0;
+            FIELD.renderTelemetry();
+          }
+        } catch (e) {}
+      }
+
+      /* ---------- app modes ---------- */
       var landing = document.getElementById("landing"), bar = document.getElementById("bar"),
         navSheet = document.getElementById("navSheet"), createSheet = document.getElementById("createSheet"),
-        pinCta = document.getElementById("pinCta"), dock = document.getElementById("dock"),
-        locateBtn = document.getElementById("locateBtn");
+        pinCta = document.getElementById("pinCta"), locateBtn = document.getElementById("locateBtn"),
+        fwrap = document.getElementById("fwrap"), fsheet = document.getElementById("fsheet"),
+        ticker = document.getElementById("ticker");
       var mode = "landing", pinLL = null;
 
       function setMode(m) {
@@ -528,14 +771,20 @@
         bar.classList.toggle("on", m !== "landing");
         navSheet.classList.toggle("on", m === "nav");
         createSheet.classList.toggle("on", m === "create");
-        dock.classList.toggle("on", m === "field");
-        locateBtn.classList.toggle("on", m !== "landing");
+        fwrap.classList.toggle("on", m === "field");
+        fsheet.classList.toggle("on", m === "field");
+        ticker.classList.toggle("on", m === "field");
+        locateBtn.classList.toggle("on", m === "nav" || m === "create" || m === "field");
         pinCta.classList.toggle("on", m === "create" && !pinLL);
-        ENGINE.showZones && ENGINE.showZones(m === "field");
-        document.getElementById("barTitle").textContent =
-          m === "field" ? "Event map · live" : m === "create" ? "Set a rendezvous" : "Navigate";
-        if (m === "field") ENGINE.setView(PPR.lat, PPR.lng, 16);
-        if (m === "nav") { ENGINE.setView(PPR.lat, PPR.lng, 11); ENGINE.clearRoute(); }
+        document.getElementById("aerialBtn").style.display = m === "field" ? "" : "none";
+        document.getElementById("trafficBtn").style.display =
+          m !== "field" && m !== "landing" && document.getElementById("trafficBtn").dataset.avail ? "" : "none";
+        var bt = document.getElementById("barTitle");
+        if (m === "field") bt.innerHTML = '<small>Official program · Sat Oct 10</small>Rancho Jaramillo';
+        else bt.textContent = m === "create" ? "Set a rendezvous" : "Navigate";
+        if (m === "field") FIELD.enter();
+        else if (FIELD.active) FIELD.leave();
+        if (m === "nav" && ENGINE.kind) { ENGINE.setView(PPR.lat, PPR.lng, 11); ENGINE.clearRoute(); }
       }
       document.getElementById("doorNav").addEventListener("click", function () { setMode("nav"); });
       document.getElementById("doorField").addEventListener("click", function () { setMode("field"); });
@@ -545,10 +794,14 @@
       });
       document.getElementById("trafficBtn").addEventListener("click", function () {
         if (!ENGINE.traffic) return;
-        this.style.color = ENGINE.traffic() ? "var(--teal)" : "var(--dim)";
+        var on = ENGINE.traffic();
+        this.classList.toggle("lit", on);
+        this.setAttribute("aria-pressed", on ? "true" : "false");
       });
+      document.getElementById("aerialBtn").addEventListener("click", function () { FIELD.setAerial(!FIELD.aerial); });
       document.getElementById("cruiseBtn").addEventListener("click", function () {
-        clearPin(); setMode("create"); ENGINE.setView(PPR.lat, PPR.lng, 10);
+        clearPin(); setMode("create");
+        ENGINE.kind && ENGINE.setView(PPR.lat, PPR.lng, 10);
       });
       document.getElementById("rvCancel").addEventListener("click", function () { clearPin(); setMode("nav"); });
       function clearPin() {
@@ -566,21 +819,14 @@
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition(function (pos) {
           var lat = pos.coords.latitude, lng = pos.coords.longitude;
+          if (mode === "field") { FIELD.showMe(lat, lng); return; }
+          if (!ENGINE.kind) return;
           meLayer && ENGINE.remove(meLayer);
           meLayer = ENGINE.addMe(lat, lng);
           ENGINE.setView(lat, lng, 12);
-          var km = havKm(lat, lng, PPR.lat, PPR.lng), mi = km * 0.621371;
-          document.getElementById("distWrap").style.display = "";
-          document.getElementById("distChip").innerHTML =
-            mi.toFixed(mi < 20 ? 1 : 0) + '<small> mi · about ' + Math.max(2, Math.round((mi / 45) * 60)) + " min</small>";
           if (mode === "nav" && ENGINE.route) ENGINE.route(lat, lng);
         }, function () {}, { enableHighAccuracy: true, timeout: 8000 });
       });
-      function havKm(a, b, c, d) {
-        var R = 6371, dLa = ((c - a) * Math.PI) / 180, dLo = ((d - b) * Math.PI) / 180;
-        var x = Math.sin(dLa / 2) ** 2 + Math.cos((a * Math.PI) / 180) * Math.cos((c * Math.PI) / 180) * Math.sin(dLo / 2) ** 2;
-        return 2 * R * Math.asin(Math.sqrt(x));
-      }
       document.addEventListener("click", function (e) {
         var r = e.target.closest("[data-route]");
         if (r && ENGINE.route) {
@@ -590,7 +836,7 @@
         }
       });
 
-      /* ---------- rendezvous ---------- */
+      /* ---------- rendezvous (nav mode) ---------- */
       async function loadRv() {
         if (!db) return;
         try {
@@ -606,7 +852,8 @@
           r.data.forEach(function (x) {
             var mk = ENGINE.addRv(x);
             rvLayerItems.push(mk);
-            var row = document.createElement("div");
+            var row = document.createElement("button");
+            row.type = "button";
             row.className = "rv";
             row.innerHTML = '<span class="dot3"></span><span style="flex:1"><b>' + esc(x.name) + "</b>" +
               esc([x.spot, x.meet_time].filter(Boolean).join(" · ")) + "</span><span>›</span>";
@@ -616,7 +863,8 @@
             });
             list.appendChild(row);
           });
-          updateCrowd(r.data.length);
+          TELEM.runs = r.data.length;
+          FIELD.renderTelemetry();
         } catch (e) {}
       }
       function rvSoon() {
@@ -647,94 +895,590 @@
         clearPin(); await loadRv(); setMode("nav");
       });
 
-      /* ---------- telemetry dock ---------- */
-      function updateCrowd(runs) {
-        var el = document.getElementById("crowdChip");
-        var heads = window.__heads || 0;
-        el.innerHTML = '<span class="t">' + heads + '</span><small> heads</small> · <span class="a2">' + (runs || 0) + "</span><small> runs</small>";
-      }
-      async function loadStats() {
+      /* ================================================================
+         FIELD PROGRAM · the event map as a race-weekend program
+         ================================================================ */
+      var GEO = { N: 35.6348, S: 35.628, W: -86.5915, E: -86.5828 };
+      var VW = 1000, VH = 958;
+      function gx(lng) { return ((lng - GEO.W) / (GEO.E - GEO.W)) * VW; }
+      function gy(lat) { return ((GEO.N - lat) / (GEO.N - GEO.S)) * VH; }
+      var STATUS = {
+        draft: { dot: "#8b95a3", word: "Draft" },
+        confirmed: { dot: "#ffffff", word: "Confirmed" },
+        open: { dot: "#00d2be", word: "Open" },
+        full: { dot: "#f8b800", word: "Full" },
+        closed: { dot: "#e5484d", word: "Closed" },
+      };
+      var CAT = {
+        show: { color: "#f8b800", word: "Show" },
+        vendor: { color: "#00d2be", word: "Vendors" },
+        vip: { color: "#4da3d8", word: "VIP" },
+        parking: { color: "#c4cbd6", word: "Parking" },
+        food: { color: "#00d2be", word: "Food" },
+        facility: { color: "#c4cbd6", word: "Facilities" },
+        entry: { color: "#f8b800", word: "Entry" },
+        charity: { color: "#f8b800", word: "Charity" },
+        ops: { color: "#c4cbd6", word: "Ops" },
+      };
+      var GLYPH = {
+        entry: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 22V3h11l-2.5 4L17 11H6" /></svg>',
+        charity: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21 4.8 13.6a4.7 4.7 0 0 1 0-6.7 4.6 4.6 0 0 1 6.6 0l.6.6.6-.6a4.6 4.6 0 0 1 6.6 0 4.7 4.7 0 0 1 0 6.7Z" /></svg>',
+        food: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M7 2v8M4 2v4a3 3 0 0 0 6 0V2M7 10v12M17 2c-2 2-2 8-2 8h4s0-6-2-8ZM17 10v12" /></svg>',
+        facility: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><rect x="4" y="3" width="16" height="18" rx="2" /><path d="M12 3v18" /></svg>',
+        firstaid: '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6Z" /></svg>',
+      };
+      /* Fallback rows, identical to the seeded map_features data, so the
+         program renders even while the Data API cache is behind. */
+      var DEFAULT_FEATURES = [
+        { slug: "show-field", kind: "zone", name: "Show Field", category: "show", status: "draft", blurb: "300 curated cars staged in rows on the north field. Row map lands with the final layout.", detail: { hours: "Staging from 8:00 AM, gates 9:00 AM" }, geometry: { type: "polygon", coords: [[35.633, -86.5892], [35.6331, -86.5852], [35.631, -86.585], [35.6312, -86.5892]] }, sort: 10 },
+        { slug: "vendor-row", kind: "zone", name: "Vendor Row", category: "vendor", status: "draft", blurb: "Curated vendors and partners along the south side of the drive.", detail: { label_at: [35.6306, -86.5892] }, geometry: { type: "polygon", coords: [[35.6308, -86.5896], [35.6307, -86.5873], [35.6304, -86.5873], [35.6305, -86.5896]] }, sort: 20 },
+        { slug: "vip-terrace", kind: "zone", name: "VIP Terrace", category: "vip", status: "draft", blurb: "VIP hospitality with the best sightline over the field. Guided ranch tour meets here.", detail: { hours: "Tour time to be announced", label_at: [35.6302, -86.5869] }, geometry: { type: "polygon", coords: [[35.6307, -86.5871], [35.6306, -86.5858], [35.6301, -86.5858], [35.6302, -86.5871]] }, sort: 30 },
+        { slug: "spectator-parking", kind: "zone", name: "Spectator Parking", category: "parking", status: "draft", blurb: "Free spectator parking on the south pasture. Follow the marshals.", detail: { label_at: [35.6297, -86.5892] }, geometry: { type: "polygon", coords: [[35.6303, -86.5896], [35.6303, -86.5873], [35.6295, -86.5872], [35.6295, -86.5896]] }, sort: 40 },
+        { slug: "main-gate", kind: "poi", name: "Main Gate", category: "entry", status: "draft", blurb: "Entry off Enon Church Rd. Gates open 9:00 AM sharp.", detail: { hours: "9:00 AM to 3:00 PM" }, geometry: { type: "point", coords: [35.6307, -86.58635] }, sort: 50 },
+        { slug: "charity-corner", kind: "poi", name: "Community Elementary Corner", category: "charity", status: "draft", blurb: "The reason we run it. Meet the school, see where the money goes.", detail: null, geometry: { type: "point", coords: [35.63035, -86.5876] }, sort: 60 },
+        { slug: "food-row", kind: "poi", name: "Food", category: "food", status: "draft", blurb: "Food and drink next to Vendor Row. Lineup firms up as we get closer.", detail: null, geometry: { type: "point", coords: [35.63035, -86.5886] }, sort: 70 },
+        { slug: "restrooms", kind: "poi", name: "Restrooms", category: "facility", status: "draft", blurb: "Facilities between the field and parking.", detail: null, geometry: { type: "point", coords: [35.6299, -86.5876] }, sort: 80 },
+        { slug: "first-aid", kind: "poi", name: "First Aid", category: "facility", status: "draft", blurb: "Medical station. Marshals can radio it from anywhere on site.", detail: null, geometry: { type: "point", coords: [35.63025, -86.5881] }, sort: 90 },
+        { slug: "entry-drive", kind: "route", name: "Entry Drive", category: "entry", status: "draft", blurb: "From the gate to spectator parking.", detail: null, geometry: { type: "path", coords: [[35.6307, -86.58635], [35.6303, -86.5863], [35.63, -86.5868], [35.6297, -86.588], [35.6296, -86.5888]] }, sort: 100 },
+      ];
+
+      var FIELD = {
+        active: false, ready: false, map: null, L: null, svg: null,
+        aerial: store.get("ppr_map_view") === "aerial",
+        features: DEFAULT_FEATURES.slice(), markers: {}, selected: null, drawn: false,
+        me: null, statusSeen: {}, log: [], view: "index", pollTimer: null,
+      };
+
+      FIELD.baseArtSVG = function () {
+        var road = "M 0,486 C 150,505 300,522 437,538 C 500,545 560,551 632,558 C 700,565 770,578 839,587 L 1000,606";
+        var toproad = "M 0,70 C 100,98 200,130 287,150 C 380,168 450,182 517,194 C 600,208 680,220 747,230 L 966,253 L 1000,256";
+        return '' +
+          '<defs>' +
+          '<pattern id="hatchFull" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">' +
+          '<rect width="9" height="9" fill="rgba(248,184,0,0.10)"/><rect width="3.5" height="9" fill="rgba(248,184,0,0.30)"/></pattern>' +
+          '<pattern id="checker" width="12" height="12" patternUnits="userSpaceOnUse">' +
+          '<rect width="12" height="12" fill="#e8e8e8"/><rect width="6" height="6" fill="#111"/><rect x="6" y="6" width="6" height="6" fill="#111"/></pattern>' +
+          '</defs>' +
+          '<g class="base-art">' +
+          /* field tints */
+          '<polygon points="264,254 724,239 747,535 264,507" fill="rgba(46,72,52,0.32)"/>' +
+          '<polygon points="193,549 494,560 494,758 193,758" fill="rgba(52,80,56,0.30)"/>' +
+          '<polygon points="218,634 620,640 620,880 200,880" fill="rgba(40,58,46,0.22)"/>' +
+          /* contour hairlines */
+          '<path d="M 120,320 C 320,290 560,300 820,340" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
+          '<path d="M 90,420 C 330,395 600,405 900,460" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
+          '<path d="M 140,760 C 380,735 640,745 880,790" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
+          /* tree masses */
+          '<path d="M 60,700 C 120,680 200,700 260,715 C 340,735 420,720 470,745 C 500,760 490,820 440,840 C 360,870 240,880 150,860 C 90,845 55,780 60,700 Z" fill="rgba(10,24,16,0.6)"/>' +
+          '<path d="M 58,560 C 100,552 132,580 138,620 C 144,662 120,692 82,700 C 54,704 40,650 44,610 C 47,584 50,562 58,560 Z" fill="rgba(10,24,16,0.55)"/>' +
+          '<path d="M 510,700 C 560,688 612,698 642,720 C 662,736 652,762 610,766 C 568,770 518,746 510,700 Z" fill="rgba(10,24,16,0.5)"/>' +
+          '<circle cx="330" cy="322" r="11" fill="rgba(10,24,16,0.5)"/><circle cx="368" cy="345" r="8" fill="rgba(10,24,16,0.5)"/>' +
+          '<circle cx="430" cy="330" r="10" fill="rgba(10,24,16,0.5)"/><circle cx="478" cy="352" r="7" fill="rgba(10,24,16,0.5)"/>' +
+          '<circle cx="520" cy="318" r="9" fill="rgba(10,24,16,0.5)"/><circle cx="405" cy="368" r="6" fill="rgba(10,24,16,0.5)"/>' +
+          /* pond */
+          '<ellipse cx="196" cy="700" rx="34" ry="26" fill="rgba(0,88,96,0.55)" stroke="rgba(0,210,190,0.35)" stroke-width="1.5"/>' +
+          '<path d="M 176,690 C 186,684 206,684 214,691" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"/>' +
+          /* barns and corrals */
+          '<rect x="745" y="34" width="64" height="16" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>' +
+          '<rect x="795" y="145" width="28" height="20" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>' +
+          '<rect x="795" y="205" width="20" height="14" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>' +
+          '<rect x="560" y="648" width="42" height="30" rx="2" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>' +
+          '<rect x="580" y="700" width="36" height="42" rx="2" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>' +
+          /* roads: white under, dark over leaves edge lines */
+          '<path d="' + toproad + '" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="14"/>' +
+          '<path d="' + toproad + '" fill="none" stroke="#05080c" stroke-width="10.5"/>' +
+          '<path d="M 747,230 C 770,200 796,186 802,160 C 808,124 790,78 778,52" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="6"/>' +
+          '<path d="M 747,230 C 770,200 796,186 802,160 C 808,124 790,78 778,52" fill="none" stroke="#05080c" stroke-width="4.5"/>' +
+          '<path id="mainRoad" d="' + road + '" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="22"/>' +
+          '<path d="' + road + '" fill="none" stroke="#05080c" stroke-width="17"/>' +
+          '<path d="' + road + '" fill="none" stroke="rgba(248,184,0,0.6)" stroke-width="1.8" stroke-dasharray="14 12"/>' +
+          '<path d="M 548,573 C 552,600 556,620 561,644" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="5.5"/>' +
+          '<path d="M 548,573 C 552,600 556,620 561,644" fill="none" stroke="#0a0f14" stroke-width="4"/>' +
+          /* kerbs flanking the gate */
+          '<path d="M 496,547 C 520,550 540,553 566,556" fill="none" stroke="#f8b800" stroke-width="4" stroke-dasharray="9 9"/>' +
+          '<path d="M 496,556 C 520,559 540,562 566,565" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="9 9" stroke-dashoffset="9"/>' +
+          '<path d="M 496,577 C 520,580 540,583 566,586" fill="none" stroke="#f8b800" stroke-width="4" stroke-dasharray="9 9"/>' +
+          '<path d="M 496,586 C 520,589 540,592 566,589" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="9 9" stroke-dashoffset="9"/>' +
+          /* start-finish checker band across the road at the gate */
+          '<g transform="rotate(7 548 570)"><rect x="541" y="548" width="14" height="44" fill="url(#checker)" opacity="0.95"/></g>' +
+          /* ghost wordmark */
+          '<text x="300" y="410" transform="rotate(-4 300 410)" font-family="Arial Black, Arial" font-size="58" fill="rgba(255,255,255,0.05)" letter-spacing="6">RANCHO JARAMILLO</text>' +
+          '<text font-family="Arial" font-size="11" fill="rgba(255,255,255,0.4)" letter-spacing="4"><textPath href="#mainRoad" startOffset="6%">ENON CHURCH RD</textPath></text>' +
+          '</g>' +
+          /* property signature outline */
+          '<path class="sig" d="M 264,250 L 730,235 L 752,540 L 745,600 L 620,770 L 490,762 L 218,755 L 214,585 L 240,540 L 264,507 Z" pathLength="1000" ' +
+          'fill="none" stroke="rgba(248,184,0,0.85)" stroke-width="3.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" stroke-dasharray="1000" stroke-dashoffset="0"/>' +
+          '<g id="dynArt"></g>';
+      };
+
+      FIELD.init = async function () {
+        if (FIELD.ready) return;
+        var L = await getLeaflet();
+        FIELD.L = L;
+        var map = L.map("fieldMap", { zoomControl: false, attributionControl: false, minZoom: 13, maxZoom: 19, zoomSnap: 0.25, zoomDelta: 0.5 });
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19 }).addTo(map);
+        L.control.attribution({ prefix: false }).addAttribution("Imagery © Esri").addTo(map);
+        map.on("zoomend", function () { fwrap.classList.toggle("zfar", map.getZoom() < 16.3); });
+        map.fitBounds(FIELD.homeBounds(), FIELD.fitPad());
+        var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svgEl.setAttribute("viewBox", "0 0 " + VW + " " + VH);
+        svgEl.setAttribute("class", "fart");
+        svgEl.innerHTML = FIELD.baseArtSVG();
+        L.svgOverlay(svgEl, [[GEO.S, GEO.W], [GEO.N, GEO.E]], { interactive: false }).addTo(map);
+        FIELD.map = map; FIELD.svg = svgEl; FIELD.ready = true;
+        FIELD.renderFeatures(true);
+        map.on("click", function () { if (FIELD.view === "detail") FIELD.showIndex(); });
+      };
+
+      /* the ground guests occupy, tighter than the full art bounds */
+      FIELD.homeBounds = function () { return [[35.6291, -86.59], [35.6334, -86.5846]]; };
+      FIELD.fitPad = function () { return { paddingTopLeft: [10, 116], paddingBottomRight: [10, 138] }; };
+      FIELD.enter = async function () {
+        FIELD.active = true;
+        await FIELD.init();
+        FIELD.map.invalidateSize();
+        FIELD.map.fitBounds(FIELD.homeBounds(), FIELD.fitPad());
+        FIELD.setAerial(FIELD.aerial, true);
+        FIELD.renderTelemetry();
+        FIELD.loadLive();
+        if (FIELD.view !== "detail") FIELD.showIndex();
+        setSnap("peek");
+        if (!FIELD.drawn && !reduce) {
+          FIELD.drawn = true;
+          var sig = FIELD.svg.querySelector(".sig");
+          sig.classList.add("draw");
+        }
+        if (!FIELD.log.length) {
+          FIELD.pushRC("Program v1 · layout in draft", true);
+        }
+        if (!FIELD.pollTimer) {
+          FIELD.pollTimer = setInterval(function () { if (!document.hidden && FIELD.active) FIELD.loadLive(); }, 6e4);
+        }
+        FIELD.goldChrome();
+      };
+      FIELD.leave = function () { FIELD.active = false; };
+
+      FIELD.setAerial = function (on, silent) {
+        FIELD.aerial = on;
+        fwrap.classList.toggle("aerial", on);
+        fwrap.classList.toggle("program", !on);
+        var b = document.getElementById("aerialBtn");
+        b.textContent = on ? "Program" : "Aerial";
+        b.classList.toggle("lit", on);
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+        if (!silent) store.set("ppr_map_view", on ? "aerial" : "program");
+      };
+
+      /* ---- live data ---- */
+      FIELD.validRow = function (row) {
+        if (!row || typeof row.slug !== "string" || typeof row.name !== "string") return false;
+        var g = row.geometry;
+        if (!g || !Array.isArray(g.coords) || !g.coords.length) return false;
+        if (g.type === "point") return isFinite(g.coords[0]) && isFinite(g.coords[1]);
+        return g.coords.every(function (p) { return Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]); });
+      };
+      FIELD.loadLive = async function () {
         if (!db) return;
         try {
-          var r = await db.rpc("public_stats", {});
-          var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
-          if (row) { window.__heads = Number(row.party_headcount) || 0; updateCrowd(rvLayerItems.length); }
-        } catch (e) {}
-      }
-      async function loadWeather() {
-        try {
-          var u = "https://api.open-meteo.com/v1/forecast?latitude=" + PPR.lat + "&longitude=" + PPR.lng +
-            "&current=temperature_2m,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago";
-          var w = await fetch(u).then(function (r) { return r.ok ? r.json() : null; });
-          if (!w) return;
-          if (w.current) {
-            document.getElementById("wxNow").innerHTML =
-              Math.round(w.current.temperature_2m) + '<small>°F · wind ' + Math.round(w.current.wind_speed_10m) + "</small>";
+          var r = await db.from("map_features").select("*").eq("event_id", EVENT_ID).order("sort");
+          if (r && r.data && r.data.length) {
+            var rows = r.data.filter(FIELD.validRow);
+            if (!rows.length) return;
+            var fp = JSON.stringify(rows);
+            var changed = fp !== FIELD.fingerprint;
+            FIELD.fingerprint = fp;
+            var diffs = [];
+            rows.forEach(function (row) {
+              var prev = FIELD.statusSeen[row.slug];
+              if (prev && prev !== row.status) diffs.push(row);
+              FIELD.statusSeen[row.slug] = row.status;
+            });
+            if (!changed) return;
+            FIELD.features = rows;
+            FIELD.renderFeatures(false);
+            diffs.forEach(function (row) {
+              FIELD.pushRC(row.name + " " + ((STATUS[row.status] || {}).word || row.status));
+              var mk = FIELD.markers[row.slug];
+              if (mk && mk.getElement) {
+                var el = mk.getElement();
+                if (el) {
+                  var cbEl = el.querySelector(".cb");
+                  if (cbEl) { cbEl.classList.remove("flip"); void cbEl.offsetWidth; cbEl.classList.add("flip"); }
+                }
+              }
+            });
+            if (FIELD.view === "index") FIELD.showIndex();
+            else if (FIELD.view === "detail" && FIELD.selected) {
+              var selF = FIELD.features.find(function (x) { return x.slug === FIELD.selected; });
+              selF ? FIELD.showDetail(selF, true) : FIELD.showIndex();
+            }
           }
-          var di = (w.daily && w.daily.time) ? w.daily.time.indexOf(SHOW_DAY) : -1;
-          if (di >= 0) {
-            document.getElementById("wxDay").innerHTML =
-              Math.round(w.daily.temperature_2m_max[di]) + "<small>°/</small>" +
-              Math.round(w.daily.temperature_2m_min[di]) + '<small>° · rain ' + w.daily.precipitation_probability_max[di] + "%</small>";
-          } else {
-            var days = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5) - 16;
-            document.getElementById("wxDay").innerHTML = '<small>unlocks in ' + Math.max(0, days) + " days</small>";
-            document.getElementById("wxDayL").textContent = "Show-day forecast";
-          }
         } catch (e) {}
-      }
-      /* Show-day sun times: NOAA solar approximation, pure math, no API. */
-      function sunTimes(dateStr, lat, lng) {
-        var d = new Date(dateStr + "T12:00:00Z");
-        var n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5);
-        var lngHour = lng / 15;
-        function calc(rising) {
-          var t = n + ((rising ? 6 : 18) - lngHour) / 24;
-          var M = 0.9856 * t - 3.289;
-          var L2 = M + 1.916 * Math.sin((M * Math.PI) / 180) + 0.02 * Math.sin((2 * M * Math.PI) / 180) + 282.634;
-          L2 = ((L2 % 360) + 360) % 360;
-          var RA = (Math.atan(0.91764 * Math.tan((L2 * Math.PI) / 180)) * 180) / Math.PI;
-          RA = ((RA % 360) + 360) % 360;
-          RA += (Math.floor(L2 / 90) - Math.floor(RA / 90)) * 90;
-          RA /= 15;
-          var sinDec = 0.39782 * Math.sin((L2 * Math.PI) / 180);
-          var cosDec = Math.cos(Math.asin(sinDec));
-          var cosH = (Math.cos((90.833 * Math.PI) / 180) - sinDec * Math.sin((lat * Math.PI) / 180)) /
-            (cosDec * Math.cos((lat * Math.PI) / 180));
-          if (cosH > 1 || cosH < -1) return null;
-          var H = rising ? 360 - (Math.acos(cosH) * 180) / Math.PI : (Math.acos(cosH) * 180) / Math.PI;
-          H /= 15;
-          var T = H + RA - 0.06571 * t - 6.622;
-          var UT = ((T - lngHour) % 24 + 24) % 24;
-          var local = UT - 5; /* CDT */
-          if (local < 0) local += 24;
-          var h = Math.floor(local), m2 = Math.round((local - h) * 60);
-          var ampm = h >= 12 ? "PM" : "AM";
-          var h12 = h % 12 || 12;
-          return h12 + ":" + String(m2).padStart(2, "0") + " " + ampm;
+      };
+
+      FIELD.pushRC = function (text, quiet) {
+        var t = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+        FIELD.log.unshift({ t: t, text: text });
+        FIELD.log = FIELD.log.slice(0, 12);
+        var m = document.getElementById("tickerMsg");
+        var fresh = m.cloneNode(false);
+        fresh.innerHTML = quiet ? esc(text) : "<b>" + esc(t) + "</b> · " + esc(text);
+        m.replaceWith(fresh);
+        fresh.id = "tickerMsg";
+      };
+
+      /* ---- feature rendering ---- */
+      FIELD.zoneOrder = function () {
+        return FIELD.features.filter(function (f) { return f.kind === "zone" && f.status !== "hidden"; });
+      };
+      FIELD.poiOrder = function () {
+        return FIELD.features.filter(function (f) { return f.kind === "poi" && f.status !== "hidden"; });
+      };
+      FIELD.centroid = function (f) {
+        var c = f.geometry.coords;
+        if (f.geometry.type === "point") return c;
+        var lat = 0, lng = 0;
+        c.forEach(function (p) { lat += p[0]; lng += p[1]; });
+        return [lat / c.length, lng / c.length];
+      };
+
+      FIELD.renderFeatures = function (first) {
+        if (!FIELD.ready) return;
+        var dyn = FIELD.svg.querySelector("#dynArt");
+        var html = "";
+        FIELD.zoneOrder().forEach(function (f) {
+          var cat = CAT[f.category] || CAT.facility;
+          var pts = f.geometry.coords.map(function (p) { return gx(p[1]).toFixed(1) + "," + gy(p[0]).toFixed(1); }).join(" ");
+          html += '<g class="zg st-' + esc(f.status) + '" data-slug="' + esc(f.slug) + '">' +
+            '<polygon class="zn-glow" points="' + pts + '" stroke="' + cat.color + '" vector-effect="non-scaling-stroke"/>' +
+            '<polygon class="zn-main" points="' + pts + '" fill="' + cat.color + '" fill-opacity="0.13" stroke="' + cat.color +
+            '" stroke-opacity="0.8" stroke-width="1.6" vector-effect="non-scaling-stroke"/>' +
+            '<polygon class="zn-hatch" points="' + pts + '" fill="url(#hatchFull)" stroke="none"/>' +
+            "</g>";
+        });
+        FIELD.features.filter(function (f) { return f.kind === "route" && f.status !== "hidden"; }).forEach(function (f) {
+          var d = f.geometry.coords.map(function (p, i) { return (i ? "L " : "M ") + gx(p[1]).toFixed(1) + "," + gy(p[0]).toFixed(1); }).join(" ");
+          html += '<path d="' + d + '" fill="none" stroke="rgba(248,184,0,0.5)" stroke-width="2" stroke-dasharray="7 6" vector-effect="non-scaling-stroke"/>';
+        });
+        /* overflow leader: a full parking lot points at whichever parking zone is open */
+        var park = FIELD.zoneOrder().filter(function (f) { return f.category === "parking"; });
+        var fullP = park.find(function (f) { return f.status === "full"; });
+        var openP = park.find(function (f) { return f.status === "open"; });
+        if (fullP && openP) {
+          var a = FIELD.centroid(fullP), b2 = FIELD.centroid(openP);
+          html += '<path class="leader" d="M ' + gx(a[1]).toFixed(1) + "," + gy(a[0]).toFixed(1) + " L " + gx(b2[1]).toFixed(1) + "," + gy(b2[0]).toFixed(1) +
+            '" stroke="#f8b800" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke"/>' +
+            '<circle cx="' + gx(b2[1]).toFixed(1) + '" cy="' + gy(b2[0]).toFixed(1) + '" r="6" fill="none" stroke="#f8b800" stroke-width="2" vector-effect="non-scaling-stroke"/>';
         }
-        return { rise: calc(true), set: calc(false) };
+        /* golden light azimuth ray across the show field */
+        var sf = FIELD.features.find(function (f) { return f.slug === "show-field"; });
+        if (sf && GOLD_START != null) {
+          var cc = FIELD.centroid(sf);
+          var cxp = gx(cc[1]), cyp = gy(cc[0]);
+          var az = 262 * Math.PI / 180;
+          var dx = Math.sin(az), dy = -Math.cos(az);
+          var sx2 = cxp + dx * 300, sy2 = cyp + dy * 300;
+          html += '<g class="goldray" opacity="0.55">' +
+            '<path d="M ' + sx2.toFixed(0) + "," + sy2.toFixed(0) + " L " + (cxp - dx * 140).toFixed(0) + "," + (cyp - dy * 140).toFixed(0) +
+            '" stroke="rgba(248,184,0,0.4)" stroke-width="1.6" stroke-dasharray="3 7" vector-effect="non-scaling-stroke"/>' +
+            '<circle cx="' + sx2.toFixed(0) + '" cy="' + sy2.toFixed(0) + '" r="9" fill="none" stroke="rgba(248,184,0,0.7)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>' +
+            '<text x="' + (sx2 + 16).toFixed(0) + '" y="' + (sy2 - 8).toFixed(0) + '" font-family="Arial" font-size="13" font-weight="bold" letter-spacing="2" fill="rgba(248,184,0,0.75)">GOLDEN LIGHT · ' + fmtH(GOLD_START) + "</text></g>";
+        }
+        dyn.innerHTML = html;
+        Array.prototype.forEach.call(dyn.querySelectorAll(".zg"), function (gEl) {
+          gEl.style.pointerEvents = "auto"; gEl.style.cursor = "pointer";
+          gEl.addEventListener("click", function (ev) { ev.stopPropagation(); FIELD.select(gEl.getAttribute("data-slug")); });
+        });
+        FIELD.renderMarkers(first);
+      };
+
+      FIELD.renderMarkers = function (first) {
+        var L = FIELD.L;
+        Object.keys(FIELD.markers).forEach(function (k) { FIELD.map.removeLayer(FIELD.markers[k]); });
+        FIELD.markers = {};
+        var i = 0;
+        FIELD.zoneOrder().forEach(function (f) {
+          i += 1;
+          var st = STATUS[f.status] || STATUS.draft;
+          var num = (f.detail && f.detail.corner) || String(i).padStart(2, "0");
+          var c = (f.detail && f.detail.label_at) || FIELD.centroid(f);
+          var htmlIc = '<div class="cb' + (first && !reduce ? " pop" : "") + (FIELD.selected === f.slug ? " sel" : "") +
+            '" style="--d:' + i * 70 + 'ms;--dot:' + st.dot + '"><span class="num">' + esc(num) + "</span>" +
+            '<span class="lab"><b>' + esc(f.name.toUpperCase()) + "</b><i>" + esc(st.word) + "</i></span></div>";
+          var mk = L.marker(c, { icon: L.divIcon({ className: "fmk", html: htmlIc, iconSize: [0, 0] }), interactive: true, keyboard: false }).addTo(FIELD.map);
+          mk.on("click", function () { FIELD.select(f.slug); });
+          f.__num = num;
+          FIELD.markers[f.slug] = mk;
+        });
+        FIELD.poiOrder().forEach(function (f, j) {
+          var g = f.slug === "first-aid" ? GLYPH.firstaid : (GLYPH[f.category] || GLYPH.facility);
+          var htmlIc = '<div class="pi' + (first && !reduce ? " pop" : "") + (FIELD.selected === f.slug ? " sel" : "") +
+            '" style="--d:' + (400 + j * 60) + 'ms"><span class="disc" role="img" aria-label="' + esc(f.name) + '">' + g + "</span></div>";
+          var mk = L.marker(f.geometry.coords, { icon: L.divIcon({ className: "fmk", html: htmlIc, iconSize: [0, 0] }), interactive: true, keyboard: false }).addTo(FIELD.map);
+          mk.on("click", function () { FIELD.select(f.slug); });
+          FIELD.markers[f.slug] = mk;
+        });
+      };
+
+      /* ---- selection + camera ---- */
+      FIELD.select = function (slug, noCam) {
+        var f = FIELD.features.find(function (x) { return x.slug === slug; });
+        if (!f) return;
+        FIELD.selected = slug;
+        try { history.replaceState(null, "", "#zone=" + slug); } catch (e) {}
+        Object.keys(FIELD.markers).forEach(function (k) {
+          var el = FIELD.markers[k].getElement && FIELD.markers[k].getElement();
+          if (!el) return;
+          var n = el.querySelector(".cb, .pi");
+          n && n.classList.toggle("sel", k === slug);
+        });
+        if (!noCam) {
+          if (f.kind === "zone") {
+            var bs = f.geometry.coords.map(function (p) { return [p[0], p[1]]; });
+            var fly = reduce ? "fitBounds" : "flyToBounds";
+            FIELD.map[fly](bs, { paddingTopLeft: [30, 90], paddingBottomRight: [30, Math.round(window.innerHeight * 0.42)] });
+          } else {
+            var fly2 = reduce ? "setView" : "flyTo";
+            FIELD.map[fly2]([f.geometry.coords[0], f.geometry.coords[1]], 17);
+          }
+        }
+        FIELD.showDetail(f);
+        setSnap("index");
+      };
+
+      /* ---- sheet views ---- */
+      var fbody = document.getElementById("fbody");
+      FIELD.showIndex = function () {
+        FIELD.view = "index";
+        FIELD.selected = null;
+        Object.keys(FIELD.markers).forEach(function (k) {
+          var el = FIELD.markers[k].getElement && FIELD.markers[k].getElement();
+          var n = el && el.querySelector(".cb, .pi");
+          n && n.classList.remove("sel");
+        });
+        try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+        var h = '<div class="fsec-eye">Show day light · October 10</div>' + FIELD.lightbarHTML();
+        h += '<div class="fsec-eye">Corner index</div>';
+        var i = 0;
+        FIELD.zoneOrder().forEach(function (f) {
+          i += 1;
+          var st = STATUS[f.status] || STATUS.draft;
+          var cat = CAT[f.category] || CAT.facility;
+          var num = (f.detail && f.detail.corner) || String(i).padStart(2, "0");
+          h += '<button class="cix" data-sel="' + esc(f.slug) + '"><span class="n">' + esc(num) + "</span>" +
+            '<span class="nm"><b>' + esc(f.name) + "</b><span>" + esc(cat.word) + "</span></span>" +
+            '<span class="lamp" style="--dot:' + st.dot + '"></span></button>';
+        });
+        h += '<div class="fsec-eye">Services</div>';
+        FIELD.poiOrder().forEach(function (f) {
+          var st = STATUS[f.status] || STATUS.draft;
+          h += '<button class="cix" data-sel="' + esc(f.slug) + '"><span class="n poi-n">·</span>' +
+            '<span class="nm"><b>' + esc(f.name) + "</b><span>" + esc((CAT[f.category] || CAT.facility).word) + "</span></span>" +
+            '<span class="lamp" style="--dot:' + st.dot + '"></span></button>';
+        });
+        h += '<button class="backln" id="openSpread">The full program ›</button>';
+        fbody.innerHTML = h;
+        wireSel();
+        var os = document.getElementById("openSpread");
+        os && os.addEventListener("click", function () { FIELD.showSpread(); setSnap("full"); });
+      };
+
+      FIELD.showDetail = function (f, keepView) {
+        FIELD.view = "detail";
+        var st = STATUS[f.status] || STATUS.draft;
+        var cat = CAT[f.category] || CAT.facility;
+        var h = '<div class="zcard"><div class="zc-eye"><span class="eyebrow">' +
+          (f.__num ? "Corner " + f.__num + " · " : "") + esc(cat.word) + "</span>" +
+          '<span class="stchip" style="--dot:' + st.dot + '">' + esc(st.word) + "</span></div>" +
+          "<h2>" + esc(f.name) + "</h2>" +
+          (f.blurb ? '<p class="blurb">' + esc(f.blurb) + "</p>" : "");
+        if (f.detail && f.detail.hours) h += '<div class="zrow"><b>Hours</b> ' + esc(f.detail.hours) + "</div>";
+        if (f.status === "draft") h += '<div class="zrow">Position is provisional until the venue sign off.</div>';
+        if (f.category === "entry" || f.category === "parking") {
+          var c = FIELD.centroid(f);
+          h += '<div class="navrow"><a target="_blank" rel="noopener" href="' + gmaps(c[0], c[1]) + '">Google</a>' +
+            '<a target="_blank" rel="noopener" href="' + waze(c[0], c[1]) + '">Waze</a>' +
+            '<a target="_blank" rel="noopener" href="' + amaps(c[0], c[1]) + '">Apple</a></div>';
+        }
+        h += '<button class="backln" id="backIx">‹ Corner index</button></div>';
+        fbody.innerHTML = h;
+        var bx = document.getElementById("backIx");
+        bx && bx.addEventListener("click", function () {
+          FIELD.showIndex();
+          var fb = reduce ? "fitBounds" : "flyToBounds";
+          FIELD.map[fb](FIELD.homeBounds(), FIELD.fitPad());
+        });
+      };
+
+      FIELD.showSpread = function () {
+        FIELD.view = "spread";
+        var h = '<div class="fsec-eye">The program</div>' +
+          '<p style="color:var(--dim);font-size:13.5px;margin:0">Three hundred curated cars on a working ranch. One day. Gates 9:00 AM to 3:00 PM, Saturday October 10, 2026. This plan is live: statuses flip in real time on show day, and the layout firms up here first as the event gets closer.</p>' +
+          '<div class="fsec-eye">Legend</div><div class="legend">' +
+          '<span class="li"><span class="sw" style="border-color:#8b95a3;border-style:dashed;background:rgba(139,149,163,0.08)"></span>Draft, provisional</span>' +
+          '<span class="li"><span class="sw" style="border-color:#fff;background:rgba(255,255,255,0.1)"></span>Confirmed</span>' +
+          '<span class="li"><span class="sw" style="border-color:#00d2be;background:rgba(0,210,190,0.15)"></span>Open now</span>' +
+          '<span class="li"><span class="sw" style="border-color:#f8b800;background:repeating-linear-gradient(45deg,rgba(248,184,0,0.35) 0 3px,rgba(248,184,0,0.1) 3px 7px)"></span>Full</span>' +
+          '<span class="li"><span class="sw" style="border-color:#e5484d;background:rgba(229,72,77,0.08)"></span>Closed</span>' +
+          '<span class="li"><span class="sw" style="border-color:#f8b800;border-style:solid;background:none"></span>Property line</span>' +
+          "</div>" +
+          '<div class="scalerow"><span class="rulebar"></span><span>90 m · about 18 car lengths</span><span style="margin-left:auto">N ↑</span></div>' +
+          '<div class="fsec-eye">Race control</div><div class="rclog">' +
+          FIELD.log.map(function (l) { return "<div><b>" + esc(l.t) + "</b> · " + esc(l.text) + "</div>"; }).join("") +
+          "</div>" +
+          '<div class="fsec-eye">Sun schedule</div>' + FIELD.lightbarHTML() +
+          '<div class="colophon">The Piston Powered Ranch · Rancho Jaramillo<br />179 Enon Church Rd · Unionville TN<br />Proceeds benefit Community Elementary School<br />A PaddockGavin Events production</div>' +
+          '<button class="backln" id="backIx2">‹ Corner index</button>';
+        fbody.innerHTML = h;
+        var b2 = document.getElementById("backIx2");
+        b2 && b2.addEventListener("click", function () { FIELD.showIndex(); setSnap("index"); });
+      };
+
+      function wireSel() {
+        Array.prototype.forEach.call(fbody.querySelectorAll("[data-sel]"), function (el) {
+          el.addEventListener("click", function () { FIELD.select(el.getAttribute("data-sel")); });
+        });
       }
-      var st = sunTimes(SHOW_DAY, PPR.lat, PPR.lng);
-      if (st.rise && st.set) {
-        document.getElementById("sunChip").innerHTML =
-          '<small>up</small> ' + st.rise + ' <small>· gold</small> ' + st.set.replace(/(\d+):(\d+)/, function (m0, h, mi) {
-            var t = (parseInt(h, 10) % 12) * 60 + parseInt(mi, 10) - 60;
-            return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0");
-          });
+
+      /* ---- light schedule bar: 7 AM to 7 PM ---- */
+      FIELD.lightbarHTML = function () {
+        var t0 = 7, t1 = 19;
+        function pct(h) { return (((h - t0) / (t1 - t0)) * 100).toFixed(1) + "%"; }
+        function span(a, b3) { return "left:" + pct(a) + ";width:" + ((b3 - a) / (t1 - t0) * 100).toFixed(1) + "%"; }
+        var h = '<div class="lightbar">' +
+          '<span class="band stage" style="' + span(8, 9) + '"></span>' +
+          '<span class="band show" style="' + span(9, 15) + '"></span>';
+        if (GOLD_START != null && SUN.set != null) h += '<span class="band goldb" style="' + span(GOLD_START, SUN.set) + '"></span>';
+        if (ranchToday() === SHOW_DAY) {
+          var hNow = ranchHourNow();
+          if (hNow >= t0 && hNow <= t1) h += '<span class="sundot" style="display:block;left:' + pct(hNow) + '"></span>';
+        }
+        h += "</div><div class=\"lightlabs\"><span><b>" + (SUN.rise != null ? fmtH(SUN.rise) : "") + "</b> sunrise</span>" +
+          "<span><b>9 AM</b> gates</span><span><b>3 PM</b> close</span>" +
+          "<span><b>" + (GOLD_START != null ? fmtH(GOLD_START) : "") + "</b> golden</span>" +
+          "<span><b>" + (SUN.set != null ? fmtH(SUN.set) : "") + "</b> sunset</span></div>";
+        return h;
+      };
+
+      /* ---- telemetry strip ---- */
+      FIELD.renderTelemetry = function () {
+        if (!document.getElementById("condLine")) return;
+        var bits = [];
+        if (TELEM.tempF != null) bits.push(TELEM.tempF + "°F");
+        if (TELEM.windMph != null) bits.push("WIND " + TELEM.windMph);
+        if (TELEM.rainPct != null) bits.push("RAIN " + TELEM.rainPct + "%");
+        if (TELEM.dayHi != null) bits.push("OCT 10 · " + TELEM.dayHi + "°/" + TELEM.dayLo + "°");
+        else {
+          var days = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5) - 16;
+          if (days > 0) bits.push("OCT 10 IN " + days + "D");
+        }
+        document.getElementById("condLine").innerHTML = bits.length
+          ? bits.map(esc).join(' <span class="sep">·</span> ')
+          : "Reading the ranch…";
+        document.getElementById("entN").textContent = TELEM.vehicles;
+        document.getElementById("headN").textContent = TELEM.heads;
+        document.getElementById("runN").textContent = TELEM.runs;
+        document.getElementById("entBar").style.width = Math.min(100, (TELEM.vehicles / 300) * 100) + "%";
+      };
+
+      FIELD.goldChrome = function () {
+        if (ranchToday() !== SHOW_DAY || GOLD_START == null) return;
+        var hNow = ranchHourNow();
+        bar.classList.toggle("gold", hNow >= GOLD_START && hNow <= SUN.set);
+      };
+
+      FIELD.showMe = function (lat, lng) {
+        FIELD.me && FIELD.map.removeLayer(FIELD.me);
+        FIELD.me = FIELD.L.circleMarker([lat, lng], { radius: 7, color: "#fff", weight: 2.5, fillColor: "#4da3d8", fillOpacity: 1 }).addTo(FIELD.map);
+        if (lat > GEO.S - 0.02 && lat < GEO.N + 0.02 && lng > GEO.W - 0.02 && lng < GEO.E + 0.02) {
+          FIELD.map[reduce ? "setView" : "flyTo"]([lat, lng], 17);
+        }
+      };
+
+      /* ---- sheet snap + drag ---- */
+      var SNAPS = { peek: null, index: 0.46, full: 0 };
+      var snapState = "peek";
+      function setSnap(s) {
+        snapState = s;
+        fsheet.classList.remove("snap-index", "snap-full");
+        if (s === "index") fsheet.classList.add("snap-index");
+        if (s === "full") fsheet.classList.add("snap-full");
       }
+      (function sheetDrag() {
+        var startY = null, startT = 0, moved = false;
+        var fhead = document.getElementById("fhead");
+        function currentOffset() {
+          var h = fsheet.getBoundingClientRect().height;
+          if (snapState === "full") return 0;
+          if (snapState === "index") return h * 0.46;
+          return h - 122;
+        }
+        fhead.addEventListener("touchstart", function (e) {
+          startY = e.touches[0].clientY; startT = currentOffset(); moved = false;
+          fsheet.classList.add("dragging");
+        }, { passive: true });
+        fhead.addEventListener("touchmove", function (e) {
+          if (startY == null) return;
+          var dy = e.touches[0].clientY - startY;
+          if (Math.abs(dy) > 6) moved = true;
+          var h = fsheet.getBoundingClientRect().height;
+          var off = Math.max(0, Math.min(h - 90, startT + dy));
+          fsheet.style.transform = "translate(-50%," + off + "px)";
+        }, { passive: true });
+        var lastTouchEnd = 0;
+        function cycleSnap() {
+          setSnap(snapState === "peek" ? "index" : snapState === "index" ? "full" : "peek");
+        }
+        fhead.addEventListener("touchend", function () {
+          fsheet.classList.remove("dragging");
+          if (startY == null) return;
+          lastTouchEnd = Date.now();
+          var h = fsheet.getBoundingClientRect().height;
+          var off = 0;
+          try { off = new DOMMatrixReadOnly(getComputedStyle(fsheet).transform).m42; } catch (e) {}
+          fsheet.style.transform = "";
+          startY = null;
+          if (!moved) { cycleSnap(); return; }
+          var cands = [["full", 0], ["index", h * 0.46], ["peek", h - 122]];
+          cands.sort(function (a, b3) { return Math.abs(a[1] - off) - Math.abs(b3[1] - off); });
+          setSnap(cands[0][0]);
+        });
+        fhead.addEventListener("click", function () {
+          if (moved || Date.now() - lastTouchEnd < 600) return;
+          cycleSnap();
+        });
+        fhead.setAttribute("tabindex", "0");
+        fhead.setAttribute("role", "button");
+        fhead.setAttribute("aria-label", "Track conditions. Activate to expand the program sheet.");
+        fhead.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cycleSnap(); }
+        });
+      })();
 
       /* ---------- boot ---------- */
       await boot();
       ENGINE.addPPR();
-      zoneItems = ENGINE.addZones();
       ENGINE.onClick(function (lat, lng) { if (mode === "create") placePin(lat, lng); });
-      ENGINE.autocomplete && ENGINE.autocomplete(document.getElementById("rvSpot"), function (lat, lng, name) {
+      ENGINE.autocomplete && ENGINE.autocomplete(document.getElementById("rvSpot"), function (lat, lng) {
         placePin(lat, lng);
         ENGINE.setView(lat, lng, 14);
       });
       loadRv(); loadStats(); loadWeather();
-      setInterval(function () { if (!document.hidden) { loadRv(); loadStats(); loadWeather(); } }, 6e4);
+      setInterval(function () { if (!document.hidden) { loadRv(); loadStats(); loadWeather(); FIELD.goldChrome(); } }, 6e4);
+      /* deep link: #zone=slug opens the program with that zone selected */
+      function applyZoneHash() {
+        var m = (location.hash || "").match(/zone=([a-z0-9-]+)/i);
+        if (!m) return;
+        if (mode !== "field") setMode("field");
+        var tries = 0;
+        var t = setInterval(function () {
+          tries += 1;
+          if (FIELD.ready) { clearInterval(t); FIELD.select(m[1]); }
+          else if (tries > 40) clearInterval(t);
+        }, 250);
+      }
+      window.addEventListener("hashchange", applyZoneHash);
+      applyZoneHash();
     </script>
   </body>
 </html>
