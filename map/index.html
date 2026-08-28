@@ -962,7 +962,7 @@
       var GEO = { N: 35.658, S: 35.629, W: -86.595, E: -86.5745 };
       var VW = 1000, VH = 1728;
       /* the 12 acres in use, and the whole 408 acre parcel */
-      var EVENT_BOUNDS = [[35.6316, -86.5938], [35.6352, -86.5878]];
+      var EVENT_BOUNDS = [[35.6452, -86.5828], [35.6494, -86.5778]];
       var PROPERTY_BOUNDS = [[35.6302, -86.5936], [35.6566, -86.5758]];
       function gx(lng) { return ((lng - GEO.W) / (GEO.E - GEO.W)) * VW; }
       function gy(lat) { return ((GEO.N - lat) / (GEO.N - GEO.S)) * VH; }
@@ -994,17 +994,17 @@
       /* Fallback rows, identical to the seeded map_features data, so the
          program renders even while the Data API cache is behind. */
       var DEFAULT_FEATURES = [
-        { slug: "show-field", kind: "zone", name: "Show Field", category: "show", status: "draft", blurb: "300 curated cars staged in rows on the open pasture north of the gate. Row map lands with the final layout.", detail: { hours: "Staging from 8:00 AM, gates 9:00 AM", acres: "6.5 acres" }, geometry: { type: "polygon", coords: [[35.6347, -86.5925], [35.6347, -86.5903], [35.6335, -86.5903], [35.6335, -86.5925]] }, sort: 10 },
-        { slug: "vendor-row", kind: "zone", name: "Vendor Row", category: "vendor", status: "draft", blurb: "Curated vendors and partners along the entry drive, first thing guests walk past.", detail: { acres: "1.2 acres", label_at: [35.63303, -86.5922] }, geometry: { type: "polygon", coords: [[35.63315, -86.5924], [35.63315, -86.5905], [35.6329, -86.5905], [35.6329, -86.5924]] }, sort: 20 },
-        { slug: "vip-terrace", kind: "zone", name: "VIP Terrace", category: "vip", status: "draft", blurb: "VIP hospitality with the sightline across the show field. Guided ranch tour meets here.", detail: { hours: "Tour time to be announced", acres: "0.6 acres" }, geometry: { type: "polygon", coords: [[35.6332, -86.5901], [35.6332, -86.5893], [35.6329, -86.5893], [35.6329, -86.5901]] }, sort: 30 },
-        { slug: "spectator-parking", kind: "zone", name: "Spectator Parking", category: "parking", status: "draft", blurb: "Free spectator parking on the south pasture. Follow the marshals in from the gate.", detail: { acres: "2.7 acres" }, geometry: { type: "polygon", coords: [[35.6326, -86.5908], [35.6326, -86.5886], [35.6321, -86.5886], [35.6321, -86.5908]] }, sort: 40 },
-        { slug: "helo-lz", kind: "zone", name: "Helicopter LZ", category: "ops", status: "draft", blurb: "Landing zone held at 150 by 150 feet, mowed and firm, with a roped crowd line at 150 feet. Aircraft not confirmed.", detail: { acres: "150 by 150 ft" }, geometry: { type: "polygon", coords: [[35.63441, -86.5895], [35.63441, -86.589], [35.634, -86.589], [35.634, -86.5895]] }, sort: 50 },
-        { slug: "ranch-gate", kind: "poi", name: "Ranch Gate", category: "entry", status: "draft", blurb: "Cars turn in here off Highway 41-A. Gates open 9:00 AM sharp.", detail: { hours: "9:00 AM to 3:00 PM" }, geometry: { type: "point", coords: [35.63328, -86.593] }, sort: 60 },
-        { slug: "charity-corner", kind: "poi", name: "Community Elementary Corner", category: "charity", status: "draft", blurb: "The reason we run it. Meet the school, see where the money goes.", detail: null, geometry: { type: "point", coords: [35.63302, -86.5912] }, sort: 70 },
-        { slug: "food-row", kind: "poi", name: "Food", category: "food", status: "draft", blurb: "Food and drink at the head of Vendor Row. Lineup firms up as we get closer.", detail: null, geometry: { type: "point", coords: [35.63302, -86.592] }, sort: 80 },
-        { slug: "restrooms", kind: "poi", name: "Restrooms", category: "facility", status: "draft", blurb: "Facilities between Vendor Row and spectator parking.", detail: null, geometry: { type: "point", coords: [35.63272, -86.5916] }, sort: 90 },
-        { slug: "first-aid", kind: "poi", name: "First Aid", category: "facility", status: "draft", blurb: "Medical station. Marshals can radio it from anywhere on site.", detail: null, geometry: { type: "point", coords: [35.63302, -86.5906] }, sort: 100 },
-        { slug: "entry-drive", kind: "route", name: "Entry Drive", category: "entry", status: "draft", blurb: "From the Highway 41-A gate east into the show field and parking.", detail: null, geometry: { type: "path", coords: [[35.63328, -86.593], [35.63326, -86.5926], [35.6332, -86.5918], [35.6331, -86.591], [35.63285, -86.5901], [35.63255, -86.5897]] }, sort: 110 },
+        { slug: "show-field", kind: "zone", name: "Show Field", category: "show", status: "draft", blurb: "300 curated cars staged in rows on the pasture east of the ranch road, running toward the creek. Row map lands with the final layout.", detail: { hours: "Staging from 8:00 AM, gates 9:00 AM", acres: "7.1 acres" }, geometry: { type: "polygon", coords: [[35.6475, -86.5815], [35.6475, -86.5789], [35.6464, -86.5789], [35.6464, -86.5815]] }, sort: 10 },
+        { slug: "vendor-row", kind: "zone", name: "Vendor Row", category: "vendor", status: "draft", blurb: "Curated vendors and partners along the south edge of the show field, first thing guests walk past.", detail: { acres: "1.1 acres", label_at: [35.6462, -86.5813] }, geometry: { type: "polygon", coords: [[35.6463, -86.5815], [35.6463, -86.5793], [35.6461, -86.5793], [35.6461, -86.5815]] }, sort: 20 },
+        { slug: "vip-terrace", kind: "zone", name: "VIP Terrace", category: "vip", status: "draft", blurb: "VIP hospitality on the creek side with the sightline back across the show field. Guided ranch tour meets here.", detail: { hours: "Tour time to be announced", acres: "0.6 acres" }, geometry: { type: "polygon", coords: [[35.6464, -86.5792], [35.6464, -86.5786], [35.646, -86.5786], [35.646, -86.5792]] }, sort: 30 },
+        { slug: "spectator-parking", kind: "zone", name: "Spectator Parking", category: "parking", status: "draft", blurb: "Free spectator parking on the pasture south of the show field. Follow the marshals up the ranch road.", detail: { acres: "3.0 acres" }, geometry: { type: "polygon", coords: [[35.6459, -86.5815], [35.6459, -86.5785], [35.6455, -86.5785], [35.6455, -86.5815]] }, sort: 40 },
+        { slug: "helo-lz", kind: "zone", name: "Helicopter LZ", category: "ops", status: "draft", blurb: "Landing zone held at 150 by 150 feet, mowed and firm, sited 400 feet north of the show field so rotor wash carries away from the cars. Roped crowd line at 150 feet. Aircraft not confirmed.", detail: { acres: "150 by 150 ft" }, geometry: { type: "polygon", coords: [[35.64901, -86.58], [35.64901, -86.5795], [35.6486, -86.5795], [35.6486, -86.58]] }, sort: 50 },
+        { slug: "ranch-gate", kind: "poi", name: "Ranch Gate", category: "entry", status: "draft", blurb: "Cars turn in here off Highway 41-A, then follow the ranch road to the field. Gates open 9:00 AM sharp.", detail: { hours: "9:00 AM to 3:00 PM" }, geometry: { type: "point", coords: [35.63751, -86.59323] }, sort: 60 },
+        { slug: "charity-corner", kind: "poi", name: "Community Elementary Corner", category: "charity", status: "draft", blurb: "The reason we run it. Meet the school, see where the money goes.", detail: null, geometry: { type: "point", coords: [35.64622, -86.5808] }, sort: 70 },
+        { slug: "food-row", kind: "poi", name: "Food", category: "food", status: "draft", blurb: "Food and drink at the head of Vendor Row. Lineup firms up as we get closer.", detail: null, geometry: { type: "point", coords: [35.64622, -86.5813] }, sort: 80 },
+        { slug: "restrooms", kind: "poi", name: "Restrooms", category: "facility", status: "draft", blurb: "Facilities between Vendor Row and spectator parking.", detail: null, geometry: { type: "point", coords: [35.64595, -86.581] }, sort: 90 },
+        { slug: "first-aid", kind: "poi", name: "First Aid", category: "facility", status: "draft", blurb: "Medical station. Marshals can radio it from anywhere on site.", detail: null, geometry: { type: "point", coords: [35.64622, -86.5798] }, sort: 100 },
+        { slug: "entry-drive", kind: "route", name: "Entry Drive", category: "entry", status: "draft", blurb: "From the Highway 41-A gate, east and then north up the ranch road to the field.", detail: null, geometry: { type: "path", coords: [[35.63751, -86.59323], [35.63733, -86.59085], [35.63721, -86.58961], [35.63712, -86.58854], [35.63697, -86.58714], [35.63719, -86.58695], [35.63752, -86.58683], [35.63743, -86.58585], [35.63733, -86.58488], [35.63728, -86.58435], [35.63756, -86.58415], [35.63788, -86.58402], [35.63777, -86.58303], [35.63767, -86.5819], [35.63756, -86.58062], [35.63752, -86.58022], [35.63761, -86.57988], [35.63806, -86.57985], [35.63839, -86.57995], [35.63864, -86.58019], [35.63921, -86.58018], [35.63973, -86.58015], [35.64031, -86.58011], [35.64101, -86.58006], [35.64153, -86.58003], [35.64202, -86.57998], [35.64279, -86.57991], [35.64322, -86.57988], [35.6437, -86.57984], [35.64401, -86.58005], [35.64422, -86.58031], [35.64477, -86.581], [35.64512, -86.58143], [35.64544, -86.58184], [35.64566, -86.58211], [35.64608, -86.58213], [35.64673, -86.58207]] }, sort: 110 },
       ];
 
       var FIELD = {
@@ -1015,8 +1015,8 @@
         frame: store.get("ppr_map_frame") === "property" ? "property" : "event",
       };
 
-      /* where cars turn in, off Hwy 41-A on the west property line */
-      FIELD.gate = function () { return [35.63328, -86.593]; };
+      /* where cars turn in: the ranch road meets Highway 41-A on the west line */
+      FIELD.gate = function () { return [35.63751, -86.59323]; };
       FIELD.gateSegIdx = function () {
         var g = FIELD.gate(), best = 0, bd = Infinity;
         (ROADS.service || []).forEach(function (seg, i) {
