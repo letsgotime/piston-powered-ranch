@@ -30,7 +30,7 @@
       :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 8px; }
       .ground { position: fixed; inset: 0; z-index: 0; }
       .ground .ly { position: absolute; inset: 0; background: url(/events/img/hero.jpg) center 34% / cover no-repeat; transform: scale(1.04); }
-      .ground .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 17, 26, 0.78), rgba(10, 17, 26, 0.7) 40%, rgba(10, 17, 26, 0.88)); }
+      .ground .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 17, 26, 0.72), rgba(10, 17, 26, 0.6) 40%, rgba(10, 17, 26, 0.86)); }
       .rule { height: 4px; position: relative; z-index: 60; background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
       /* .wrap spans the viewport so image bands can go full bleed without a
          100vw negative margin, which overflows by the scrollbar width. The
@@ -38,10 +38,20 @@
       .wrap { position: relative; z-index: 1; padding: 20px 0 calc(56px + env(safe-area-inset-bottom)); }
       .col { max-width: 1160px; margin: 0 auto; padding: 0 var(--pad); }
       .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      /* Floating glass: the lift comes from the rim highlight and the shadow,
+         not from thinning the panel out. Keeping the fill substantive is what
+         holds text contrast steady over a photograph that changes underneath. */
       .glass {
-        background: var(--glass);
-        -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
-        border: 1px solid var(--gline); border-radius: 18px; box-shadow: var(--e1);
+        background: linear-gradient(157deg, rgba(30, 45, 62, 0.66), rgba(11, 19, 29, 0.64));
+        -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5);
+        border: 1px solid var(--gline); border-radius: 18px;
+        box-shadow: var(--e1), inset 0 1px 0 rgba(255, 255, 255, 0.15),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+      }
+      .lane { transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+      @media (hover: hover) {
+        .lane:hover { transform: translateY(-3px);
+          box-shadow: var(--e2), inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 rgba(0, 0, 0, 0.3); }
       }
       /* header: rounded card on phones, stadium pill once it fits on one line */
       .head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 16px; }
@@ -74,9 +84,10 @@
       .node {
         text-align: left; width: 100%; font: inherit; color: var(--dim); cursor: pointer;
         min-height: 56px; padding: 11px 42px 11px 14px; border-radius: 12px;
-        background: rgba(255, 255, 255, 0.055); border: 1px solid var(--gline);
-        font-size: 13px; position: relative;
-        transition: transform 0.18s var(--ease), border-color 0.2s, background 0.2s;
+        background: linear-gradient(160deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.035));
+        border: 1px solid var(--gline); font-size: 13px; position: relative;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), var(--e0);
+        transition: transform 0.18s var(--ease), border-color 0.2s, background 0.2s, box-shadow 0.2s;
       }
       .node b { color: var(--ink); display: block; font-size: 13.5px; line-height: 1.35; }
       .node .n { position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -87,7 +98,9 @@
       .node .pill.on { display: inline-block; }
       .arrow { align-self: center; height: 14px; width: 2px; background: var(--faint); opacity: 0.5; margin: 2px 0; }
       @media (hover: hover) {
-        .node:hover { transform: translateY(-2px); border-color: rgba(248, 184, 0, 0.55); background: rgba(255, 255, 255, 0.09); }
+        .node:hover { transform: translateY(-2px); border-color: rgba(248, 184, 0, 0.55);
+          background: linear-gradient(160deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.06));
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), var(--e1); }
         .node:hover .n { color: var(--amber); transform: translateY(-50%) translateX(2px); }
       }
       .node:active { transform: scale(0.99); border-color: rgba(248, 184, 0, 0.55); }
