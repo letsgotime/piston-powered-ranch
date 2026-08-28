@@ -140,6 +140,8 @@
       @keyframes leadflow { to { stroke-dashoffset: -13; } }
       /* corner badges + poi markers (divIcons, screen sized) */
       .cb { display: flex; align-items: center; gap: 7px; transform: translate(-17px, -17px); cursor: pointer; }
+      /* near the right edge the label flips inboard so it never runs off screen */
+      .cb.lft { flex-direction: row-reverse; transform: translate(calc(-100% + 17px), -17px); }
       .cb .num {
         width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
         background: rgba(10, 17, 26, 0.88); border: 2px solid var(--amber);
@@ -337,10 +339,12 @@
       .pac-item:hover { background: rgba(255, 255, 255, 0.06); }
       .pac-item-query { color: var(--ink); }
       /* far zoom: badges compact, poi discs collapse to dots */
-      .fwrap.zfar .pi .disc { width: 12px; height: 12px; }
+      .fwrap.zfar .pi .disc { width: 13px; height: 13px; background: rgba(196, 203, 214, 0.9); border-width: 2px; }
       .fwrap.zfar .pi .disc svg { display: none; }
-      .fwrap.zfar .cb .lab i { display: none; }
-      .fwrap.zfar .cb .num { width: 26px; height: 26px; font-size: 11px; }
+      /* wide view reads as a numbered program map; names live in the corner index */
+      .fwrap.zfar .cb .lab { display: none; }
+      .fwrap.zfar .cb.sel .lab { display: block; }
+      .fwrap.zfar .cb .num { width: 30px; height: 30px; font-size: 12px; }
       @media (max-width: 430px) {
         .bar { gap: 6px; padding: 7px 10px; }
         .bar img { height: 20px; }
@@ -406,6 +410,7 @@
       <img src="/brand/pg-mark.png" alt="" />
       <span class="t" id="barTitle">Navigate</span>
       <span class="spacer"></span>
+      <button id="frameBtn" style="display: none" aria-pressed="false">Property</button>
       <button id="aerialBtn" style="display: none" aria-pressed="false">Aerial</button>
       <button id="trafficBtn" style="display: none" aria-pressed="false">Traffic</button>
       <button id="backBtn">Menu</button>
@@ -466,6 +471,7 @@
         createClient,
         SupabaseAuthAdapter,
       } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      import { PARCEL, ROADS } from "./geo.js";
 
       /* Side gate fix pending from Gavin: swap this one constant when it lands. */
       var PPR = { lat: 35.6309932, lng: -86.5868705 };
@@ -781,6 +787,7 @@
         locateBtn.classList.toggle("on", m === "nav" || m === "create" || m === "field");
         pinCta.classList.toggle("on", m === "create" && !pinLL);
         document.getElementById("aerialBtn").style.display = m === "field" ? "" : "none";
+        document.getElementById("frameBtn").style.display = m === "field" ? "" : "none";
         document.getElementById("trafficBtn").style.display =
           m !== "field" && m !== "landing" && document.getElementById("trafficBtn").dataset.avail ? "" : "none";
         var bt = document.getElementById("barTitle");
@@ -803,6 +810,9 @@
         this.setAttribute("aria-pressed", on ? "true" : "false");
       });
       document.getElementById("aerialBtn").addEventListener("click", function () { FIELD.setAerial(!FIELD.aerial); });
+      document.getElementById("frameBtn").addEventListener("click", function () {
+        FIELD.setFrame(FIELD.frame === "property" ? "event" : "property");
+      });
       document.getElementById("cruiseBtn").addEventListener("click", function () {
         clearPin(); setMode("create");
         ENGINE.kind && ENGINE.setView(PPR.lat, PPR.lng, 10);
@@ -902,8 +912,11 @@
       /* ================================================================
          FIELD PROGRAM · the event map as a race-weekend program
          ================================================================ */
-      var GEO = { N: 35.6348, S: 35.628, W: -86.5915, E: -86.5828 };
-      var VW = 1000, VH = 958;
+      var GEO = { N: 35.658, S: 35.629, W: -86.595, E: -86.5745 };
+      var VW = 1000, VH = 1728;
+      /* the 12 acres in use, and the whole 408 acre parcel */
+      var EVENT_BOUNDS = [[35.6316, -86.5938], [35.6352, -86.5878]];
+      var PROPERTY_BOUNDS = [[35.6302, -86.5936], [35.6566, -86.5758]];
       function gx(lng) { return ((lng - GEO.W) / (GEO.E - GEO.W)) * VW; }
       function gy(lat) { return ((GEO.N - lat) / (GEO.N - GEO.S)) * VH; }
       var STATUS = {
@@ -934,16 +947,17 @@
       /* Fallback rows, identical to the seeded map_features data, so the
          program renders even while the Data API cache is behind. */
       var DEFAULT_FEATURES = [
-        { slug: "show-field", kind: "zone", name: "Show Field", category: "show", status: "draft", blurb: "300 curated cars staged in rows on the north field. Row map lands with the final layout.", detail: { hours: "Staging from 8:00 AM, gates 9:00 AM" }, geometry: { type: "polygon", coords: [[35.633, -86.5892], [35.6331, -86.5852], [35.631, -86.585], [35.6312, -86.5892]] }, sort: 10 },
-        { slug: "vendor-row", kind: "zone", name: "Vendor Row", category: "vendor", status: "draft", blurb: "Curated vendors and partners along the south side of the drive.", detail: { label_at: [35.6306, -86.5892] }, geometry: { type: "polygon", coords: [[35.6308, -86.5896], [35.6307, -86.5873], [35.6304, -86.5873], [35.6305, -86.5896]] }, sort: 20 },
-        { slug: "vip-terrace", kind: "zone", name: "VIP Terrace", category: "vip", status: "draft", blurb: "VIP hospitality with the best sightline over the field. Guided ranch tour meets here.", detail: { hours: "Tour time to be announced", label_at: [35.6302, -86.5869] }, geometry: { type: "polygon", coords: [[35.6307, -86.5871], [35.6306, -86.5858], [35.6301, -86.5858], [35.6302, -86.5871]] }, sort: 30 },
-        { slug: "spectator-parking", kind: "zone", name: "Spectator Parking", category: "parking", status: "draft", blurb: "Free spectator parking on the south pasture. Follow the marshals.", detail: { label_at: [35.6297, -86.5892] }, geometry: { type: "polygon", coords: [[35.6303, -86.5896], [35.6303, -86.5873], [35.6295, -86.5872], [35.6295, -86.5896]] }, sort: 40 },
-        { slug: "main-gate", kind: "poi", name: "Main Gate", category: "entry", status: "draft", blurb: "Entry off Enon Church Rd. Gates open 9:00 AM sharp.", detail: { hours: "9:00 AM to 3:00 PM" }, geometry: { type: "point", coords: [35.6307, -86.58635] }, sort: 50 },
-        { slug: "charity-corner", kind: "poi", name: "Community Elementary Corner", category: "charity", status: "draft", blurb: "The reason we run it. Meet the school, see where the money goes.", detail: null, geometry: { type: "point", coords: [35.63035, -86.5876] }, sort: 60 },
-        { slug: "food-row", kind: "poi", name: "Food", category: "food", status: "draft", blurb: "Food and drink next to Vendor Row. Lineup firms up as we get closer.", detail: null, geometry: { type: "point", coords: [35.63035, -86.5886] }, sort: 70 },
-        { slug: "restrooms", kind: "poi", name: "Restrooms", category: "facility", status: "draft", blurb: "Facilities between the field and parking.", detail: null, geometry: { type: "point", coords: [35.6299, -86.5876] }, sort: 80 },
-        { slug: "first-aid", kind: "poi", name: "First Aid", category: "facility", status: "draft", blurb: "Medical station. Marshals can radio it from anywhere on site.", detail: null, geometry: { type: "point", coords: [35.63025, -86.5881] }, sort: 90 },
-        { slug: "entry-drive", kind: "route", name: "Entry Drive", category: "entry", status: "draft", blurb: "From the gate to spectator parking.", detail: null, geometry: { type: "path", coords: [[35.6307, -86.58635], [35.6303, -86.5863], [35.63, -86.5868], [35.6297, -86.588], [35.6296, -86.5888]] }, sort: 100 },
+        { slug: "show-field", kind: "zone", name: "Show Field", category: "show", status: "draft", blurb: "300 curated cars staged in rows on the open pasture north of the gate. Row map lands with the final layout.", detail: { hours: "Staging from 8:00 AM, gates 9:00 AM", acres: "6.5 acres" }, geometry: { type: "polygon", coords: [[35.6347, -86.5925], [35.6347, -86.5903], [35.6335, -86.5903], [35.6335, -86.5925]] }, sort: 10 },
+        { slug: "vendor-row", kind: "zone", name: "Vendor Row", category: "vendor", status: "draft", blurb: "Curated vendors and partners along the entry drive, first thing guests walk past.", detail: { acres: "1.2 acres", label_at: [35.63303, -86.5922] }, geometry: { type: "polygon", coords: [[35.63315, -86.5924], [35.63315, -86.5905], [35.6329, -86.5905], [35.6329, -86.5924]] }, sort: 20 },
+        { slug: "vip-terrace", kind: "zone", name: "VIP Terrace", category: "vip", status: "draft", blurb: "VIP hospitality with the sightline across the show field. Guided ranch tour meets here.", detail: { hours: "Tour time to be announced", acres: "0.6 acres" }, geometry: { type: "polygon", coords: [[35.6332, -86.5901], [35.6332, -86.5893], [35.6329, -86.5893], [35.6329, -86.5901]] }, sort: 30 },
+        { slug: "spectator-parking", kind: "zone", name: "Spectator Parking", category: "parking", status: "draft", blurb: "Free spectator parking on the south pasture. Follow the marshals in from the gate.", detail: { acres: "2.7 acres" }, geometry: { type: "polygon", coords: [[35.6326, -86.5908], [35.6326, -86.5886], [35.6321, -86.5886], [35.6321, -86.5908]] }, sort: 40 },
+        { slug: "helo-lz", kind: "zone", name: "Helicopter LZ", category: "ops", status: "draft", blurb: "Landing zone held at 150 by 150 feet, mowed and firm, with a roped crowd line at 150 feet. Aircraft not confirmed.", detail: { acres: "150 by 150 ft" }, geometry: { type: "polygon", coords: [[35.63441, -86.5895], [35.63441, -86.589], [35.634, -86.589], [35.634, -86.5895]] }, sort: 50 },
+        { slug: "ranch-gate", kind: "poi", name: "Ranch Gate", category: "entry", status: "draft", blurb: "Cars turn in here off Highway 41-A. Gates open 9:00 AM sharp.", detail: { hours: "9:00 AM to 3:00 PM" }, geometry: { type: "point", coords: [35.63328, -86.593] }, sort: 60 },
+        { slug: "charity-corner", kind: "poi", name: "Community Elementary Corner", category: "charity", status: "draft", blurb: "The reason we run it. Meet the school, see where the money goes.", detail: null, geometry: { type: "point", coords: [35.63302, -86.5912] }, sort: 70 },
+        { slug: "food-row", kind: "poi", name: "Food", category: "food", status: "draft", blurb: "Food and drink at the head of Vendor Row. Lineup firms up as we get closer.", detail: null, geometry: { type: "point", coords: [35.63302, -86.592] }, sort: 80 },
+        { slug: "restrooms", kind: "poi", name: "Restrooms", category: "facility", status: "draft", blurb: "Facilities between Vendor Row and spectator parking.", detail: null, geometry: { type: "point", coords: [35.63272, -86.5916] }, sort: 90 },
+        { slug: "first-aid", kind: "poi", name: "First Aid", category: "facility", status: "draft", blurb: "Medical station. Marshals can radio it from anywhere on site.", detail: null, geometry: { type: "point", coords: [35.63302, -86.5906] }, sort: 100 },
+        { slug: "entry-drive", kind: "route", name: "Entry Drive", category: "entry", status: "draft", blurb: "From the Highway 41-A gate east into the show field and parking.", detail: null, geometry: { type: "path", coords: [[35.63328, -86.593], [35.63326, -86.5926], [35.6332, -86.5918], [35.6331, -86.591], [35.63285, -86.5901], [35.63255, -86.5897]] }, sort: 110 },
       ];
 
       var FIELD = {
@@ -951,68 +965,65 @@
         aerial: store.get("ppr_map_view") === "aerial",
         features: DEFAULT_FEATURES.slice(), markers: {}, selected: null, drawn: false,
         me: null, statusSeen: {}, log: [], view: "index", pollTimer: null,
+        frame: store.get("ppr_map_frame") === "property" ? "property" : "event",
       };
 
+      /* where cars turn in, off Hwy 41-A on the west property line */
+      FIELD.gate = function () { return [35.63328, -86.593]; };
+      FIELD.gateSegIdx = function () {
+        var g = FIELD.gate(), best = 0, bd = Infinity;
+        (ROADS.service || []).forEach(function (seg, i) {
+          seg.forEach(function (p) {
+            var d = Math.abs(p[0] - g[0]) + Math.abs(p[1] - g[1]);
+            if (d < bd) { bd = d; best = i; }
+          });
+        });
+        return best;
+      };
       FIELD.baseArtSVG = function () {
-        var road = "M 0,486 C 150,505 300,522 437,538 C 500,545 560,551 632,558 C 700,565 770,578 839,587 L 1000,606";
-        var toproad = "M 0,70 C 100,98 200,130 287,150 C 380,168 450,182 517,194 C 600,208 680,220 747,230 L 966,253 L 1000,256";
-        return '' +
-          '<defs>' +
+        function path(pts, close) {
+          return pts.map(function (p, i) {
+            return (i ? "L " : "M ") + gx(p[1]).toFixed(1) + "," + gy(p[0]).toFixed(1);
+          }).join(" ") + (close ? " Z" : "");
+        }
+        function roadLayer(segs, casing, ink) {
+          return segs.map(function (s) {
+            var d = path(s, false);
+            return '<path d="' + d + '" fill="none" stroke="rgba(255,255,255,' + casing[1] +
+              ')" stroke-width="' + casing[0] + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+              '<path d="' + d + '" fill="none" stroke="#05080c" stroke-width="' + ink +
+              '" stroke-linecap="round" stroke-linejoin="round"/>';
+          }).join("");
+        }
+        var parcelD = path(PARCEL, true);
+        var gateP = FIELD.gate();
+        var s = '<defs>' +
           '<pattern id="hatchFull" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">' +
           '<rect width="9" height="9" fill="rgba(248,184,0,0.10)"/><rect width="3.5" height="9" fill="rgba(248,184,0,0.30)"/></pattern>' +
-          '<pattern id="checker" width="12" height="12" patternUnits="userSpaceOnUse">' +
-          '<rect width="12" height="12" fill="#e8e8e8"/><rect width="6" height="6" fill="#111"/><rect x="6" y="6" width="6" height="6" fill="#111"/></pattern>' +
-          '</defs>' +
-          '<g class="base-art">' +
-          /* field tints */
-          '<polygon points="264,254 724,239 747,535 264,507" fill="rgba(46,72,52,0.32)"/>' +
-          '<polygon points="193,549 494,560 494,758 193,758" fill="rgba(52,80,56,0.30)"/>' +
-          '<polygon points="218,634 620,640 620,880 200,880" fill="rgba(40,58,46,0.22)"/>' +
-          /* contour hairlines */
-          '<path d="M 120,320 C 320,290 560,300 820,340" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
-          '<path d="M 90,420 C 330,395 600,405 900,460" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
-          '<path d="M 140,760 C 380,735 640,745 880,790" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="1.4"/>' +
-          /* tree masses */
-          '<path d="M 60,700 C 120,680 200,700 260,715 C 340,735 420,720 470,745 C 500,760 490,820 440,840 C 360,870 240,880 150,860 C 90,845 55,780 60,700 Z" fill="rgba(10,24,16,0.6)"/>' +
-          '<path d="M 58,560 C 100,552 132,580 138,620 C 144,662 120,692 82,700 C 54,704 40,650 44,610 C 47,584 50,562 58,560 Z" fill="rgba(10,24,16,0.55)"/>' +
-          '<path d="M 510,700 C 560,688 612,698 642,720 C 662,736 652,762 610,766 C 568,770 518,746 510,700 Z" fill="rgba(10,24,16,0.5)"/>' +
-          '<circle cx="330" cy="322" r="11" fill="rgba(10,24,16,0.5)"/><circle cx="368" cy="345" r="8" fill="rgba(10,24,16,0.5)"/>' +
-          '<circle cx="430" cy="330" r="10" fill="rgba(10,24,16,0.5)"/><circle cx="478" cy="352" r="7" fill="rgba(10,24,16,0.5)"/>' +
-          '<circle cx="520" cy="318" r="9" fill="rgba(10,24,16,0.5)"/><circle cx="405" cy="368" r="6" fill="rgba(10,24,16,0.5)"/>' +
-          /* pond */
-          '<ellipse cx="196" cy="700" rx="34" ry="26" fill="rgba(0,88,96,0.55)" stroke="rgba(0,210,190,0.35)" stroke-width="1.5"/>' +
-          '<path d="M 176,690 C 186,684 206,684 214,691" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.5" stroke-linecap="round"/>' +
-          /* barns and corrals */
-          '<rect x="745" y="34" width="64" height="16" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>' +
-          '<rect x="795" y="145" width="28" height="20" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>' +
-          '<rect x="795" y="205" width="20" height="14" rx="2" fill="rgba(20,30,40,0.9)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>' +
-          '<rect x="560" y="648" width="42" height="30" rx="2" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>' +
-          '<rect x="580" y="700" width="36" height="42" rx="2" fill="none" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/>' +
-          /* roads: white under, dark over leaves edge lines */
-          '<path d="' + toproad + '" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="14"/>' +
-          '<path d="' + toproad + '" fill="none" stroke="#05080c" stroke-width="10.5"/>' +
-          '<path d="M 747,230 C 770,200 796,186 802,160 C 808,124 790,78 778,52" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="6"/>' +
-          '<path d="M 747,230 C 770,200 796,186 802,160 C 808,124 790,78 778,52" fill="none" stroke="#05080c" stroke-width="4.5"/>' +
-          '<path id="mainRoad" d="' + road + '" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="22"/>' +
-          '<path d="' + road + '" fill="none" stroke="#05080c" stroke-width="17"/>' +
-          '<path d="' + road + '" fill="none" stroke="rgba(248,184,0,0.6)" stroke-width="1.8" stroke-dasharray="14 12"/>' +
-          '<path d="M 548,573 C 552,600 556,620 561,644" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="5.5"/>' +
-          '<path d="M 548,573 C 552,600 556,620 561,644" fill="none" stroke="#0a0f14" stroke-width="4"/>' +
-          /* kerbs flanking the gate */
-          '<path d="M 496,547 C 520,550 540,553 566,556" fill="none" stroke="#f8b800" stroke-width="4" stroke-dasharray="9 9"/>' +
-          '<path d="M 496,556 C 520,559 540,562 566,565" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="9 9" stroke-dashoffset="9"/>' +
-          '<path d="M 496,577 C 520,580 540,583 566,586" fill="none" stroke="#f8b800" stroke-width="4" stroke-dasharray="9 9"/>' +
-          '<path d="M 496,586 C 520,589 540,592 566,589" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="9 9" stroke-dashoffset="9"/>' +
-          /* start-finish checker band across the road at the gate */
-          '<g transform="rotate(7 548 570)"><rect x="541" y="548" width="14" height="44" fill="url(#checker)" opacity="0.95"/></g>' +
-          /* ghost wordmark */
-          '<text x="300" y="410" transform="rotate(-4 300 410)" font-family="Arial Black, Arial" font-size="58" fill="rgba(255,255,255,0.05)" letter-spacing="6">RANCHO JARAMILLO</text>' +
-          '<text font-family="Arial" font-size="11" fill="rgba(255,255,255,0.4)" letter-spacing="4"><textPath href="#mainRoad" startOffset="6%">ENON CHURCH RD</textPath></text>' +
-          '</g>' +
-          /* property signature outline */
-          '<path class="sig" d="M 264,250 L 730,235 L 752,540 L 745,600 L 620,770 L 490,762 L 218,755 L 214,585 L 240,540 L 264,507 Z" pathLength="1000" ' +
-          'fill="none" stroke="rgba(248,184,0,0.85)" stroke-width="3.5" stroke-linejoin="round" vector-effect="non-scaling-stroke" stroke-dasharray="1000" stroke-dashoffset="0"/>' +
-          '<g id="dynArt"></g>';
+          '<pattern id="checker" width="10" height="10" patternUnits="userSpaceOnUse">' +
+          '<rect width="10" height="10" fill="#e8e8e8"/><rect width="5" height="5" fill="#111"/><rect x="5" y="5" width="5" height="5" fill="#111"/></pattern>' +
+          '</defs>';
+        s += '<g class="base-art">';
+        /* the land itself, lifted out of the ink */
+        s += '<path d="' + parcelD + '" fill="rgba(150,190,120,0.09)" stroke="none"/>';
+        s += roadLayer(ROADS.service, [5, 0.22], 3.5);
+        s += roadLayer(ROADS.lane, [7, 0.28], 5);
+        s += roadLayer(ROADS.main, [10, 0.4], 7.5);
+        s += roadLayer(ROADS.primary, [13, 0.5], 10);
+        /* the drive guests turn in on, called out in amber */
+        s += '<path d="' + path(ROADS.service[FIELD.gateSegIdx()], false) +
+          '" fill="none" stroke="rgba(248,184,0,0.55)" stroke-width="2" stroke-dasharray="10 8"/>';
+        s += '</g>';
+        /* the property line, drawn from the county parcel record */
+        s += '<path class="sig" d="' + parcelD + '" pathLength="1000" fill="none" ' +
+          'stroke="rgba(248,184,0,0.85)" stroke-width="3" stroke-linejoin="round" ' +
+          'vector-effect="non-scaling-stroke" stroke-dasharray="1000" stroke-dashoffset="0"/>';
+        /* start finish band across the gate drive */
+        s += '<g transform="rotate(90 ' + gx(gateP[1]).toFixed(1) + " " + gy(gateP[0]).toFixed(1) + ')">' +
+          '<rect x="' + (gx(gateP[1]) - 5).toFixed(1) + '" y="' + (gy(gateP[0]) - 17).toFixed(1) +
+          '" width="10" height="34" fill="url(#checker)" opacity="0.95"/></g>';
+        s += '<g id="dynArt"></g>';
+        return s;
       };
 
       FIELD.init = async function () {
@@ -1023,6 +1034,7 @@
         L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", { maxZoom: 19 }).addTo(map);
         L.control.attribution({ prefix: false }).addAttribution("Imagery © Esri").addTo(map);
         map.on("zoomend", function () { fwrap.classList.toggle("zfar", map.getZoom() < 16.3); });
+        map.on("moveend zoomend", function () { FIELD.flipLabels(); });
         map.fitBounds(FIELD.homeBounds(), FIELD.fitPad());
         var svgEl = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svgEl.setAttribute("viewBox", "0 0 " + VW + " " + VH);
@@ -1035,7 +1047,16 @@
       };
 
       /* the ground guests occupy, tighter than the full art bounds */
-      FIELD.homeBounds = function () { return [[35.6291, -86.59], [35.6334, -86.5846]]; };
+      FIELD.homeBounds = function () { return FIELD.frame === "property" ? PROPERTY_BOUNDS : EVENT_BOUNDS; };
+      FIELD.setFrame = function (f) {
+        FIELD.frame = f;
+        var b = document.getElementById("frameBtn");
+        b.textContent = f === "property" ? "Event" : "Property";
+        b.setAttribute("aria-pressed", f === "property" ? "true" : "false");
+        b.classList.toggle("lit", f === "property");
+        store.set("ppr_map_frame", f);
+        if (FIELD.ready) FIELD.map[reduce ? "fitBounds" : "flyToBounds"](FIELD.homeBounds(), FIELD.fitPad());
+      };
       FIELD.fitPad = function () { return { paddingTopLeft: [10, 116], paddingBottomRight: [10, 138] }; };
       FIELD.enter = async function () {
         FIELD.active = true;
@@ -1043,6 +1064,9 @@
         FIELD.map.invalidateSize();
         FIELD.map.fitBounds(FIELD.homeBounds(), FIELD.fitPad());
         FIELD.setAerial(FIELD.aerial, true);
+        var fb = document.getElementById("frameBtn");
+        fb.textContent = FIELD.frame === "property" ? "Event" : "Property";
+        fb.classList.toggle("lit", FIELD.frame === "property");
         FIELD.renderTelemetry();
         FIELD.loadLive();
         if (FIELD.view !== "detail") FIELD.showIndex();
@@ -1174,6 +1198,15 @@
             '" stroke="#f8b800" stroke-width="2.5" fill="none" vector-effect="non-scaling-stroke"/>' +
             '<circle cx="' + gx(b2[1]).toFixed(1) + '" cy="' + gy(b2[0]).toFixed(1) + '" r="6" fill="none" stroke="#f8b800" stroke-width="2" vector-effect="non-scaling-stroke"/>';
         }
+        /* helicopter crowd line, 150 feet from the landing zone per the LZ brief */
+        var lz = FIELD.features.find(function (f) { return f.slug === "helo-lz" && f.status !== "hidden"; });
+        if (lz) {
+          var lc = FIELD.centroid(lz);
+          var mPerUnit = ((GEO.E - GEO.W) * 111320 * Math.cos((GEO.N * Math.PI) / 180)) / VW;
+          var rr = (45.72 / mPerUnit).toFixed(1);
+          html += '<circle cx="' + gx(lc[1]).toFixed(1) + '" cy="' + gy(lc[0]).toFixed(1) + '" r="' + rr +
+            '" fill="none" stroke="rgba(229,72,77,0.5)" stroke-width="1.6" stroke-dasharray="6 6" vector-effect="non-scaling-stroke"/>';
+        }
         /* golden light azimuth ray across the show field */
         var sf = FIELD.features.find(function (f) { return f.slug === "show-field"; });
         if (sf && GOLD_START != null) {
@@ -1181,12 +1214,12 @@
           var cxp = gx(cc[1]), cyp = gy(cc[0]);
           var az = 262 * Math.PI / 180;
           var dx = Math.sin(az), dy = -Math.cos(az);
-          var sx2 = cxp + dx * 300, sy2 = cyp + dy * 300;
+          var sx2 = cxp + dx * 95, sy2 = cyp + dy * 95;
           html += '<g class="goldray" opacity="0.55">' +
-            '<path d="M ' + sx2.toFixed(0) + "," + sy2.toFixed(0) + " L " + (cxp - dx * 140).toFixed(0) + "," + (cyp - dy * 140).toFixed(0) +
+            '<path d="M ' + sx2.toFixed(0) + "," + sy2.toFixed(0) + " L " + (cxp - dx * 50).toFixed(0) + "," + (cyp - dy * 50).toFixed(0) +
             '" stroke="rgba(248,184,0,0.4)" stroke-width="1.6" stroke-dasharray="3 7" vector-effect="non-scaling-stroke"/>' +
-            '<circle cx="' + sx2.toFixed(0) + '" cy="' + sy2.toFixed(0) + '" r="9" fill="none" stroke="rgba(248,184,0,0.7)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>' +
-            '<text x="' + (sx2 + 16).toFixed(0) + '" y="' + (sy2 - 8).toFixed(0) + '" font-family="Arial" font-size="13" font-weight="bold" letter-spacing="2" fill="rgba(248,184,0,0.75)">GOLDEN LIGHT · ' + fmtH(GOLD_START) + "</text></g>";
+            '<circle cx="' + sx2.toFixed(0) + '" cy="' + sy2.toFixed(0) + '" r="3.5" fill="none" stroke="rgba(248,184,0,0.7)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>' +
+            '<text x="' + (sx2 + 6).toFixed(0) + '" y="' + (sy2 - 3).toFixed(0) + '" font-family="Arial" font-size="4.6" font-weight="bold" letter-spacing="0.7" fill="rgba(248,184,0,0.75)">GOLDEN LIGHT · ' + fmtH(GOLD_START) + "</text></g>";
         }
         dyn.innerHTML = html;
         Array.prototype.forEach.call(dyn.querySelectorAll(".zg"), function (gEl) {
@@ -1214,6 +1247,7 @@
           f.__num = num;
           FIELD.markers[f.slug] = mk;
         });
+        setTimeout(FIELD.flipLabels, 0);
         FIELD.poiOrder().forEach(function (f, j) {
           var g = f.slug === "first-aid" ? GLYPH.firstaid : (GLYPH[f.category] || GLYPH.facility);
           var htmlIc = '<div class="pi' + (first && !reduce ? " pop" : "") + (FIELD.selected === f.slug ? " sel" : "") +
@@ -1221,6 +1255,20 @@
           var mk = L.marker(f.geometry.coords, { icon: L.divIcon({ className: "fmk", html: htmlIc, iconSize: [0, 0] }), interactive: true, keyboard: false }).addTo(FIELD.map);
           mk.on("click", function () { FIELD.select(f.slug); });
           FIELD.markers[f.slug] = mk;
+        });
+      };
+
+      FIELD.flipLabels = function () {
+        if (!FIELD.ready) return;
+        var w = FIELD.map.getSize().x;
+        FIELD.zoneOrder().forEach(function (f) {
+          var mk = FIELD.markers[f.slug];
+          var el = mk && mk.getElement && mk.getElement();
+          var cb = el && el.querySelector(".cb");
+          if (!cb) return;
+          var c = (f.detail && f.detail.label_at) || FIELD.centroid(f);
+          var pt = FIELD.map.latLngToContainerPoint(c);
+          cb.classList.toggle("lft", pt.x > w * 0.52);
         });
       };
 
