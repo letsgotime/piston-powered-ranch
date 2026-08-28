@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Spectate · The Piston Powered Ranch</title>
+    <meta
+      name="description"
+      content="RSVP to spectate The Piston Powered Ranch at Rancho Jaramillo, Saturday October 10, 2026. Free to attend."
+    />
+    <meta property="og:title" content="Spectate · The Piston Powered Ranch" />
+    <meta
+      property="og:description"
+      content="300 curated collector cars on a Tennessee ranch, Saturday October 10, 2026. RSVP free."
+    />
+    <meta property="og:image" content="https://piston-powered-ranch.vercel.app/og/ppr-og.jpg" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <style>
+      :root {
+        --bg: #0d1620;
+        --glass: rgba(16, 26, 38, 0.6);
+        --gline: rgba(255, 255, 255, 0.1);
+        --ink: #fff;
+        --dim: #c4cbd6;
+        --mute: #8b95a3;
+        --amber: #f8b800;
+        --teal: #00d2be;
+        --crit: #e5484d;
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.38);
+        --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly {
+        position: absolute; inset: 0;
+        background: url(/events/img/hero.jpg) center 35% / cover no-repeat; transform: scale(1.04);
+      }
+      .ground .veil {
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(13, 22, 32, 0.55), rgba(13, 22, 32, 0.48) 40%, rgba(13, 22, 32, 0.72));
+      }
+      .rule { height: 4px; position: relative; z-index: 2;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--mute) 75% 100%); }
+      main { position: relative; z-index: 1; min-height: calc(100vh - 4px); display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+      .card {
+        width: 100%; max-width: 500px; padding: 32px 34px 30px; border-radius: 24px;
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
+        border: 1px solid var(--gline); box-shadow: var(--e2);
+      }
+      .card img.mark { height: 40px; width: auto; margin-bottom: 16px; }
+      .eyebrow { font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700;
+        color: var(--teal); display: flex; align-items: center; gap: 9px; }
+      .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--teal); }
+      h1 {
+        font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin: 10px 0 0; font-size: clamp(28px, 6vw, 38px); line-height: 1.02; letter-spacing: -0.02em;
+      }
+      h1 .a { color: var(--amber); }
+      .lede { color: var(--dim); font-size: 15px; margin: 12px 0 0; }
+      .lede b { color: var(--ink); }
+      form { margin-top: 22px; display: flex; flex-direction: column; gap: 14px; }
+      label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--mute); display: block; margin-bottom: 6px; }
+      input, select {
+        width: 100%; font: inherit; font-size: 15px; color: var(--ink);
+        background: rgba(255, 255, 255, 0.06); border: 1px solid var(--gline); border-radius: 12px;
+        padding: 12px 15px;
+      }
+      input::placeholder { color: var(--mute); }
+      input:focus, select:focus { outline: none; border-color: rgba(248, 184, 0, 0.55); }
+      select { appearance: none; -webkit-appearance: none; }
+      button {
+        font: inherit; font-weight: 800; font-size: 15.5px; color: #151000; background: var(--amber);
+        border: 0; border-radius: 999px; padding: 15px 24px; cursor: pointer; margin-top: 6px;
+        box-shadow: 0 10px 34px -12px rgba(248, 184, 0, 0.55);
+        transition: transform 0.18s var(--ease);
+      }
+      button:hover { transform: translateY(-2px); }
+      button[disabled] { opacity: 0.55; pointer-events: none; }
+      .err { color: var(--crit); font-size: 13.5px; display: none; }
+      .fine { margin: 16px 0 0; font-size: 12px; color: var(--mute); line-height: 1.6; }
+      .fine a { color: var(--dim); }
+      .done { display: none; text-align: left; }
+      .done .check {
+        width: 64px; height: 64px; border-radius: 50%; margin-bottom: 16px;
+        background: rgba(0, 210, 190, 0.16); border: 2px solid var(--teal);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .done .check svg { width: 30px; height: 30px; }
+      .done h2 { font-family: "Arial Black", Helvetica, sans-serif; margin: 0; font-size: 26px; }
+      .done p { color: var(--dim); font-size: 15px; margin: 10px 0 0; }
+      .done a.btn2 {
+        display: inline-block; margin-top: 18px; text-decoration: none; font-weight: 700; font-size: 14px;
+        color: var(--ink); border: 1px solid var(--gline); border-radius: 999px; padding: 11px 20px;
+      }
+      @media (prefers-reduced-motion: reduce) { button:hover { transform: none; } }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
+    <main>
+      <div class="card">
+        <img class="mark" src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div id="formWrap">
+          <div class="eyebrow">Free to attend · RSVP</div>
+          <h1>Come see<br /><span class="a">the field</span></h1>
+          <p class="lede">
+            <b>Saturday, October 10, 2026 · 9 AM to 3 PM.</b> 300 curated collector cars at Rancho
+            Jaramillo in Unionville, TN. Spectating is free; an RSVP helps us plan parking and
+            benefits Community Elementary School.
+          </p>
+          <form id="rsvp" novalidate>
+            <div>
+              <label for="fName">Name</label>
+              <input id="fName" autocomplete="name" placeholder="Jordan Alvarez" required maxlength="120" />
+            </div>
+            <div>
+              <label for="fEmail">Email</label>
+              <input id="fEmail" type="email" autocomplete="email" placeholder="you@email.com" required maxlength="200" />
+            </div>
+            <div>
+              <label for="fParty">Party size</label>
+              <select id="fParty">
+                <option value="1">Just me</option>
+                <option value="2" selected>2 people</option>
+                <option value="3">3 people</option>
+                <option value="4">4 people</option>
+                <option value="5">5 people</option>
+                <option value="6">6 people</option>
+                <option value="8">7 to 8 people</option>
+                <option value="10">9 to 10 people</option>
+              </select>
+            </div>
+            <span class="err" id="err"></span>
+            <button id="go" type="submit">RSVP to spectate</button>
+          </form>
+          <p class="fine">
+            One RSVP per group is plenty. Bringing a car instead?
+            <a href="/#submit">Submit it for approval</a>. Questions:
+            <a href="mailto:gavin@paddock20.com">gavin@paddock20.com</a>
+          </p>
+        </div>
+        <div class="done" id="done">
+          <div class="check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d2be" stroke-width="2.6">
+              <path d="M4 12l6 6L20 6" />
+            </svg>
+          </div>
+          <h2>See you on the field</h2>
+          <p>
+            You are on the list. Gates open 9 AM, awards at 1:30, Cítrico Grill cooks 11 to 1.
+            Watch <a href="https://www.instagram.com/gotimemotorsports/" style="color: var(--dim)">@gotimemotorsports</a>
+            for parking details as the day gets close.
+          </p>
+          <a class="btn2" href="/events/?utm_source=rsvp_confirm">Explore PaddockGavin Events</a>
+        </div>
+      </div>
+    </main>
+    <script type="module">
+      import {
+        createClient,
+        SupabaseAuthAdapter,
+      } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var db = null;
+      try {
+        db = createClient({
+          auth: {
+            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+            allowAnonymous: true,
+            adapter: SupabaseAuthAdapter(),
+          },
+          dataApi: {
+            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
+          },
+        });
+      } catch (e) {}
+      var form = document.getElementById("rsvp"),
+        err = document.getElementById("err"),
+        go = document.getElementById("go");
+      function fail(m) {
+        err.textContent = m;
+        err.style.display = "block";
+        go.disabled = false;
+        go.textContent = "RSVP to spectate";
+      }
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        err.style.display = "none";
+        var name = document.getElementById("fName").value.trim(),
+          email = document.getElementById("fEmail").value.trim(),
+          party = parseInt(document.getElementById("fParty").value, 10) || 1;
+        if (!name) return fail("Add your name so we know who to expect.");
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+          return fail("That email does not look complete.");
+        if (!db) return fail("Could not reach the RSVP list. Try again in a minute.");
+        go.disabled = true;
+        go.textContent = "Adding you…";
+        var source = null;
+        try {
+          source = new URLSearchParams(location.search).get("utm_source");
+        } catch (e2) {}
+        var r = await db.from("spectators").insert({
+          event_id: EVENT_ID,
+          name: name,
+          email: email,
+          party_size: Math.min(20, Math.max(1, party)),
+          source: source,
+        });
+        if (r.error) return fail("Could not save your RSVP. Try again in a minute.");
+        document.getElementById("formWrap").style.display = "none";
+        document.getElementById("done").style.display = "block";
+      });
+    </script>
+  </body>
+</html>

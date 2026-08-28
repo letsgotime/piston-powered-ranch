@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /collateral/
+Sitemap: https://piston-powered-ranch.vercel.app/sitemap.xml

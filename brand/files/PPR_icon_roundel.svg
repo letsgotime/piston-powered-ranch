@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="104" fill="#0D1620"/>
+  <g transform="translate(0,6)">
+  <g>
+    <!-- ranch rails behind -->
+    <rect x="52" y="222" width="408" height="20" rx="10" fill="#35E0B2"/>
+    <rect x="84" y="262" width="344" height="20" rx="10" fill="#35E0B2" opacity=".72"/>
+    <!-- TN star -->
+    <path fill="#F7B500" d="M256 44l14.6 29.6 32.6 4.7-23.6 23 5.6 32.5L256 118.5l-29.2 15.3 5.6-32.5-23.6-23 32.6-4.7z"/>
+    <!-- piston crown -->
+    <rect x="166" y="150" width="180" height="82" rx="14" fill="#FFFFFF"/>
+    <rect x="166" y="178" width="180" height="9" fill="#0D1620"/>
+    <rect x="166" y="198" width="180" height="9" fill="#0D1620"/>
+    <!-- skirt -->
+    <rect x="188" y="232" width="136" height="66" rx="10" fill="#FFFFFF"/>
+    <circle cx="256" cy="262" r="20" fill="#0D1620"/>
+    <!-- rod -->
+    <polygon points="238,296 274,296 294,398 218,398" fill="#FFFFFF"/>
+    <circle cx="256" cy="412" r="46" fill="#FFFFFF"/>
+    <circle cx="256" cy="412" r="21" fill="#0D1620"/>
+  </g></g>
+</svg>
