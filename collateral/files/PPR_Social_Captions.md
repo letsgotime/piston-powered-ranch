@@ -9,7 +9,7 @@ The car you hold back from cars and coffee.
 
 On October 10, it has somewhere to be.
 
-The Piston Powered Ranch at Rancho Jaramillo: a private-collector car show thirty minutes from Nashville, in the spirit of Monterey Car Week. Three hundred curated cars on a six-hundred-acre working ranch in Unionville, Tennessee, with Citrico Grill cooking over open fire and awards at 1:30.
+The Piston Powered Ranch at Rancho Jaramillo: a private-collector car show an hour south of Nashville, held to concours standards. Three hundred curated cars on a four-hundred-and-eight-acre working ranch in Unionville, Tennessee, with Citrico Grill cooking over open fire and awards at 1:30.
 
 Entry is by approval, and submissions are open now at piston-powered-ranch.vercel.app. Every entry benefits Community Elementary School in Unionville.
 
@@ -27,7 +27,7 @@ Poll sticker idea: "Would your car make the field?" Yes / Submit it and find out
 
 ## Facebook: event or page post
 
-Nashville, the car you save for better than a parking lot has a date. On Saturday, October 10, 2026, The Piston Powered Ranch opens at Rancho Jaramillo, a six-hundred-acre working ranch in Unionville, about thirty minutes from town. Three hundred curated collector cars on one field, in the spirit of Monterey Car Week: open-pit cooking from Citrico Grill, a mimosa bar in the morning, and awards at 1:30.
+Nashville, the car you save for better than a parking lot has a date. On Saturday, October 10, 2026, The Piston Powered Ranch opens at Rancho Jaramillo, a four-hundred-and-eight-acre working ranch in Unionville, about an hour south of town. Three hundred curated collector cars on one field, held to concours standards: open-pit cooking from Citrico Grill, a mimosa bar in the morning, and awards at 1:30.
 
 This is a private-collector car show, and entry is by approval. If you have been waiting for a Tennessee car show worth the detail day, submit your car at piston-powered-ranch.vercel.app. Every entry benefits Community Elementary School in Unionville.
 
@@ -41,7 +41,7 @@ The car show Nashville's cars and coffee crowd has been waiting for. Oct 10, Ran
 
 ## Event listings: Hemmings, Donuts with duPont, Eventbrite, Google Business (paste as the description)
 
-The Piston Powered Ranch at Rancho Jaramillo is a private-collector car show near Nashville, Tennessee, held Saturday, October 10, 2026, from 9 AM to 3 PM in Unionville. Three hundred curated collector cars gather on a six-hundred-acre working ranch in the spirit of Monterey Car Week, with open-pit cooking from Citrico Grill and awards at 1:30. Entry is by approval; submit your car at piston-powered-ranch.vercel.app. The event benefits Community Elementary School in Unionville.
+The Piston Powered Ranch at Rancho Jaramillo is a private-collector car show near Nashville, Tennessee, held Saturday, October 10, 2026, from 9 AM to 3 PM in Unionville. Three hundred curated collector cars gather on a four-hundred-and-eight-acre working ranch, held to concours standards, with open-pit cooking from Citrico Grill and awards at 1:30. Entry is by approval; submit your car at piston-powered-ranch.vercel.app. The event benefits Community Elementary School in Unionville.
 
 ---
 
