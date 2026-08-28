@@ -1,6 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [{ "source": "/rancho", "destination": "/collateral/index.html" }],
+  "rewrites": [
+    { "source": "/rancho", "destination": "/collateral/index.html" },
+    { "source": "/hq", "destination": "/journeys/index.html" },
+    { "source": "/hq/", "destination": "/journeys/index.html" }
+  ],
   "headers": [
     {
       "source": "/collateral/files/(.*)",
