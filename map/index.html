@@ -692,7 +692,8 @@
       }
 
       /* ---------- shared telemetry state ---------- */
-      var TELEM = { tempF: null, windMph: null, rainPct: null, dayHi: null, dayLo: null, dayRain: null, heads: 0, vehicles: 0, runs: 0 };
+      var TELEM = { tempF: null, windMph: null, rainPct: null, dayHi: null, dayLo: null, dayRain: null,
+        sky: null, daySky: null, source: null, alert: null, alertLevel: null, heads: 0, vehicles: 0, runs: 0 };
       function sunTimes(dateStr, lat, lng) {
         var d = new Date(dateStr + "T12:00:00Z");
         var n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5);
@@ -732,27 +733,73 @@
       var SUN = sunTimes(SHOW_DAY, PPR.lat, PPR.lng);
       var GOLD_START = SUN.set != null ? SUN.set - 1 : null;
 
+      /* Weather comes from the National Weather Service first, api.weather.gov,
+         the free US government feed. NWS only forecasts 7 days out, so
+         Open-Meteo covers the longer horizon until show day comes into range. */
+      var NWS = {
+        obs: "https://api.weather.gov/stations/KSYI/observations/latest",
+        forecast: "https://api.weather.gov/gridpoints/OHX/59,34/forecast",
+        alerts: "https://api.weather.gov/alerts/active?point=35.6310,-86.5869",
+      };
+      function jget(u) {
+        return fetch(u, { headers: { Accept: "application/geo+json" } })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; });
+      }
       async function loadWeather() {
-        try {
-          var u = "https://api.open-meteo.com/v1/forecast?latitude=" + PPR.lat + "&longitude=" + PPR.lng +
-            "&current=temperature_2m,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago";
-          var w = await fetch(u).then(function (r) { return r.ok ? r.json() : null; });
-          if (!w) return;
-          if (w.current) {
-            TELEM.tempF = Math.round(w.current.temperature_2m);
-            TELEM.windMph = Math.round(w.current.wind_speed_10m);
+        var got = { now: false, day: false };
+        var res = await Promise.all([jget(NWS.obs), jget(NWS.forecast), jget(NWS.alerts)]);
+        var obs = res[0] && res[0].properties;
+        if (obs && obs.temperature && obs.temperature.value != null) {
+          TELEM.tempF = Math.round((obs.temperature.value * 9) / 5 + 32);
+          TELEM.sky = obs.textDescription || null;
+          if (obs.windSpeed && obs.windSpeed.value != null) TELEM.windMph = Math.round(obs.windSpeed.value * 0.621371);
+          TELEM.source = "NWS";
+          got.now = true;
+        }
+        var fc = res[1] && res[1].properties && res[1].properties.periods;
+        if (fc) {
+          var day = fc.find(function (x) { return x.isDaytime && x.startTime.slice(0, 10) === SHOW_DAY; });
+          if (day) {
+            TELEM.dayHi = day.temperature;
+            TELEM.dayRain = (day.probabilityOfPrecipitation || {}).value;
+            TELEM.daySky = day.shortForecast;
+            TELEM.source = "NWS";
+            got.day = true;
           }
-          if (w.daily && w.daily.time) {
-            TELEM.rainPct = w.daily.precipitation_probability_max[0];
-            var di = w.daily.time.indexOf(SHOW_DAY);
-            if (di >= 0) {
-              TELEM.dayHi = Math.round(w.daily.temperature_2m_max[di]);
-              TELEM.dayLo = Math.round(w.daily.temperature_2m_min[di]);
-              TELEM.dayRain = w.daily.precipitation_probability_max[di];
+        }
+        var al = res[2] && res[2].features;
+        if (al) {
+          var prev = TELEM.alert;
+          TELEM.alert = al.length ? (al[0].properties.event || "Weather alert") : null;
+          TELEM.alertLevel = al.length ? al[0].properties.severity : null;
+          if (TELEM.alert && TELEM.alert !== prev) FIELD.pushRC("NWS alert · " + TELEM.alert);
+        }
+        /* long range fallback, keyless, until Oct 10 enters the NWS window */
+        if (!got.now || !got.day) {
+          try {
+            var u = "https://api.open-meteo.com/v1/forecast?latitude=" + PPR.lat + "&longitude=" + PPR.lng +
+              "&current=temperature_2m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+              "&forecast_days=16&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago";
+            var w = await jget(u);
+            if (w) {
+              if (!got.now && w.current) {
+                TELEM.tempF = Math.round(w.current.temperature_2m);
+                TELEM.windMph = Math.round(w.current.wind_speed_10m);
+                TELEM.source = TELEM.source || "Open-Meteo";
+              }
+              if (!got.day && w.daily && w.daily.time) {
+                var di = w.daily.time.indexOf(SHOW_DAY);
+                if (di >= 0) {
+                  TELEM.dayHi = Math.round(w.daily.temperature_2m_max[di]);
+                  TELEM.dayLo = Math.round(w.daily.temperature_2m_min[di]);
+                  TELEM.dayRain = w.daily.precipitation_probability_max[di];
+                }
+              }
             }
-          }
-          FIELD.renderTelemetry();
-        } catch (e) {}
+          } catch (e) {}
+        }
+        FIELD.renderTelemetry();
       }
       async function loadStats() {
         if (!db) return;
@@ -1418,16 +1465,26 @@
         if (!document.getElementById("condLine")) return;
         var bits = [];
         if (TELEM.tempF != null) bits.push(TELEM.tempF + "°F");
+        if (TELEM.sky) bits.push(String(TELEM.sky).toUpperCase());
         if (TELEM.windMph != null) bits.push("WIND " + TELEM.windMph);
-        if (TELEM.rainPct != null) bits.push("RAIN " + TELEM.rainPct + "%");
-        if (TELEM.dayHi != null) bits.push("OCT 10 · " + TELEM.dayHi + "°/" + TELEM.dayLo + "°");
-        else {
+        if (TELEM.dayHi != null) {
+          bits.push("OCT 10 · " + TELEM.dayHi + "°" + (TELEM.dayLo != null ? "/" + TELEM.dayLo + "°" : ""));
+          if (TELEM.dayRain != null) bits.push("RAIN " + TELEM.dayRain + "%");
+        } else {
           var days = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5) - 16;
           if (days > 0) bits.push("OCT 10 IN " + days + "D");
         }
         document.getElementById("condLine").innerHTML = bits.length
           ? bits.map(esc).join(' <span class="sep">·</span> ')
           : "Reading the ranch…";
+        var stamp = document.getElementById("condStamp");
+        if (TELEM.alert) {
+          stamp.textContent = String(TELEM.alert).toUpperCase();
+          stamp.style.color = "var(--crit)";
+        } else {
+          stamp.textContent = TELEM.source || "Live";
+          stamp.style.color = "";
+        }
         document.getElementById("entN").textContent = TELEM.vehicles;
         document.getElementById("headN").textContent = TELEM.heads;
         document.getElementById("runN").textContent = TELEM.runs;
