@@ -299,10 +299,21 @@
             "<p>Approving a block spawns an individual submission per roster car, so every car still carries its own pass and status link. Approval lives in the console pipeline.</p>" +
             (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : lock()) };
         },
+        function pipeline(rows) {
+          var order = [["committed","Committed"],["warm","Warm"],["named","Named, not asked"],["open","Open"]];
+          var out = "";
+          order.forEach(function (st) {
+            var g = rows.filter(function (x) { return x.pipeline_stage === st[0]; });
+            if (!g.length) return;
+            out += '<p style="margin:10px 0 4px"><b>' + st[1] + "</b> &middot; " + g.length + "</p><p style='color:var(--mute);font-size:13px;line-height:1.7;margin:0'>" +
+              g.map(function (x) { return esc(x.category || x.company); }).join(" &middot; ") + "</p>";
+          });
+          return out;
+        }
         vendorapply: function () {
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "vendor"; }) : null;
           return { e: "Vendors", t: "Vendor applications", body:
-            (v ? stat("Vendor accounts", v.length, true) + stat("Applied", v.filter(function (x) { return x.status === "applied"; }).length) + stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) : lock()) +
+            (v ? stat("Vendor categories", v.length, true) + stat("Applied", v.filter(function (x) { return x.status === "applied"; }).length) + stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) + pipeline(v) : lock()) +
             acts('<a class="primary" href="/#submit" target="_blank" rel="noopener">Open submit</a>') };
         },
         deposit: function () {
@@ -321,7 +332,7 @@
         sponsorapply: function () {
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "sponsor"; }) : null;
           return { e: "Sponsors", t: "Sponsor interest", body:
-            (v ? stat("Sponsor accounts", v.length, true) : lock()) +
+            (v ? stat("Sponsor categories", v.length, true) + pipeline(v) : lock()) +
             "<p style='margin-top:10px'>Tier numbers stay out of every public page. The proposal one-pager carries them.</p>" +
             acts(copyBtn("Copy collateral link", ORIGIN + "/rancho")) };
         },
@@ -443,7 +454,7 @@
           subs.error || (LIVE.subs = subs.data);
         } catch (e) {}
         try {
-          var a = await db.from("accounts").select("type,status");
+          var a = await db.from("accounts").select("type,status,company,category,pipeline_stage,note").order("sort");
           a.error || (LIVE.accounts = a.data);
           var p = await db.from("payments").select("status,amount_cents");
           p.error || (LIVE.payments = p.data);
