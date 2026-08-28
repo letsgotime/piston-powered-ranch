@@ -51,7 +51,8 @@
           -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
         font-size: 15px;
         line-height: 1.55;
-        -webkit-font-smoothing: antialiased;
+        -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
       }
       img {
         max-width: 100%;
@@ -420,6 +421,12 @@
         a.dl:hover {
           transform: none;
         }
+      }
+      @media (max-height: 520px) {
+        .hero { min-height: 120vh; min-height: unset; padding-top: 70px; }
+        h1 { font-size: clamp(30px, 7vw, 44px); }
+        .count .cunit .v, .cunit .v { font-size: 22px; }
+        section { padding-top: 44px; }
       }
     </style>
   </head>

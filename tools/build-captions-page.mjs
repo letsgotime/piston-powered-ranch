@@ -74,6 +74,12 @@ const html = `<!doctype html>
       .copybtn{font:inherit;font-size:13px;font-weight:650;color:#151000;background:var(--accent);border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
       .copybtn.done{background:var(--accent-2);color:#00302b}
       footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line-soft);color:var(--ink-mute);font-size:13px}
+      @media (max-height: 520px) {
+        .hero { min-height: 120vh; min-height: unset; padding-top: 70px; }
+        h1 { font-size: clamp(30px, 7vw, 44px); }
+        .count .cunit .v, .cunit .v { font-size: 22px; }
+        section { padding-top: 44px; }
+      }
     </style>
   </head>
   <body>
