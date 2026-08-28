@@ -14,8 +14,13 @@ migration in P1; the live site stays up throughout and deploys stay git-push.
 - Vercel: piston-powered-ranch (prj_xkNiyY8AKvP58rlAmg15DWSTNl4B), team go-time-motorsports
 - Neon: wispy-wave-74040583, branch main, db neondb, Neon Auth + Data API live
 - Stripe: build against the Paddock20 sandbox (acct_1TpxSsF2UEFJidMh, test
-  mode). Live keys require Gavin to activate the account. The other connected
-  account (GT Premier Mobile Detailing) is a different business; never use it.
+  mode) via the Stripe MCP, per Gavin Aug 28. Live keys require Gavin to
+  activate the account. The other connected account (GT Premier Mobile
+  Detailing, acct_1Jq2CiFC0g3jRYhU, livemode) is a different business; never
+  use it. Sandbox scaffolding created Aug 28: product prod_V9eQl4XHYCHpnz
+  (Vendor Booth Setup Deposit) with price price_1U9L7vF2UEFJidMhUm3FBBCV
+  ($250 one-time, 10x10). Additional footprint prices get added as the booth
+  matrix firms up; Checkout sessions in P1 reference these.
 - Any new domain or preview URL that serves auth goes into Neon Auth
   trusted_origins first, or logins 403 silently.
 
