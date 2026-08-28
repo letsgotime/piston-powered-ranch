@@ -106,7 +106,11 @@ phase.
 ## Decisions Gavin owes the build (defaults in effect)
 
 1. Platform domain (default: piston-powered-ranch.vercel.app until chosen;
-   new domain requires a Neon Auth trusted origin).
+   new domain requires a Neon Auth trusted origin). Note: paddockgavin.com is
+   already owned and verified for sending in Resend, making it the natural
+   candidate; pointing it at this Vercel project is a dashboard action plus
+   the trusted-origin add. gotimemotorsports.com shows failed verification in
+   Resend, DNS records have drifted.
 2. Stripe live activation (default: sandbox).
 3. The exclusivity collision: 111 Motorcars was pitched the single dealer
    position on the field. Selling a secondary title to another dealer breaks
@@ -115,6 +119,16 @@ phase.
 4. Ranch remittance path (default: ledger plus manual payment).
 5. Spectators free or ticketed (default: free RSVP; Checkout covers ticketing
    in a day if chosen).
+
+## Email (Resend, green-lit by Gavin Aug 28)
+
+Resend MCP is connected; paddockgavin.com and paddock20.com are verified
+sending domains. Acceptance, decline, and received notices exist today as
+copy-paste templates in the staff submission sheet; the next step is a
+serverless send (RESEND_API_KEY in Vercel env) from
+notices@paddockgavin.com, fired on staff approve and decline, and an update
+broadcast path for the spectators list. Every automated send stays
+per-action confirmed until Gavin says otherwise.
 
 ## Guardrails
 
