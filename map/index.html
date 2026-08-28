@@ -1471,8 +1471,9 @@
           bits.push("OCT 10 · " + TELEM.dayHi + "°" + (TELEM.dayLo != null ? "/" + TELEM.dayLo + "°" : ""));
           if (TELEM.dayRain != null) bits.push("RAIN " + TELEM.dayRain + "%");
         } else {
-          var days = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5) - 16;
-          if (days > 0) bits.push("OCT 10 IN " + days + "D");
+          /* no show-day forecast yet, so count down to the day itself */
+          var out = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5);
+          if (out > 0) bits.push("OCT 10 · " + out + " DAYS OUT");
         }
         document.getElementById("condLine").innerHTML = bits.length
           ? bits.map(esc).join(' <span class="sep">·</span> ')
