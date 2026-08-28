@@ -6,7 +6,7 @@
     <title>Ranch Map · The Piston Powered Ranch</title>
     <meta
       name="description"
-      content="Navigate to The Piston Powered Ranch, cruise in with a group from a rendezvous point, and see the event map. Rancho Jaramillo, Unionville, TN."
+      content="Navigate to The Piston Powered Ranch, cruise in with a group from a rendezvous point, and see the live event map. Rancho Jaramillo, Unionville, TN."
     />
     <meta property="og:title" content="Ranch Map · The Piston Powered Ranch" />
     <meta property="og:description" content="Route to the ranch, set a rendezvous, cruise in together. October 10, 2026." />
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
       :root {
-        --bg: #0a111a; --glass: rgba(14, 23, 34, 0.66); --glass2: rgba(20, 31, 45, 0.75);
+        --bg: #0a111a; --glass: rgba(14, 23, 34, 0.66); --glass2: rgba(20, 31, 45, 0.78);
         --gline: rgba(255, 255, 255, 0.11); --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
         --amber: #f8b800; --teal: #00d2be; --crit: #e5484d;
         --e1: 0 10px 34px rgba(0, 0, 0, 0.4); --e2: 0 24px 70px rgba(0, 0, 0, 0.55);
@@ -32,7 +32,7 @@
       }
       #theMap { position: fixed; inset: 0; z-index: 0; background: #0a111a; }
       .leaflet-container { background: #0a111a; }
-      /* landing overlay */
+      /* landing */
       .landing {
         position: fixed; inset: 0; z-index: 30; display: flex; align-items: center;
         justify-content: center; padding: 20px;
@@ -44,7 +44,7 @@
         width: 100%; max-width: 460px; padding: 30px 32px 26px; border-radius: 26px;
         background: var(--glass);
         -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
-        border: 1px solid var(--gline); box-shadow: var(--e2); text-align: left;
+        border: 1px solid var(--gline); box-shadow: var(--e2);
       }
       .land-card img { height: 40px; width: auto; margin-bottom: 14px; }
       .eyebrow { font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--teal); }
@@ -66,7 +66,9 @@
       .door b { display: block; font-size: 16.5px; }
       .door span { display: block; font-size: 13px; color: var(--mute); }
       .door .go { margin-left: auto; color: var(--mute); font-size: 18px; }
-      /* top bar in map modes */
+      .engine { margin-top: 14px; font-size: 11px; color: var(--mute); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+      .engine b { color: var(--teal); }
+      /* bar */
       .bar {
         position: fixed; top: calc(10px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%);
         z-index: 40; width: calc(100% - 24px); max-width: 640px;
@@ -79,15 +81,33 @@
       .bar.on { opacity: 1; pointer-events: auto; }
       .bar img { height: 24px; width: auto; }
       .bar .t { font-weight: 800; font-size: 13px; letter-spacing: 0.04em; }
+      .bar .spacer { flex: 1; }
       .bar button {
-        margin-left: auto; font: inherit; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em;
+        font: inherit; font-size: 11.5px; font-weight: 800; letter-spacing: 0.06em;
         text-transform: uppercase; color: var(--dim); background: rgba(255, 255, 255, 0.07);
-        border: 1px solid var(--gline); border-radius: 999px; padding: 7px 14px; cursor: pointer;
+        border: 1px solid var(--gline); border-radius: 999px; padding: 7px 12px; cursor: pointer;
       }
-      /* bottom sheet */
+      /* telemetry dock (event map mode) */
+      .dock {
+        position: fixed; z-index: 36; top: calc(64px + env(safe-area-inset-top)); left: 50%;
+        transform: translateX(-50%); width: calc(100% - 24px); max-width: 640px;
+        display: none; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;
+      }
+      .dock.on { display: grid; }
+      .chip2 {
+        padding: 10px 13px; border-radius: 14px; background: var(--glass2);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
+        border: 1px solid var(--gline); box-shadow: var(--e1);
+      }
+      .chip2 .v { font-family: "Arial Black", Helvetica, sans-serif; font-size: 17px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+      .chip2 .v small { font-size: 11px; color: var(--mute); font-family: inherit; font-weight: 400; }
+      .chip2 .l { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); font-weight: 800; margin-top: 3px; }
+      .chip2 .v .t { color: var(--teal); }
+      .chip2 .v .a2 { color: var(--amber); }
+      /* sheets */
       .sheet {
         position: fixed; z-index: 40; left: 50%; transform: translate(-50%, 112%);
-        bottom: 0; width: min(100vw, 560px); max-height: 68vh; max-height: 68dvh; overflow: auto;
+        bottom: 0; width: min(100vw, 560px); max-height: 66vh; max-height: 66dvh; overflow: auto;
         border-radius: 24px 24px 0 0; padding: 18px 20px calc(22px + env(safe-area-inset-bottom));
         background: var(--glass2);
         -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4);
@@ -126,13 +146,13 @@
       .btn.tealb { color: #04211d; background: var(--teal); }
       .btn.ghost { color: var(--ink); background: rgba(255, 255, 255, 0.07); border: 1px solid var(--gline); }
       .btn[disabled] { opacity: 0.55; pointer-events: none; }
-      input, select {
+      input {
         width: 100%; font: inherit; font-size: 16px; color: var(--ink);
         background: rgba(255, 255, 255, 0.07); border: 1px solid var(--gline); border-radius: 12px;
         padding: 12px 14px; margin-top: 8px;
       }
       input::placeholder { color: var(--mute); }
-      input:focus, select:focus { outline: none; border-color: rgba(248, 184, 0, 0.55); }
+      input:focus { outline: none; border-color: rgba(248, 184, 0, 0.55); }
       .hint { font-size: 12px; color: var(--mute); margin-top: 8px; }
       .err2 { color: var(--crit); font-size: 13px; margin-top: 8px; display: none; }
       .pin-cta {
@@ -143,18 +163,36 @@
         border: 1px solid var(--gline); box-shadow: var(--e1); white-space: nowrap;
       }
       .pin-cta.on { display: block; }
+      .locate {
+        position: fixed; z-index: 36; right: 12px; bottom: calc(110px + env(safe-area-inset-bottom));
+        width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--gline);
+        background: var(--glass2); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+        color: var(--teal); font-size: 19px; cursor: pointer; box-shadow: var(--e1);
+        display: none; align-items: center; justify-content: center;
+      }
+      .locate.on { display: flex; }
       .leaflet-popup-content-wrapper, .leaflet-popup-tip {
         background: var(--glass2) !important; color: var(--ink) !important;
         -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
         border: 1px solid var(--gline); box-shadow: var(--e1) !important;
       }
       .leaflet-popup-content { margin: 12px 16px !important; font: inherit !important; }
-      .pp b { display: block; font-size: 14px; }
+      .pp b { display: block; font-size: 14px; color: var(--ink); }
       .pp span { font-size: 12px; color: var(--mute); display: block; margin-top: 2px; }
-      .pp .plinks { display: flex; gap: 6px; margin-top: 8px; }
+      .pp .plinks { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
       .pp .plinks a { font-size: 11.5px; font-weight: 800; text-decoration: none; color: #151000;
         background: var(--amber); border-radius: 999px; padding: 5px 11px; }
       .pp .plinks a.t2 { background: var(--teal); color: #04211d; }
+      /* google infowindow reset */
+      .gm-style .gm-style-iw-c { background: var(--glass2) !important; border-radius: 14px !important;
+        border: 1px solid var(--gline); box-shadow: var(--e1) !important; color: var(--ink) !important; padding: 12px 16px !important; }
+      .gm-style .gm-style-iw-d { overflow: hidden !important; color: var(--ink); }
+      .gm-style .gm-style-iw-tc { display: none; }
+      .pac-container { background: var(--glass2); border: 1px solid var(--gline); border-radius: 12px;
+        font-family: inherit; box-shadow: var(--e1); }
+      .pac-item { color: var(--dim); border-top: 1px solid var(--gline); padding: 8px 12px; cursor: pointer; }
+      .pac-item:hover { background: rgba(255, 255, 255, 0.06); }
+      .pac-item-query { color: var(--ink); }
       @media (prefers-reduced-motion: reduce) {
         .door:hover, .btn:hover { transform: none; }
         .sheet, .landing, .bar { transition: none; }
@@ -171,7 +209,7 @@
         <h1>Roll in<br /><span class="a">like you mean it</span></h1>
         <p class="lede">
           Route straight to the ranch in your maps app, or set a rendezvous and cruise in as a
-          pack. On show day this same page becomes the event map.
+          pack. On show day this same page becomes the live event map.
         </p>
         <button class="door nav" id="doorNav">
           <span class="ic">
@@ -193,20 +231,32 @@
           </span>
           <span style="flex: 1">
             <b>Event map</b>
-            <span>The field from above · layout lands as it is finalized</span>
+            <span>Live telemetry · the field from above · draft layout</span>
           </span>
           <span class="go">›</span>
         </button>
+        <div class="engine" id="engineTag">Map engine: loading…</div>
       </div>
     </div>
 
     <div class="bar" id="bar">
       <img src="/brand/pg-mark.png" alt="" />
       <span class="t" id="barTitle">Navigate</span>
+      <span class="spacer"></span>
+      <button id="trafficBtn" style="display: none">Traffic</button>
       <button id="backBtn">Menu</button>
     </div>
 
-    <span class="pin-cta" id="pinCta">Tap the map to drop your rendezvous point</span>
+    <div class="dock" id="dock">
+      <div class="chip2"><div class="v" id="wxNow">…</div><div class="l">Ranch right now</div></div>
+      <div class="chip2"><div class="v" id="wxDay">…</div><div class="l" id="wxDayL">Show-day forecast</div></div>
+      <div class="chip2"><div class="v" id="sunChip">…</div><div class="l">Oct 10 light</div></div>
+      <div class="chip2"><div class="v" id="crowdChip">…</div><div class="l">Expected + runs</div></div>
+      <div class="chip2" id="distWrap" style="display: none"><div class="v" id="distChip">…</div><div class="l">You to the gate</div></div>
+    </div>
+
+    <span class="pin-cta" id="pinCta">Tap the map or type the spot below</span>
+    <button class="locate" id="locateBtn" aria-label="Show my location">◎</button>
 
     <div class="sheet" id="navSheet">
       <div class="grab"></div>
@@ -224,26 +274,28 @@
     <div class="sheet" id="createSheet">
       <div class="grab"></div>
       <h2>Set a <span class="a">rendezvous</span></h2>
-      <p class="sub2" id="createSub">Tap the map where the pack should meet, then fill this in.</p>
+      <p class="sub2" id="createSub">Tap the map where the pack meets, or type the spot.</p>
+      <input id="rvSpot" placeholder="Meet spot, e.g. Berry Farms Starbucks lot" maxlength="120" autocomplete="off" />
       <input id="rvName" placeholder="Run name, e.g. Franklin Cars and Coffee run" maxlength="80" />
-      <input id="rvSpot" placeholder="Meet spot, e.g. Berry Farms Starbucks lot" maxlength="120" />
       <input id="rvTime" placeholder="Meet time, e.g. 7:30 AM, roll at 8:00" maxlength="40" />
       <input id="rvHost" placeholder="Your name or club (optional)" maxlength="80" />
       <span class="err2" id="rvErr"></span>
       <button class="btn amber" id="rvSave" disabled>Drop the pin first</button>
       <button class="btn ghost" id="rvCancel">Cancel</button>
-      <p class="hint">Rendezvous points are public so others can join the run. Every point routes the pack to the ranch.</p>
+      <p class="hint">Rendezvous runs are public so others can join. Every run routes the pack to the ranch.</p>
     </div>
 
     <script type="module">
-      import L from "https://esm.sh/leaflet@1.9.4";
       import {
         createClient,
         SupabaseAuthAdapter,
       } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
 
+      /* Side gate fix pending from Gavin: swap this one constant when it lands. */
       var PPR = { lat: 35.6309932, lng: -86.5868705 };
       var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var SHOW_DAY = "2026-10-10";
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       var db = null;
       try {
         db = createClient({
@@ -262,58 +314,213 @@
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
         });
       };
-
-      /* nav deep links: no keys, work on every phone */
       function gmaps(lat, lng) { return "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng; }
       function waze(lat, lng) { return "https://waze.com/ul?ll=" + lat + "," + lng + "&navigate=yes"; }
       function amaps(lat, lng) { return "https://maps.apple.com/?daddr=" + lat + "," + lng + "&dirflg=d"; }
+      function meetToRanch(lat, lng) {
+        return "https://www.google.com/maps/dir/?api=1&origin=" + lat + "," + lng + "&destination=" + PPR.lat + "," + PPR.lng;
+      }
       document.getElementById("gmapsD").href = gmaps(PPR.lat, PPR.lng);
       document.getElementById("wazeD").href = waze(PPR.lat, PPR.lng);
       document.getElementById("amapsD").href = amaps(PPR.lat, PPR.lng);
 
-      /* map: satellite imagery, keyless */
-      var map = L.map("theMap", { zoomControl: false, attributionControl: true }).setView(
-        [PPR.lat, PPR.lng],
-        15,
-      );
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19, attribution: "Imagery © Esri · Map data © OpenStreetMap contributors" },
-      ).addTo(map);
-      L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        { maxZoom: 19 },
-      ).addTo(map);
-      L.control.zoom({ position: "bottomright" }).addTo(map);
-
-      var ranchIcon = L.divIcon({
-        className: "",
-        html: '<div style="width:38px;height:38px;border-radius:50%;background:rgba(248,184,0,.95);border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font:900 13px Arial Black,Arial">PG</div>',
-        iconSize: [38, 38],
-        iconAnchor: [19, 19],
-      });
-      var rvIcon = L.divIcon({
-        className: "",
-        html: '<div style="width:26px;height:26px;border-radius:50%;background:rgba(0,210,190,.95);border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,.5)"></div>',
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
-      });
-      L.marker([PPR.lat, PPR.lng], { icon: ranchIcon })
-        .addTo(map)
-        .bindPopup(
+      function pprPopupHTML() {
+        return (
           '<div class="pp"><b>The Piston Powered Ranch</b><span>Rancho Jaramillo · gates 9 AM, Oct 10</span><div class="plinks"><a target="_blank" rel="noopener" href="' +
-            gmaps(PPR.lat, PPR.lng) + '">Google</a><a target="_blank" rel="noopener" href="' +
-            waze(PPR.lat, PPR.lng) + '">Waze</a><a class="t2" target="_blank" rel="noopener" href="' +
-            amaps(PPR.lat, PPR.lng) + '">Apple</a></div></div>',
+          gmaps(PPR.lat, PPR.lng) + '">Google</a><a target="_blank" rel="noopener" href="' +
+          waze(PPR.lat, PPR.lng) + '">Waze</a><a class="t2" target="_blank" rel="noopener" href="' +
+          amaps(PPR.lat, PPR.lng) + '">Apple</a></div></div>'
         );
+      }
+      function rvPopupHTML(x) {
+        return (
+          '<div class="pp"><b>' + esc(x.name) + "</b>" +
+          (x.spot ? "<span>" + esc(x.spot) + "</span>" : "") +
+          (x.meet_time ? "<span>Meet: " + esc(x.meet_time) + "</span>" : "") +
+          (x.host_name ? "<span>Host: " + esc(x.host_name) + "</span>" : "") +
+          '<div class="plinks"><a target="_blank" rel="noopener" href="' + gmaps(x.lat, x.lng) +
+          '">To meet</a><a class="t2" target="_blank" rel="noopener" href="' + meetToRanch(x.lat, x.lng) +
+          '">Meet → Ranch</a>' +
+          (ENGINE.kind === "google" ? '<a class="t2" href="#" data-route="' + x.lat + "," + x.lng + '">Show route</a>' : "") +
+          "</div></div>"
+        );
+      }
 
-      /* modes */
-      var landing = document.getElementById("landing"),
-        bar = document.getElementById("bar"),
-        navSheet = document.getElementById("navSheet"),
-        createSheet = document.getElementById("createSheet"),
-        pinCta = document.getElementById("pinCta");
-      var mode = "landing", pinMarker = null, pinLL = null;
+      /* Draft field layout: provisional zones around the venue pin, clearly
+         labeled DRAFT until the P3 layout is signed off with the ranch. */
+      var ZONES = [
+        { name: "Show Field · DRAFT", color: "#f8b800", pts: [
+          [35.6329, -86.5889], [35.6329, -86.5855], [35.6305, -86.5855], [35.6305, -86.5889]] },
+        { name: "Vendor Row · DRAFT", color: "#00d2be", pts: [
+          [35.6303, -86.5889], [35.6303, -86.5872], [35.6297, -86.5872], [35.6297, -86.5889]] },
+        { name: "VIP Area · DRAFT", color: "#4da3d8", pts: [
+          [35.6303, -86.5870], [35.6303, -86.5858], [35.6297, -86.5858], [35.6297, -86.5870]] },
+        { name: "Spectator Parking · DRAFT", color: "#c4cbd6", pts: [
+          [35.6295, -86.5889], [35.6295, -86.5855], [35.6281, -86.5855], [35.6281, -86.5889]] },
+      ];
+
+      /* ---------- engine adapter: Google when keyed, Leaflet always ready ---------- */
+      var ENGINE = { kind: null, map: null, api: null };
+      var rvLayerItems = [], zoneItems = [], meLayer = null, pinItem = null, routeRenderer = null, trafficLayer = null;
+
+      function engineTag(t) { document.getElementById("engineTag").innerHTML = t; }
+
+      async function boot() {
+        var key = null;
+        try {
+          var c = await fetch("/api/config").then(function (r) { return r.ok ? r.json() : null; });
+          key = c && c.gmapsKey;
+        } catch (e) {}
+        if (key) {
+          try { await bootGoogle(key); engineTag("Map engine: <b>Google Maps</b> · live traffic ready"); return; }
+          catch (e) { console.warn("google boot failed, falling back", e); }
+        }
+        await bootLeaflet();
+        engineTag(key ? "Map engine: <b>satellite</b> (Google failed to load)" : "Map engine: <b>satellite</b> · Google upgrade ready for the key");
+      }
+
+      function bootGoogle(key) {
+        return new Promise(function (resolve, reject) {
+          window.__gmReady = function () {
+            try {
+              var g = window.google.maps;
+              var map = new g.Map(document.getElementById("theMap"), {
+                center: PPR, zoom: 15, mapTypeId: "hybrid", tilt: 0,
+                disableDefaultUI: true, zoomControl: true,
+                zoomControlOptions: { position: g.ControlPosition.RIGHT_BOTTOM },
+                gestureHandling: "greedy",
+              });
+              ENGINE = { kind: "google", map: map, api: g };
+              var iw = new g.InfoWindow();
+              function marker(lat, lng, opts, html) {
+                var mk = new g.Marker(Object.assign({ position: { lat: lat, lng: lng }, map: map }, opts));
+                if (html) mk.addListener("click", function () { iw.setContent(html()); iw.open({ map: map, anchor: mk }); });
+                return mk;
+              }
+              ENGINE.addPPR = function () {
+                return marker(PPR.lat, PPR.lng, {
+                  icon: { path: g.SymbolPath.CIRCLE, scale: 15, fillColor: "#f8b800", fillOpacity: 0.95, strokeColor: "#fff", strokeWeight: 3 },
+                  label: { text: "PG", color: "#151000", fontWeight: "900", fontSize: "12px" },
+                }, pprPopupHTML);
+              };
+              ENGINE.addRv = function (x) {
+                return marker(x.lat, x.lng, {
+                  icon: { path: g.SymbolPath.CIRCLE, scale: 10, fillColor: "#00d2be", fillOpacity: 0.95, strokeColor: "#fff", strokeWeight: 3 },
+                }, function () { return rvPopupHTML(x); });
+              };
+              ENGINE.addPin = function (lat, lng) {
+                return marker(lat, lng, {
+                  icon: { path: g.SymbolPath.CIRCLE, scale: 10, fillColor: "#00d2be", fillOpacity: 0.95, strokeColor: "#fff", strokeWeight: 3 },
+                });
+              };
+              ENGINE.remove = function (item) { item && item.setMap && item.setMap(null); };
+              ENGINE.setView = function (lat, lng, z) { map.setCenter({ lat: lat, lng: lng }); map.setZoom(z); };
+              ENGINE.onClick = function (fn) { map.addListener("click", function (e) { fn(e.latLng.lat(), e.latLng.lng()); }); };
+              ENGINE.addZones = function () {
+                return ZONES.map(function (z2) {
+                  var poly = new g.Polygon({
+                    paths: z2.pts.map(function (p) { return { lat: p[0], lng: p[1] }; }),
+                    strokeColor: z2.color, strokeOpacity: 0.9, strokeWeight: 2,
+                    fillColor: z2.color, fillOpacity: 0.13, map: null,
+                  });
+                  poly.addListener("click", function (e) {
+                    iw.setContent('<div class="pp"><b>' + esc(z2.name) + "</b><span>Provisional. Final layout lands with the venue sign-off.</span></div>");
+                    iw.setPosition(e.latLng); iw.open({ map: map });
+                  });
+                  return poly;
+                });
+              };
+              ENGINE.showZones = function (on) { zoneItems.forEach(function (p) { p.setMap(on ? map : null); }); };
+              ENGINE.addMe = function (lat, lng) {
+                return marker(lat, lng, {
+                  icon: { path: g.SymbolPath.CIRCLE, scale: 8, fillColor: "#4da3d8", fillOpacity: 1, strokeColor: "#fff", strokeWeight: 3 },
+                });
+              };
+              ENGINE.route = function (fromLat, fromLng) {
+                if (!routeRenderer) routeRenderer = new g.DirectionsRenderer({
+                  map: map, suppressMarkers: true, preserveViewport: false,
+                  polylineOptions: { strokeColor: "#f8b800", strokeOpacity: 0.95, strokeWeight: 5 },
+                });
+                new g.DirectionsService().route(
+                  { origin: { lat: fromLat, lng: fromLng }, destination: PPR, travelMode: g.TravelMode.DRIVING },
+                  function (res, status) { if (status === "OK") routeRenderer.setDirections(res); },
+                );
+              };
+              ENGINE.clearRoute = function () { routeRenderer && routeRenderer.setMap(null); routeRenderer = null; };
+              ENGINE.traffic = function () {
+                if (trafficLayer) { trafficLayer.setMap(null); trafficLayer = null; return false; }
+                trafficLayer = new g.TrafficLayer(); trafficLayer.setMap(map); return true;
+              };
+              ENGINE.autocomplete = function (input, onPlace) {
+                if (!g.places) return;
+                var ac = new g.places.Autocomplete(input, {
+                  fields: ["geometry", "name"],
+                  bounds: new g.LatLngBounds({ lat: 34.6, lng: -88.2 }, { lat: 36.7, lng: -85.0 }),
+                });
+                ac.addListener("place_changed", function () {
+                  var p = ac.getPlace();
+                  if (p && p.geometry && p.geometry.location) onPlace(p.geometry.location.lat(), p.geometry.location.lng(), p.name);
+                });
+              };
+              document.getElementById("trafficBtn").style.display = "";
+              resolve();
+            } catch (err) { reject(err); }
+          };
+          var s2 = document.createElement("script");
+          s2.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(key) + "&libraries=places&loading=async&callback=__gmReady";
+          s2.async = true;
+          s2.onerror = function () { reject(new Error("gmaps script failed")); };
+          document.head.appendChild(s2);
+          setTimeout(function () { ENGINE.kind || reject(new Error("gmaps timeout")); }, 9000);
+        });
+      }
+
+      async function bootLeaflet() {
+        var Lmod = await import("https://esm.sh/leaflet@1.9.4");
+        var L = Lmod.default || Lmod;
+        var map = L.map("theMap", { zoomControl: false }).setView([PPR.lat, PPR.lng], 15);
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 19, attribution: "Imagery © Esri · © OpenStreetMap contributors" }).addTo(map);
+        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 19 }).addTo(map);
+        L.control.zoom({ position: "bottomright" }).addTo(map);
+        ENGINE = { kind: "leaflet", map: map, api: L };
+        function icon(px, bg, label) {
+          return L.divIcon({ className: "", iconSize: [px, px], iconAnchor: [px / 2, px / 2],
+            html: '<div style="width:' + px + "px;height:" + px + 'px;border-radius:50%;background:' + bg +
+              ';border:3px solid #fff;box-shadow:0 5px 16px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font:900 12px Arial Black,Arial;color:#151000">' + (label || "") + "</div>" });
+        }
+        ENGINE.addPPR = function () {
+          return L.marker([PPR.lat, PPR.lng], { icon: icon(38, "rgba(248,184,0,.95)", "PG") }).addTo(map).bindPopup(pprPopupHTML());
+        };
+        ENGINE.addRv = function (x) {
+          return L.marker([x.lat, x.lng], { icon: icon(26, "rgba(0,210,190,.95)") }).addTo(map).bindPopup(rvPopupHTML(x));
+        };
+        ENGINE.addPin = function (lat, lng) {
+          return L.marker([lat, lng], { icon: icon(26, "rgba(0,210,190,.95)") }).addTo(map);
+        };
+        ENGINE.remove = function (item) { item && map.removeLayer(item); };
+        ENGINE.setView = function (lat, lng, z) { map.setView([lat, lng], z); };
+        ENGINE.onClick = function (fn) { map.on("click", function (e) { fn(e.latlng.lat, e.latlng.lng); }); };
+        ENGINE.addZones = function () {
+          return ZONES.map(function (z2) {
+            return L.polygon(z2.pts, { color: z2.color, weight: 2, opacity: 0.9, fillColor: z2.color, fillOpacity: 0.13 })
+              .bindPopup('<div class="pp"><b>' + esc(z2.name) + "</b><span>Provisional. Final layout lands with the venue sign-off.</span></div>");
+          });
+        };
+        ENGINE.showZones = function (on) {
+          zoneItems.forEach(function (p) { on ? p.addTo(map) : map.removeLayer(p); });
+        };
+        ENGINE.addMe = function (lat, lng) { return L.marker([lat, lng], { icon: icon(20, "rgba(77,163,216,1)") }).addTo(map); };
+        ENGINE.route = null; ENGINE.clearRoute = function () {}; ENGINE.traffic = null; ENGINE.autocomplete = null;
+      }
+
+      /* ---------- app state over the adapter ---------- */
+      var landing = document.getElementById("landing"), bar = document.getElementById("bar"),
+        navSheet = document.getElementById("navSheet"), createSheet = document.getElementById("createSheet"),
+        pinCta = document.getElementById("pinCta"), dock = document.getElementById("dock"),
+        locateBtn = document.getElementById("locateBtn");
+      var mode = "landing", pinLL = null;
 
       function setMode(m) {
         mode = m;
@@ -321,11 +528,14 @@
         bar.classList.toggle("on", m !== "landing");
         navSheet.classList.toggle("on", m === "nav");
         createSheet.classList.toggle("on", m === "create");
+        dock.classList.toggle("on", m === "field");
+        locateBtn.classList.toggle("on", m !== "landing");
         pinCta.classList.toggle("on", m === "create" && !pinLL);
+        ENGINE.showZones && ENGINE.showZones(m === "field");
         document.getElementById("barTitle").textContent =
-          m === "field" ? "Event map" : m === "create" ? "Set a rendezvous" : "Navigate";
-        if (m === "field") map.setView([PPR.lat, PPR.lng], 17);
-        if (m === "nav") map.setView([PPR.lat, PPR.lng], 11);
+          m === "field" ? "Event map · live" : m === "create" ? "Set a rendezvous" : "Navigate";
+        if (m === "field") ENGINE.setView(PPR.lat, PPR.lng, 16);
+        if (m === "nav") { ENGINE.setView(PPR.lat, PPR.lng, 11); ENGINE.clearRoute(); }
       }
       document.getElementById("doorNav").addEventListener("click", function () { setMode("nav"); });
       document.getElementById("doorField").addEventListener("click", function () { setMode("field"); });
@@ -333,90 +543,96 @@
         if (mode === "create") return setMode("nav");
         setMode("landing");
       });
+      document.getElementById("trafficBtn").addEventListener("click", function () {
+        if (!ENGINE.traffic) return;
+        this.style.color = ENGINE.traffic() ? "var(--teal)" : "var(--dim)";
+      });
       document.getElementById("cruiseBtn").addEventListener("click", function () {
-        clearPin();
-        setMode("create");
-        map.setView([PPR.lat, PPR.lng], 10);
+        clearPin(); setMode("create"); ENGINE.setView(PPR.lat, PPR.lng, 10);
       });
-      document.getElementById("rvCancel").addEventListener("click", function () {
-        clearPin();
-        setMode("nav");
-      });
+      document.getElementById("rvCancel").addEventListener("click", function () { clearPin(); setMode("nav"); });
       function clearPin() {
-        pinMarker && map.removeLayer(pinMarker);
-        pinMarker = null; pinLL = null;
-        var b = document.getElementById("rvSave");
-        b.disabled = true; b.textContent = "Drop the pin first";
+        pinItem && ENGINE.remove(pinItem); pinItem = null; pinLL = null;
+        var b = document.getElementById("rvSave"); b.disabled = true; b.textContent = "Drop the pin first";
       }
-      map.on("click", function (e) {
-        if (mode !== "create") return;
-        pinLL = e.latlng;
-        pinMarker && map.removeLayer(pinMarker);
-        pinMarker = L.marker(pinLL, { icon: rvIcon }).addTo(map);
+      function placePin(lat, lng) {
+        pinLL = { lat: lat, lng: lng };
+        pinItem && ENGINE.remove(pinItem);
+        pinItem = ENGINE.addPin(lat, lng);
         pinCta.classList.remove("on");
-        var b = document.getElementById("rvSave");
-        b.disabled = false; b.textContent = "Post the rendezvous";
+        var b = document.getElementById("rvSave"); b.disabled = false; b.textContent = "Post the rendezvous";
+      }
+      locateBtn.addEventListener("click", function () {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          var lat = pos.coords.latitude, lng = pos.coords.longitude;
+          meLayer && ENGINE.remove(meLayer);
+          meLayer = ENGINE.addMe(lat, lng);
+          ENGINE.setView(lat, lng, 12);
+          var km = havKm(lat, lng, PPR.lat, PPR.lng), mi = km * 0.621371;
+          document.getElementById("distWrap").style.display = "";
+          document.getElementById("distChip").innerHTML =
+            mi.toFixed(mi < 20 ? 1 : 0) + '<small> mi · about ' + Math.max(2, Math.round((mi / 45) * 60)) + " min</small>";
+          if (mode === "nav" && ENGINE.route) ENGINE.route(lat, lng);
+        }, function () {}, { enableHighAccuracy: true, timeout: 8000 });
+      });
+      function havKm(a, b, c, d) {
+        var R = 6371, dLa = ((c - a) * Math.PI) / 180, dLo = ((d - b) * Math.PI) / 180;
+        var x = Math.sin(dLa / 2) ** 2 + Math.cos((a * Math.PI) / 180) * Math.cos((c * Math.PI) / 180) * Math.sin(dLo / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(x));
+      }
+      document.addEventListener("click", function (e) {
+        var r = e.target.closest("[data-route]");
+        if (r && ENGINE.route) {
+          e.preventDefault();
+          var p = r.getAttribute("data-route").split(",");
+          ENGINE.route(parseFloat(p[0]), parseFloat(p[1]));
+        }
       });
 
-      /* rendezvous data */
-      var rvMarkers = [];
+      /* ---------- rendezvous ---------- */
       async function loadRv() {
         if (!db) return;
         try {
-          var r = await db
-            .from("rendezvous")
-            .select("*")
-            .eq("status", "open")
-            .order("created_at", { ascending: false })
-            .limit(50);
-          if (r.error || !r.data) return;
-          rvMarkers.forEach(function (m) { map.removeLayer(m); });
-          rvMarkers = [];
+          var r = await db.from("rendezvous").select("*").eq("status", "open")
+            .order("created_at", { ascending: false }).limit(50);
+          if (r.error || !r.data) return r.error && r.error.code === "PGRST205" ? rvSoon() : null;
+          rvLayerItems.forEach(function (m) { ENGINE.remove(m); });
+          rvLayerItems = [];
           var list = document.getElementById("rvList");
           list.innerHTML = r.data.length
             ? '<p class="sub2" style="margin:14px 0 2px">Cruise-in runs, tap to view:</p>'
             : '<p class="sub2" style="margin:14px 0 2px">No rendezvous runs posted yet. Start the first one.</p>';
           r.data.forEach(function (x) {
-            var mk = L.marker([x.lat, x.lng], { icon: rvIcon }).addTo(map).bindPopup(
-              '<div class="pp"><b>' + esc(x.name) + "</b>" +
-                (x.spot ? "<span>" + esc(x.spot) + "</span>" : "") +
-                (x.meet_time ? "<span>Meet: " + esc(x.meet_time) + "</span>" : "") +
-                (x.host_name ? "<span>Host: " + esc(x.host_name) + "</span>" : "") +
-                '<div class="plinks"><a target="_blank" rel="noopener" href="' +
-                gmaps(x.lat, x.lng) + '">To meet</a><a class="t2" target="_blank" rel="noopener" href="' +
-                "https://www.google.com/maps/dir/?api=1&origin=" + x.lat + "," + x.lng +
-                "&destination=" + PPR.lat + "," + PPR.lng + '">Meet → Ranch</a></div></div>',
-            );
-            rvMarkers.push(mk);
+            var mk = ENGINE.addRv(x);
+            rvLayerItems.push(mk);
             var row = document.createElement("div");
             row.className = "rv";
-            row.innerHTML =
-              '<span class="dot3"></span><span style="flex:1"><b>' + esc(x.name) + "</b>" +
+            row.innerHTML = '<span class="dot3"></span><span style="flex:1"><b>' + esc(x.name) + "</b>" +
               esc([x.spot, x.meet_time].filter(Boolean).join(" · ")) + "</span><span>›</span>";
             row.addEventListener("click", function () {
-              map.setView([x.lat, x.lng], 14);
-              mk.openPopup();
+              ENGINE.setView(x.lat, x.lng, 14);
+              mk.openPopup ? mk.openPopup() : window.google && window.google.maps.event.trigger(mk, "click");
             });
             list.appendChild(row);
           });
+          updateCrowd(r.data.length);
         } catch (e) {}
+      }
+      function rvSoon() {
+        document.getElementById("rvList").innerHTML =
+          '<p class="sub2" style="margin:14px 0 2px">Rendezvous runs are lighting up shortly. Check back in a few minutes.</p>';
       }
       document.getElementById("rvSave").addEventListener("click", async function () {
         var err = document.getElementById("rvErr");
         err.style.display = "none";
         var name = document.getElementById("rvName").value.trim();
         if (!pinLL) return;
-        if (name.length < 2) {
-          err.textContent = "Give the run a name."; err.style.display = "block"; return;
-        }
-        if (!db) {
-          err.textContent = "Could not reach the map data. Try again in a minute.";
-          err.style.display = "block"; return;
-        }
+        if (name.length < 2) { err.textContent = "Give the run a name."; err.style.display = "block"; return; }
+        if (!db) { err.textContent = "Could not reach the map data. Try again in a minute."; err.style.display = "block"; return; }
         this.disabled = true; this.textContent = "Posting…";
         var r = await db.from("rendezvous").insert({
-          event_id: EVENT_ID,
-          name: name,
+          event_id: EVENT_ID, name: name,
           spot: document.getElementById("rvSpot").value.trim() || null,
           meet_time: document.getElementById("rvTime").value.trim() || null,
           host_name: document.getElementById("rvHost").value.trim() || null,
@@ -427,15 +643,98 @@
           err.textContent = "Could not post it. Check the pin is in middle Tennessee and try again.";
           err.style.display = "block"; return;
         }
-        ["rvName", "rvSpot", "rvTime", "rvHost"].forEach(function (id) {
-          document.getElementById(id).value = "";
-        });
-        clearPin();
-        await loadRv();
-        setMode("nav");
+        ["rvName", "rvSpot", "rvTime", "rvHost"].forEach(function (id) { document.getElementById(id).value = ""; });
+        clearPin(); await loadRv(); setMode("nav");
       });
-      loadRv();
-      setInterval(function () { document.hidden || loadRv(); }, 60e3);
+
+      /* ---------- telemetry dock ---------- */
+      function updateCrowd(runs) {
+        var el = document.getElementById("crowdChip");
+        var heads = window.__heads || 0;
+        el.innerHTML = '<span class="t">' + heads + '</span><small> heads</small> · <span class="a2">' + (runs || 0) + "</span><small> runs</small>";
+      }
+      async function loadStats() {
+        if (!db) return;
+        try {
+          var r = await db.rpc("public_stats", {});
+          var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
+          if (row) { window.__heads = Number(row.party_headcount) || 0; updateCrowd(rvLayerItems.length); }
+        } catch (e) {}
+      }
+      async function loadWeather() {
+        try {
+          var u = "https://api.open-meteo.com/v1/forecast?latitude=" + PPR.lat + "&longitude=" + PPR.lng +
+            "&current=temperature_2m,wind_speed_10m,precipitation&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=16&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FChicago";
+          var w = await fetch(u).then(function (r) { return r.ok ? r.json() : null; });
+          if (!w) return;
+          if (w.current) {
+            document.getElementById("wxNow").innerHTML =
+              Math.round(w.current.temperature_2m) + '<small>°F · wind ' + Math.round(w.current.wind_speed_10m) + "</small>";
+          }
+          var di = (w.daily && w.daily.time) ? w.daily.time.indexOf(SHOW_DAY) : -1;
+          if (di >= 0) {
+            document.getElementById("wxDay").innerHTML =
+              Math.round(w.daily.temperature_2m_max[di]) + "<small>°/</small>" +
+              Math.round(w.daily.temperature_2m_min[di]) + '<small>° · rain ' + w.daily.precipitation_probability_max[di] + "%</small>";
+          } else {
+            var days = Math.ceil((new Date(SHOW_DAY + "T09:00:00-05:00") - Date.now()) / 864e5) - 16;
+            document.getElementById("wxDay").innerHTML = '<small>unlocks in ' + Math.max(0, days) + " days</small>";
+            document.getElementById("wxDayL").textContent = "Show-day forecast";
+          }
+        } catch (e) {}
+      }
+      /* Show-day sun times: NOAA solar approximation, pure math, no API. */
+      function sunTimes(dateStr, lat, lng) {
+        var d = new Date(dateStr + "T12:00:00Z");
+        var n = Math.floor((d - new Date(Date.UTC(d.getUTCFullYear(), 0, 0))) / 864e5);
+        var lngHour = lng / 15;
+        function calc(rising) {
+          var t = n + ((rising ? 6 : 18) - lngHour) / 24;
+          var M = 0.9856 * t - 3.289;
+          var L2 = M + 1.916 * Math.sin((M * Math.PI) / 180) + 0.02 * Math.sin((2 * M * Math.PI) / 180) + 282.634;
+          L2 = ((L2 % 360) + 360) % 360;
+          var RA = (Math.atan(0.91764 * Math.tan((L2 * Math.PI) / 180)) * 180) / Math.PI;
+          RA = ((RA % 360) + 360) % 360;
+          RA += (Math.floor(L2 / 90) - Math.floor(RA / 90)) * 90;
+          RA /= 15;
+          var sinDec = 0.39782 * Math.sin((L2 * Math.PI) / 180);
+          var cosDec = Math.cos(Math.asin(sinDec));
+          var cosH = (Math.cos((90.833 * Math.PI) / 180) - sinDec * Math.sin((lat * Math.PI) / 180)) /
+            (cosDec * Math.cos((lat * Math.PI) / 180));
+          if (cosH > 1 || cosH < -1) return null;
+          var H = rising ? 360 - (Math.acos(cosH) * 180) / Math.PI : (Math.acos(cosH) * 180) / Math.PI;
+          H /= 15;
+          var T = H + RA - 0.06571 * t - 6.622;
+          var UT = ((T - lngHour) % 24 + 24) % 24;
+          var local = UT - 5; /* CDT */
+          if (local < 0) local += 24;
+          var h = Math.floor(local), m2 = Math.round((local - h) * 60);
+          var ampm = h >= 12 ? "PM" : "AM";
+          var h12 = h % 12 || 12;
+          return h12 + ":" + String(m2).padStart(2, "0") + " " + ampm;
+        }
+        return { rise: calc(true), set: calc(false) };
+      }
+      var st = sunTimes(SHOW_DAY, PPR.lat, PPR.lng);
+      if (st.rise && st.set) {
+        document.getElementById("sunChip").innerHTML =
+          '<small>up</small> ' + st.rise + ' <small>· gold</small> ' + st.set.replace(/(\d+):(\d+)/, function (m0, h, mi) {
+            var t = (parseInt(h, 10) % 12) * 60 + parseInt(mi, 10) - 60;
+            return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0");
+          });
+      }
+
+      /* ---------- boot ---------- */
+      await boot();
+      ENGINE.addPPR();
+      zoneItems = ENGINE.addZones();
+      ENGINE.onClick(function (lat, lng) { if (mode === "create") placePin(lat, lng); });
+      ENGINE.autocomplete && ENGINE.autocomplete(document.getElementById("rvSpot"), function (lat, lng, name) {
+        placePin(lat, lng);
+        ENGINE.setView(lat, lng, 14);
+      });
+      loadRv(); loadStats(); loadWeather();
+      setInterval(function () { if (!document.hidden) { loadRv(); loadStats(); loadWeather(); } }, 6e4);
     </script>
   </body>
 </html>
