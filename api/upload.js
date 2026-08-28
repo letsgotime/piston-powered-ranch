@@ -1,4 +1,5 @@
 import { handleUpload } from "@vercel/blob/client";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 import { verifySession, sessionSecret } from "./upload-session.js";
 
 /**
@@ -45,6 +46,39 @@ const KINDS = {
 
 const SUBMISSION_TYPES = new Set(["vehicle", "vendor", "sponsor"]);
 
+/**
+ * Workbench attachments are a second, separate scope on this endpoint.
+ *
+ * The submissions scope below is deliberately open, because the Submit form is
+ * public. The workbench is not: it is internal working material, so this scope
+ * demands a verified Neon Auth token on a staff address before it will mint a
+ * token, and confines that token to one workbench item's folder. Keep STAFF in
+ * step with public.staff_allowlist and with api/media.js.
+ */
+const STAFF = new Set([
+  "paddock20auto@gmail.com",
+  "gavin@paddock20.com",
+  "bekah@paddock20.com",
+  "bekahstallard@gmail.com",
+]);
+
+const JWKS = createRemoteJWKSet(
+  new URL(
+    "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json",
+  ),
+);
+
+async function staffEmail(token) {
+  if (!token) return "";
+  try {
+    const { payload } = await jwtVerify(String(token), JWKS);
+    const email = String(payload.email || payload.sub_email || "").toLowerCase();
+    return STAFF.has(email) ? email : "";
+  } catch {
+    return "";
+  }
+}
+
 export default async function handler(request, response) {
   if (request.method !== "POST") {
     response.setHeader("Allow", "POST");
@@ -66,6 +100,24 @@ export default async function handler(request, response) {
 
         const kind = KINDS[payload.kind];
         if (!kind) throw new Error("Unknown upload kind");
+
+        // Workbench scope: staff only, and pinned to one item's folder.
+        if (payload.scope === "workbench") {
+          const email = await staffEmail(payload.token);
+          if (!email) throw new Error("Sign in as staff to attach files to the workbench");
+          const item = String(payload.itemId || "").replace(/[^a-zA-Z0-9-]/g, "");
+          if (item.length < 8 || item.length > 64) throw new Error("Invalid workbench item");
+          const wanted = `workbench/${item}/${payload.kind}/`;
+          if (!pathname.startsWith(wanted) || pathname.includes("..")) {
+            throw new Error("Upload path is not allowed for this token");
+          }
+          return {
+            allowedContentTypes: kind.types,
+            maximumSizeInBytes: kind.max,
+            addRandomSuffix: true,
+            tokenPayload: JSON.stringify({ scope: "workbench", kind: payload.kind, item, by: email }),
+          };
+        }
 
         // Bot gate. Enforced only once TURNSTILE_SECRET exists, so this ships
         // inert and turns on with configuration rather than a code change.

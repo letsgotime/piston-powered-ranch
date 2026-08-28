@@ -207,6 +207,21 @@
       .feed .ev .t { color: var(--faint); white-space: nowrap; font-size: 11px; }
       .wbnote { font-size: 12px; color: var(--mute); padding: 10px 12px; border-radius: 10px;
         background: rgba(255,255,255,0.04); border: 1px dashed var(--gline2); }
+      .films { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+      .film { display: flex; flex-direction: column; gap: 2px; text-decoration: none;
+        border: 1px solid var(--gline2); border-radius: 9px; padding: 7px 10px; max-width: 190px;
+        background: rgba(0,0,0,0.25); overflow: hidden; }
+      .film .fn { font-size: 11.5px; color: var(--dim); white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; }
+      .film .fs { font-size: 10px; color: var(--faint); }
+      .film:hover { border-color: var(--amber); }
+      .film img { width: 100%; height: 84px; object-fit: cover; border-radius: 6px; margin-top: 4px; }
+      .film.photo { max-width: 150px; }
+      .att { font: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em;
+        text-transform: uppercase; cursor: pointer; color: var(--mute);
+        border: 1px solid var(--gline); border-radius: 999px; padding: 8px 12px;
+        min-height: 34px; display: inline-flex; align-items: center; }
+      .att:hover { border-color: var(--amber); color: var(--ink); }
       /* tablet */
       @media (min-width: 640px) {
         :root { --pad: 18px; }
@@ -278,6 +293,7 @@
         createClient,
         SupabaseAuthAdapter,
       } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      import { upload as blobUpload } from "https://esm.sh/@vercel/blob@2.8.0/client";
       var db = null;
       try {
         db = createClient({
@@ -595,6 +611,78 @@
         };
       })();
 
+      /* Attachments live in the private blob store, same as entrant media, so
+         nothing is readable from a guessable URL. Reads come back as signed
+         ten minute links through /api/media. */
+      var MEDIA_KIND = { image: "photo", video: "video", audio: "voice" };
+      function kindOf(file) {
+        return MEDIA_KIND[String(file.type).split("/")[0]] || "doc";
+      }
+      async function bearer() {
+        try {
+          var s = await db.auth.getSession();
+          return (s && s.data && s.data.session && (s.data.session.access_token || s.data.session.accessToken)) || "";
+        } catch (e) { return ""; }
+      }
+      async function attach(itemId, files) {
+        var tok = await bearer();
+        if (!tok) return svState("error", "sign in again to attach files");
+        var item = (LIVE.wb || []).filter(function (x) { return x.id === itemId; })[0];
+        if (!item) return;
+        var added = [];
+        for (var i = 0; i < files.length; i++) {
+          var f = files[i], k = kindOf(f);
+          svState("saving");
+          try {
+            var res = await blobUpload("workbench/" + itemId + "/" + k + "/" + f.name, f, {
+              access: "public", // the STORE is private; this flag is the client API's, not the store's
+              handleUploadUrl: "/api/upload",
+              clientPayload: JSON.stringify({ scope: "workbench", kind: k, itemId: itemId, token: tok }),
+            });
+            added.push({ pathname: res.pathname, name: f.name, type: f.type, size: f.size, kind: k });
+          } catch (err) {
+            return svState("error", (err && err.message) || "upload refused");
+          }
+        }
+        var media = (item.media || []).concat(added);
+        var r = await db.from("workbench_items").update({ media: media }).eq("id", itemId).select("id");
+        if (r && r.error) return svState("error", r.error.message);
+        if (!r || !r.data || !r.data.length) return svState("error", "the file uploaded but the record did not save");
+        svState("saved");
+        await loadWorkbench();
+        if (openKey) paintPanel(openKey);
+      }
+      async function signMedia(paths) {
+        var tok = await bearer();
+        if (!tok || !paths.length) return {};
+        try {
+          var r = await fetch("/api/media", {
+            method: "POST",
+            headers: { "content-type": "application/json", authorization: "Bearer " + tok },
+            body: JSON.stringify({ pathnames: paths }),
+          });
+          if (!r.ok) return {};
+          var j = await r.json();
+          var map = {};
+          (j.urls || []).forEach(function (u) { if (u.url) map[u.pathname] = u.url; });
+          return map;
+        } catch (e) { return {}; }
+      }
+      async function paintMedia() {
+        var els = [].slice.call(sheet.querySelectorAll("[data-media]"));
+        var paths = els.map(function (el) { return el.getAttribute("data-media"); });
+        if (!paths.length) return;
+        var map = await signMedia(paths);
+        els.forEach(function (el) {
+          var u = map[el.getAttribute("data-media")];
+          if (!u) return;
+          el.setAttribute("href", u);
+          if (el.getAttribute("data-kind") === "photo") {
+            el.innerHTML = '<img src="' + u + '" alt="" />';
+          }
+        });
+      }
+
       function ago(iso) {
         var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
         if (s < 60) return "just now";
@@ -611,6 +699,26 @@
       function itemsFor(panel) {
         return (LIVE.wb || []).filter(function (x) { return x.panel === panel; })
           .sort(function (a, b) { return a.sort - b.sort || a.created_at.localeCompare(b.created_at); });
+      }
+
+      function bytes(n) {
+        if (!n) return "";
+        return n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+      }
+      function mediaHtml(r) {
+        var m = r.media || [];
+        if (!m.length) return "";
+        return '<div class="films">' + m.map(function (f) {
+          return '<a class="film ' + esc(f.kind || "doc") + '" data-media="' + esc(f.pathname) +
+            '" data-kind="' + esc(f.kind || "doc") + '" target="_blank" rel="noopener" title="' + esc(f.name) + '">' +
+            '<span class="fn">' + esc(f.name) + "</span>" +
+            '<span class="fs">' + esc(bytes(f.size)) + "</span></a>";
+        }).join("") + "</div>";
+      }
+      function attachHtml(id) {
+        return '<label class="att">Attach' +
+          '<input type="file" multiple data-attach="' + id + '" hidden ' +
+          'accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip" /></label>';
       }
 
       function wbHtml(panel) {
@@ -654,7 +762,9 @@
                 '<textarea data-f="body" data-id="' + o.id + '" placeholder="Option ' + esc(o.option_key) +
                 '" aria-label="Option ' + esc(o.option_key) + ' detail">' + esc(o.body || "") + "</textarea></div>";
             }).join("") +
-            '</div><div class="row"><button class="del" type="button" data-delgroup="' + esc(g) +
+            "</div>" + mediaHtml(head) +
+            '<div class="row">' + attachHtml(head.id) +
+            '<button class="del" type="button" data-delgroup="' + esc(g) +
             '" data-panel="' + esc(panel) + '">Remove this set</button></div></div>';
         });
 
@@ -666,6 +776,7 @@
             '" placeholder="' + (r.kind === "deliverable" ? "What has to exist" : "Heading") + '" aria-label="Title" />' +
             '<textarea data-f="body" data-id="' + r.id + '" placeholder="Type here. It saves as you go." aria-label="Detail">' +
             esc(r.body || "") + "</textarea>" +
+            mediaHtml(r) +
             '<div class="row">' +
             (r.kind === "deliverable"
               ? '<div class="st" role="group" aria-label="Status">' +
@@ -674,6 +785,7 @@
                     '" aria-pressed="' + (r.status === s ? "true" : "false") + '">' + s + "</button>";
                 }).join("") + "</div>"
               : "") +
+            attachHtml(r.id) +
             '<button class="del" type="button" data-del="' + r.id + '">Delete</button>' +
             "</div></div>";
         });
@@ -761,6 +873,7 @@
         // Every panel except the log itself carries its own workbench, so the
         // work for a step is written down next to the numbers for that step.
         document.getElementById("shBody").innerHTML = p.body + (key === "changes" ? "" : wbHtml(key));
+        paintMedia(); // swap blob paths for signed, short lived URLs
         return p;
       }
       function openPanel(key, trigger) {
@@ -818,6 +931,15 @@
           return loadWorkbench();
         }).catch(function (err) { svState("error", err.message); });
       }
+
+      document.addEventListener("change", function (e) {
+        var at = e.target.getAttribute && e.target.getAttribute("data-attach");
+        if (at && e.target.files && e.target.files.length) {
+          var files = e.target.files;
+          e.target.value = "";
+          attach(at, files);
+        }
+      });
 
       document.addEventListener("input", function (e) {
         var f = e.target.getAttribute && e.target.getAttribute("data-f");

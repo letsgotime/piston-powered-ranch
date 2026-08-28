@@ -69,8 +69,11 @@ export default async function handler(request, response) {
     const urls = await Promise.all(
       pathnames.map(async (raw) => {
         const pathname = String(raw || "");
-        // Only ever sign things that live under the submissions namespace.
-        if (!pathname.startsWith("submissions/") || pathname.includes("..")) {
+        // Only ever sign things under a namespace this endpoint owns:
+        // submitted entrant media, and staff workbench attachments. Anything
+        // else, including traversal, is refused rather than signed.
+        const allowed = pathname.startsWith("submissions/") || pathname.startsWith("workbench/");
+        if (!allowed || pathname.includes("..")) {
           return { pathname, error: "Refused" };
         }
         const signed = await issueSignedToken({
