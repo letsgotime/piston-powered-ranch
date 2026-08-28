@@ -32,8 +32,11 @@
       .ground .ly { position: absolute; inset: 0; background: url(/events/img/hero.jpg) center 34% / cover no-repeat; transform: scale(1.04); }
       .ground .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 17, 26, 0.78), rgba(10, 17, 26, 0.7) 40%, rgba(10, 17, 26, 0.88)); }
       .rule { height: 4px; position: relative; z-index: 60; background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
-      .wrap { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto;
-        padding: 20px var(--pad) calc(56px + env(safe-area-inset-bottom)); }
+      /* .wrap spans the viewport so image bands can go full bleed without a
+         100vw negative margin, which overflows by the scrollbar width. The
+         reading column lives in .col. */
+      .wrap { position: relative; z-index: 1; padding: 20px 0 calc(56px + env(safe-area-inset-bottom)); }
+      .col { max-width: 1160px; margin: 0 auto; padding: 0 var(--pad); }
       .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
       .glass {
         background: var(--glass);
@@ -135,6 +138,75 @@
         background: rgba(255, 255, 255, 0.05); border: 1px dashed var(--gline2); }
       .lock a { color: var(--amber); }
       .foot { margin-top: 22px; font-size: 12px; color: var(--mute); }
+      /* full bleed act dividers */
+      .band { position: relative; width: 100%; margin: 26px 0; overflow: hidden;
+        min-height: 190px; display: grid; place-items: center; isolation: isolate; }
+      .band .bimg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+      .band .bveil { position: absolute; inset: 0; z-index: -1;
+        background: linear-gradient(180deg, rgba(10,17,26,0.9), rgba(10,17,26,0.55) 45%, rgba(10,17,26,0.92)); }
+      .band .btxt { text-align: center; padding: 34px var(--pad); max-width: 760px; }
+      .band .beye { font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+        font-weight: 800; color: var(--amber); }
+      .band h2 { margin: 8px 0 0; font-size: clamp(22px, 4.6vw, 36px); letter-spacing: -0.02em; line-height: 1.05; }
+      .band p { margin: 8px 0 0; color: var(--dim); font-size: 13.5px; }
+      /* workbench */
+      .wb { margin-top: 16px; border-top: 1px solid var(--gline2); padding-top: 14px; }
+      .wb .wbhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+      .wb .wbeye { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 800; color: var(--amber); }
+      .wb .sv { margin-left: auto; font-size: 11px; color: var(--mute); display: flex; align-items: center; gap: 6px; }
+      .wb .sv .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .wb .sv.dirty .dot { background: var(--amber); }
+      .wb .sv.saving .dot { background: var(--amber); animation: pulse 1s infinite; }
+      .wb .sv.saved .dot { background: var(--teal); }
+      .wb .sv.error { color: var(--crit); } .wb .sv.error .dot { background: var(--crit); }
+      @keyframes pulse { 50% { opacity: 0.3; } }
+      .wbadd { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+      .wbadd button { font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; color: var(--dim);
+        background: rgba(255,255,255,0.06); border: 1px dashed var(--gline2); border-radius: 999px;
+        padding: 8px 13px; min-height: 38px; }
+      .wbadd button:hover { border-color: var(--amber); color: var(--ink); }
+      .wbitem { border: 1px solid var(--gline); border-radius: 12px; padding: 11px 12px; margin-bottom: 9px;
+        background: rgba(255,255,255,0.04); }
+      .wbitem .top { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+      .wbitem .tag { font-size: 9.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+        padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.09); color: var(--mute); }
+      .wbitem .tag.note { color: #bfe6ff; } .wbitem .tag.deliverable { color: #ffd98a; }
+      .wbitem .tag.option { color: #9df0e4; }
+      .wbitem .who { margin-left: auto; font-size: 10.5px; color: var(--faint); }
+      .wbitem input.t, .wbitem textarea {
+        width: 100%; font: inherit; color: var(--ink); background: rgba(0,0,0,0.28);
+        border: 1px solid var(--gline); border-radius: 9px; padding: 9px 11px; resize: vertical;
+      }
+      .wbitem input.t { font-weight: 700; font-size: 13.5px; margin-bottom: 6px; }
+      .wbitem textarea { font-size: 13px; line-height: 1.55; min-height: 62px; }
+      .wbitem input.t:focus, .wbitem textarea:focus { border-color: rgba(248,184,0,0.55); outline: none; }
+      .wbitem .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+      .st { display: flex; gap: 4px; }
+      .st button { font: inherit; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em;
+        text-transform: uppercase; cursor: pointer; color: var(--mute); background: transparent;
+        border: 1px solid var(--gline); border-radius: 999px; padding: 6px 10px; min-height: 34px; }
+      .st button[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #04211d; }
+      .st button.done[aria-pressed="true"] { background: var(--teal); }
+      .del { margin-left: auto; font: inherit; font-size: 11px; cursor: pointer; color: var(--faint);
+        background: none; border: 0; padding: 6px; }
+      .del:hover { color: var(--crit); }
+      .opts { display: grid; gap: 7px; }
+      .opt { display: grid; grid-template-columns: auto 1fr; gap: 9px; align-items: start;
+        border: 1px solid var(--gline); border-radius: 10px; padding: 9px 10px; background: rgba(0,0,0,0.18); }
+      .opt.won { border-color: var(--teal); background: rgba(0,210,190,0.09); }
+      .opt .pick { font: inherit; font-family: "Arial Black", Arial, sans-serif; font-size: 13px; cursor: pointer;
+        width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--gline2);
+        background: rgba(255,255,255,0.06); color: var(--dim); }
+      .opt.won .pick { background: var(--teal); border-color: var(--teal); color: #04211d; }
+      .opt textarea { min-height: 46px; }
+      .feed { max-height: 300px; overflow: auto; }
+      .feed .ev { display: flex; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--gline); font-size: 12.5px; }
+      .feed .ev:last-child { border-bottom: 0; }
+      .feed .ev .a { color: var(--teal); font-weight: 700; white-space: nowrap; }
+      .feed .ev .d { color: var(--dim); flex: 1; }
+      .feed .ev .t { color: var(--faint); white-space: nowrap; font-size: 11px; }
+      .wbnote { font-size: 12px; color: var(--mute); padding: 10px 12px; border-radius: 10px;
+        background: rgba(255,255,255,0.04); border: 1px dashed var(--gline2); }
       /* tablet */
       @media (min-width: 640px) {
         :root { --pad: 18px; }
@@ -173,20 +245,25 @@
     <div class="rule"></div>
     <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
     <div class="wrap">
-      <div class="head glass">
-        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
-        <h1 class="display">Visitor <span class="a">Journeys</span></h1>
-        <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span><span class="lbl">&nbsp;view</span></span>
+      <div class="col">
+        <div class="head glass">
+          <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+          <h1 class="display">Visitor <span class="a">Journeys</span></h1>
+          <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span><span class="lbl">&nbsp;view</span></span>
+        </div>
+        <p class="sub">
+          Every visitor journey, live. Tap any step for its numbers, links, and the workbench
+          where the work for that step gets written down. Staff who are signed in at the console
+          see live admin data and can edit here; everyone edits the same copy.
+        </p>
       </div>
-      <p class="sub">
-        Every visitor journey, live. Tap any step for its numbers, links, and controls. Staff who
-        are signed in at the console see live admin data here automatically.
-      </p>
-      <div class="lanes" id="lanes"></div>
-      <p class="foot">
-        Numbers refresh every 45 seconds while this tab is open. Rows and totals come straight
-        from the console database; nothing here is simulated.
-      </p>
+      <div id="stage"></div>
+      <div class="col">
+        <p class="foot">
+          Numbers refresh every 45 seconds while this tab is open. Rows and totals come straight
+          from the console database; nothing here is simulated.
+        </p>
+      </div>
     </div>
     <div class="scrim" id="scrim"></div>
     <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle" aria-hidden="true" tabindex="-1" inert>
@@ -222,7 +299,8 @@
       var ORIGIN = location.origin;
       var staff = false;
       var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
-      var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null, spectators: null, clubs: null, features: null };
+      var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null,
+                   spectators: null, clubs: null, features: null, wb: null, feed: null };
 
       /* ---------- the map model: every node declares its own panel ---------- */
       var LANES = [
@@ -276,6 +354,7 @@
             { t: "One sheet per submission", d: "Approve, decline, copy the notice.", panel: "review" },
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
             { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
+            { t: "Every change, logged", d: "Who touched what, and when.", panel: "changes", pill: function () { return LIVE.feed && LIVE.feed.length; } },
           ] },
       ];
 
@@ -422,6 +501,28 @@
               '<a href="/site-plan/">Print the site plan</a>' +
               copyBtn("Copy site plan link", ORIGIN + "/site-plan/")) };
         },
+        changes: function () {
+          var f = LIVE.feed;
+          var body;
+          if (!staff) body = lock();
+          else if (WB_MISSING) body = '<div class="wbnote">The activity table was created a moment ago and the ' +
+            'data API has not picked it up yet. It starts filling in as soon as that cache refreshes.</div>';
+          else if (!f || !f.length) body = "<p>Nothing has been written into the workbench yet. Every note, option, " +
+            "status change and upload lands here the moment someone makes it.</p>";
+          else {
+            var verb = { created: "added", edited: "edited", chose: "chose", status: "moved",
+                         uploaded: "attached to", deleted: "deleted" };
+            body = '<div class="feed">' + f.slice(0, 60).map(function (e) {
+              return '<div class="ev"><span class="a">' + esc(who(e.actor)) + "</span>" +
+                '<span class="d">' + esc(verb[e.action] || e.action) + " " + esc(e.detail || "an item") +
+                (e.panel ? ' <span style="color:var(--faint)">in ' + esc(e.panel) + "</span>" : "") + "</span>" +
+                '<span class="t">' + ago(e.at) + "</span></div>";
+            }).join("") + "</div>";
+          }
+          return { e: "Staff", t: "Every change, logged", body:
+            "<p>The workbench writes its own history. This is logged in the database by a trigger, not by the " +
+            "page, so a change cannot happen without showing up here.</p>" + body };
+        },
       };
       function pipeline(rows) {
         var order = [["committed", "Committed"], ["warm", "Warm"], ["named", "Named, not asked"], ["open", "Open"]];
@@ -447,29 +548,186 @@
         }
         return Math.abs(s) / 2 / 4046.86;
       }
+      /* ---------- workbench: shared, autosaving, logged ----------
+         Save contract, learned the hard way on this codebase:
+         (a) flush on panel close, never rely on the debounce alone,
+         (b) serialise per row so two responses cannot land out of order,
+         (c) ask for the id back and treat zero rows as a FAILURE, because an
+             RLS refusal returns success-with-no-rows and the UI would
+             otherwise cheerfully report "Saved" over data that never landed. */
+      var WB_MISSING = false; // Data API schema cache has not picked the table up yet
+      var Saver = (function () {
+        var chain = {}, timer = {}, pending = {}, watchers = [];
+        function emit(state, msg) { watchers.forEach(function (f) { f(state, msg); }); }
+        function flush(id) {
+          var patch = pending[id];
+          if (!patch) return Promise.resolve();
+          delete pending[id];
+          chain[id] = (chain[id] || Promise.resolve())
+            .then(function () {
+              emit("saving");
+              return db.from("workbench_items").update(patch).eq("id", id).select("id");
+            })
+            .then(function (r) {
+              if (r && r.error) throw new Error(r.error.message);
+              if (!r || !r.data || !r.data.length) {
+                throw new Error("nothing came back, which is what a permission refusal looks like");
+              }
+              emit("saved");
+            })
+            .catch(function (e) { emit("error", e.message || String(e)); });
+          return chain[id];
+        }
+        return {
+          queue: function (id, patch, delay) {
+            pending[id] = Object.assign(pending[id] || {}, patch);
+            clearTimeout(timer[id]);
+            emit("dirty");
+            timer[id] = setTimeout(function () { flush(id); }, delay == null ? 650 : delay);
+          },
+          flushAll: function () {
+            var ids = Object.keys(pending);
+            ids.forEach(function (id) { clearTimeout(timer[id]); });
+            return Promise.all(ids.map(flush));
+          },
+          dirty: function () { return Object.keys(pending).length > 0; },
+          watch: function (f) { watchers.push(f); },
+        };
+      })();
+
+      function ago(iso) {
+        var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+        if (s < 60) return "just now";
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+      function who(email) {
+        if (!email) return "someone";
+        var m = { "paddock20auto@gmail.com": "Gavin", "gavin@paddock20.com": "Gavin",
+                  "bekah@paddock20.com": "Bekah", "bekahstallard@gmail.com": "Bekah" };
+        return m[String(email).toLowerCase()] || String(email).split("@")[0];
+      }
+      function itemsFor(panel) {
+        return (LIVE.wb || []).filter(function (x) { return x.panel === panel; })
+          .sort(function (a, b) { return a.sort - b.sort || a.created_at.localeCompare(b.created_at); });
+      }
+
+      function wbHtml(panel) {
+        if (!staff) return "";
+        if (WB_MISSING) {
+          return '<div class="wb"><div class="wbhead"><span class="wbeye">Workbench</span></div>' +
+            '<div class="wbnote">The workbench tables were created a moment ago and the data API has not ' +
+            'picked them up yet. Neon refreshes that cache on its own schedule, usually inside an hour. ' +
+            'Nothing is lost; this panel starts working when it lands.</div></div>';
+        }
+        var rows = itemsFor(panel);
+        var h = '<div class="wb" data-wb="' + esc(panel) + '"><div class="wbhead">' +
+          '<span class="wbeye">Workbench</span>' +
+          '<span class="sv" data-sv><span class="dot"></span><span class="txt">Up to date</span></span></div>' +
+          '<div class="wbadd">' +
+          '<button type="button" data-add="note" data-panel="' + esc(panel) + '">+ Note</button>' +
+          '<button type="button" data-add="option" data-panel="' + esc(panel) + '">+ A / B / C options</button>' +
+          '<button type="button" data-add="deliverable" data-panel="' + esc(panel) + '">+ Deliverable</button>' +
+          "</div>";
+
+        var groups = {}, plain = [];
+        rows.forEach(function (r) {
+          if (r.kind === "option" && r.option_group) {
+            (groups[r.option_group] = groups[r.option_group] || []).push(r);
+          } else plain.push(r);
+        });
+
+        Object.keys(groups).forEach(function (g) {
+          var set = groups[g].sort(function (a, b) { return (a.option_key || "").localeCompare(b.option_key || ""); });
+          var head = set[0];
+          h += '<div class="wbitem"><div class="top"><span class="tag option">Options</span>' +
+            '<span class="who">' + (head.updated_by ? esc(who(head.updated_by)) + " · " + ago(head.updated_at) : "new") + "</span></div>" +
+            '<input class="t" data-f="title" data-id="' + head.id + '" value="' + esc(head.title || "") +
+            '" placeholder="What is being decided" aria-label="Option set name" />' +
+            '<div class="opts">' +
+            set.map(function (o) {
+              return '<div class="opt' + (o.chosen ? " won" : "") + '">' +
+                '<button class="pick" type="button" data-choose="' + o.id + '" data-group="' + esc(g) +
+                '" aria-pressed="' + (o.chosen ? "true" : "false") +
+                '" aria-label="Choose option ' + esc(o.option_key) + '">' + esc(o.option_key) + "</button>" +
+                '<textarea data-f="body" data-id="' + o.id + '" placeholder="Option ' + esc(o.option_key) +
+                '" aria-label="Option ' + esc(o.option_key) + ' detail">' + esc(o.body || "") + "</textarea></div>";
+            }).join("") +
+            '</div><div class="row"><button class="del" type="button" data-delgroup="' + esc(g) +
+            '" data-panel="' + esc(panel) + '">Remove this set</button></div></div>';
+        });
+
+        plain.forEach(function (r) {
+          h += '<div class="wbitem"><div class="top">' +
+            '<span class="tag ' + esc(r.kind) + '">' + (r.kind === "deliverable" ? "Deliverable" : "Note") + "</span>" +
+            '<span class="who">' + (r.updated_by ? esc(who(r.updated_by)) + " · " + ago(r.updated_at) : "new") + "</span></div>" +
+            '<input class="t" data-f="title" data-id="' + r.id + '" value="' + esc(r.title || "") +
+            '" placeholder="' + (r.kind === "deliverable" ? "What has to exist" : "Heading") + '" aria-label="Title" />' +
+            '<textarea data-f="body" data-id="' + r.id + '" placeholder="Type here. It saves as you go." aria-label="Detail">' +
+            esc(r.body || "") + "</textarea>" +
+            '<div class="row">' +
+            (r.kind === "deliverable"
+              ? '<div class="st" role="group" aria-label="Status">' +
+                ["open", "doing", "done", "parked"].map(function (s) {
+                  return '<button type="button" class="' + s + '" data-status="' + s + '" data-id="' + r.id +
+                    '" aria-pressed="' + (r.status === s ? "true" : "false") + '">' + s + "</button>";
+                }).join("") + "</div>"
+              : "") +
+            '<button class="del" type="button" data-del="' + r.id + '">Delete</button>' +
+            "</div></div>";
+        });
+        return h + "</div>";
+      }
+
       function stat(l, v, t) { return '<div class="stat-line"><span class="l">' + l + '</span><span class="v' + (t ? " t" : "") + '">' + v + "</span></div>"; }
       function acts(inner) { return '<div class="acts">' + inner + "</div>"; }
       function lock() { return '<div class="lock">Live admin numbers unlock automatically when you are signed in at the <a href="/">console</a> on this device.</div>'; }
 
       /* ---------- render lanes ---------- */
+      /* The three acts of a show day, each introduced by a full bleed band.
+         The image is structural: it announces whose turn it is, so the page
+         reads as a story rather than a wall of cards. */
+      var ACTS = [
+        { lanes: [0, 1, 2] },
+        { lanes: [3, 4], band: { img: "/events/img/ranch.jpg", eye: "Act two",
+            h: "The people who pay for it",
+            p: "Vendors and sponsors carry the day. Their lane is where the money and the promises live." } },
+        { lanes: [5], band: { img: "/events/img/walk.jpg", eye: "Act three",
+            h: "The people who run it",
+            p: "Every decision, every deliverable, every change to this document, logged as it happens." } },
+      ];
+
+      function laneHtml(l, li) {
+        return (
+          '<section class="lane glass" style="--i:' + li + '">' +
+          '<div class="who"><h2>' + esc(l.who) + '</h2><span class="badge ' + l.badge[0] + '">' + esc(l.badge[1]) + "</span></div>" +
+          '<div class="kpi" data-kpi="' + li + '">' + (l.kpi() || "&nbsp;") + "</div>" +
+          '<div class="flow">' +
+          l.nodes.map(function (n, ni) {
+            return (
+              (ni ? '<div class="arrow" aria-hidden="true"></div>' : "") +
+              '<button class="node" type="button" data-panel="' + n.panel + '" aria-label="' + esc(n.t + ". " + n.d) + '">' +
+              '<span class="pill" data-pill="' + n.panel + '" aria-hidden="true"></span>' +
+              "<b>" + esc(n.t) + "</b>" + esc(n.d) +
+              '<span class="n" aria-hidden="true">›</span></button>'
+            );
+          }).join("") +
+          "</div></section>"
+        );
+      }
       function render() {
-        document.getElementById("lanes").innerHTML = LANES.map(function (l, li) {
-          return (
-            '<section class="lane glass" style="--i:' + li + '">' +
-            '<div class="who"><h2>' + esc(l.who) + '</h2><span class="badge ' + l.badge[0] + '">' + esc(l.badge[1]) + "</span></div>" +
-            '<div class="kpi" data-kpi="' + li + '">' + (l.kpi() || "&nbsp;") + "</div>" +
-            '<div class="flow">' +
-            l.nodes.map(function (n, ni) {
-              return (
-                (ni ? '<div class="arrow" aria-hidden="true"></div>' : "") +
-                '<button class="node" type="button" data-panel="' + n.panel + '" aria-label="' + esc(n.t + ". " + n.d) + '">' +
-                '<span class="pill" data-pill="' + n.panel + '" aria-hidden="true"></span>' +
-                "<b>" + esc(n.t) + "</b>" + esc(n.d) +
-                '<span class="n" aria-hidden="true">›</span></button>'
-              );
-            }).join("") +
-            "</div></section>"
-          );
+        document.getElementById("stage").innerHTML = ACTS.map(function (act) {
+          var band = act.band
+            ? '<div class="band"><img class="bimg" src="' + act.band.img + '" alt="" aria-hidden="true" />' +
+              '<div class="bveil" aria-hidden="true"></div><div class="btxt">' +
+              '<div class="beye">' + esc(act.band.eye) + "</div>" +
+              '<h2 class="display">' + esc(act.band.h) + "</h2>" +
+              "<p>" + esc(act.band.p) + "</p></div></div>"
+            : "";
+          return band + '<div class="col"><div class="lanes">' +
+            act.lanes.map(function (i) { return laneHtml(LANES[i], i); }).join("") +
+            "</div></div>";
         }).join("");
         refreshPills();
       }
@@ -494,13 +752,21 @@
 
       /* ---------- modal ---------- */
       var sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim");
-      var lastFocus = null;
-      function openPanel(key, trigger) {
+      var lastFocus = null, openKey = null;
+      function paintPanel(key) {
         var p = PANELS[key] && PANELS[key]();
-        if (!p) return;
+        if (!p) return null;
         document.getElementById("shEyebrow").textContent = p.e;
         document.getElementById("shTitle").textContent = p.t;
-        document.getElementById("shBody").innerHTML = p.body;
+        // Every panel except the log itself carries its own workbench, so the
+        // work for a step is written down next to the numbers for that step.
+        document.getElementById("shBody").innerHTML = p.body + (key === "changes" ? "" : wbHtml(key));
+        return p;
+      }
+      function openPanel(key, trigger) {
+        var p = paintPanel(key);
+        if (!p) return;
+        openKey = key;
         lastFocus = trigger || document.activeElement;
         sheet.classList.add("on"); scrim.classList.add("on");
         sheet.setAttribute("aria-hidden", "false");
@@ -513,6 +779,8 @@
       }
       function closePanel() {
         if (!sheet.classList.contains("on")) return;
+        Saver.flushAll().then(function () { loadWorkbench(); }); // (a) flush on close
+        openKey = null;
         sheet.classList.remove("on"); scrim.classList.remove("on");
         sheet.setAttribute("aria-hidden", "true");
         sheet.setAttribute("inert", "");
@@ -520,7 +788,85 @@
         if (lastFocus && lastFocus.isConnected) lastFocus.focus();
         lastFocus = null;
       }
+      /* workbench writes */
+      function svState(state, msg) {
+        var el = sheet.querySelector("[data-sv]");
+        if (!el) return;
+        el.className = "sv " + state;
+        var t = { dirty: "Unsaved", saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || "") };
+        el.querySelector(".txt").textContent = t[state] || "Up to date";
+      }
+      Saver.watch(svState);
+
+      function newItem(panel, kind) {
+        var base = { event_id: EVENT_ID, panel: panel, kind: kind,
+          sort: itemsFor(panel).length * 10 + 10 };
+        var rows = kind === "option"
+          ? ["A", "B", "C"].map(function (k, i) {
+              return Object.assign({}, base, { option_group: "g" + Date.now(), option_key: k, sort: base.sort + i });
+            })
+          : [base];
+        return db.from("workbench_items").insert(rows).select("id").then(function (r) {
+          if (r && r.error) throw new Error(r.error.message);
+          if (!r || !r.data || !r.data.length) throw new Error("the insert came back empty, which is a permission refusal");
+          return loadWorkbench();
+        }).catch(function (err) { svState("error", err.message); });
+      }
+      function removeIds(ids) {
+        return db.from("workbench_items").delete().in("id", ids).select("id").then(function (r) {
+          if (r && r.error) throw new Error(r.error.message);
+          return loadWorkbench();
+        }).catch(function (err) { svState("error", err.message); });
+      }
+
+      document.addEventListener("input", function (e) {
+        var f = e.target.getAttribute && e.target.getAttribute("data-f");
+        if (!f) return;
+        var id = e.target.getAttribute("data-id");
+        var patch = {}; patch[f] = e.target.value;
+        Saver.queue(id, patch);
+      });
+
       document.addEventListener("click", function (e) {
+        var add = e.target.closest("[data-add]");
+        if (add) return newItem(add.getAttribute("data-panel"), add.getAttribute("data-add"));
+
+        var st = e.target.closest("[data-status]");
+        if (st) {
+          var sid = st.getAttribute("data-id"), sv = st.getAttribute("data-status");
+          st.parentNode.querySelectorAll("button").forEach(function (b) {
+            b.setAttribute("aria-pressed", b === st ? "true" : "false");
+          });
+          Saver.queue(sid, { status: sv }, 0);
+          return;
+        }
+
+        var ch = e.target.closest("[data-choose]");
+        if (ch) {
+          var pick = ch.getAttribute("data-choose"), grp = ch.getAttribute("data-group");
+          var set = (LIVE.wb || []).filter(function (x) { return x.option_group === grp; });
+          set.forEach(function (o) {
+            var won = o.id === pick;
+            o.chosen = won;
+            Saver.queue(o.id, { chosen: won }, 0);
+          });
+          ch.closest(".opts").querySelectorAll(".opt").forEach(function (el) {
+            var b = el.querySelector(".pick");
+            var won = b === ch;
+            el.classList.toggle("won", won);
+            b.setAttribute("aria-pressed", won ? "true" : "false");
+          });
+          return;
+        }
+
+        var d1 = e.target.closest("[data-del]");
+        if (d1) return removeIds([d1.getAttribute("data-del")]);
+        var dg = e.target.closest("[data-delgroup]");
+        if (dg) {
+          var g = dg.getAttribute("data-delgroup");
+          return removeIds((LIVE.wb || []).filter(function (x) { return x.option_group === g; }).map(function (x) { return x.id; }));
+        }
+
         var n = e.target.closest(".node");
         if (n) return openPanel(n.getAttribute("data-panel"), n);
         if (e.target.closest("#close") || e.target === scrim) return closePanel();
@@ -593,13 +939,57 @@
         m.classList.add("staff");
         document.getElementById("modeTxt").textContent = "Staff · live";
       }
+      /* ---------- workbench sync ---------- */
+      function typingInSheet() {
+        var a = document.activeElement;
+        return !!(a && sheet.contains(a) && (a.tagName === "TEXTAREA" || a.tagName === "INPUT"));
+      }
+      async function loadWorkbench() {
+        if (!db || !staff) return;
+        try {
+          var w = await db.from("workbench_items").select("*").eq("event_id", EVENT_ID).order("sort");
+          if (w.error) {
+            // A brand new table is invisible to the data API until its schema
+            // cache refreshes. Say so plainly rather than rendering an empty
+            // workbench that looks like data loss.
+            if (/schema cache/i.test(w.error.message)) { WB_MISSING = true; return; }
+            throw new Error(w.error.message);
+          }
+          WB_MISSING = false;
+          LIVE.wb = w.data || [];
+        } catch (e) { return; }
+        try {
+          var a = await db.from("workbench_activity").select("*").eq("event_id", EVENT_ID)
+            .order("at", { ascending: false }).limit(60);
+          a.error || (LIVE.feed = a.data || []);
+        } catch (e) {}
+        // Repaint only when it cannot steal a caret or overwrite an unsaved edit.
+        if (openKey && sheet.classList.contains("on") && !typingInSheet() && !Saver.dirty()) {
+          paintPanel(openKey);
+        }
+        refreshPills();
+      }
       async function tick() {
         await loadPublic();
         await loadStaff();
+        await loadWorkbench();
         refreshPills();
       }
+      // Never lose an edit to a closing tab.
+      window.addEventListener("beforeunload", function (e) {
+        if (!Saver.dirty()) return;
+        Saver.flushAll();
+        e.preventDefault();
+        e.returnValue = "";
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) Saver.flushAll();
+      });
       render();
       tick();
+      // The workbench is shared, so it polls faster than the headline numbers:
+      // this is near-live, not true realtime. The data API has no push channel.
+      setInterval(function () { document.hidden || loadWorkbench(); }, 8e3);
       setInterval(function () { document.hidden || tick(); }, 45e3);
     </script>
   </body>

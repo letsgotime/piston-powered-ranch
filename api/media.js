@@ -6,12 +6,23 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
  *
  * The Blob store is private, so nothing under it is readable by URL. Submitted
  * vehicle photos routinely show plates and VINs, so read access is gated on a
- * verified Neon Auth token belonging to one of the three staff addresses,
- * the same allowlist is_staff() enforces in Postgres. This is deliberately a
- * second, independent check: RLS protects the rows, this protects the pixels.
+ * verified Neon Auth token belonging to a staff address, mirroring what
+ * is_staff() enforces in Postgres. This is deliberately a second, independent
+ * check: RLS protects the rows, this protects the pixels.
+ *
+ * Keep this set in step with public.staff_allowlist. It drifted once already:
+ * the table had bekahstallard@gmail.com (the address she actually signs in
+ * with) while this list only had bekah@paddock20.com, so her session verified
+ * and was then refused here. Once DATABASE_URL is in the Vercel env this
+ * should read the allowlist table instead of duplicating it.
  */
 
-const STAFF = new Set(["paddock20auto@gmail.com", "gavin@paddock20.com", "bekah@paddock20.com"]);
+const STAFF = new Set([
+  "paddock20auto@gmail.com",
+  "gavin@paddock20.com",
+  "bekah@paddock20.com",
+  "bekahstallard@gmail.com",
+]);
 
 const JWKS = createRemoteJWKSet(
   new URL(
