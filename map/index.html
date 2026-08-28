@@ -737,7 +737,10 @@
          the free US government feed. NWS only forecasts 7 days out, so
          Open-Meteo covers the longer horizon until show day comes into range. */
       var NWS = {
-        obs: "https://api.weather.gov/stations/KSYI/observations/latest",
+        /* Shelbyville, then Lewisburg, then Smyrna. The latest endpoint can
+           publish a null temperature, so walk recent observations instead. */
+        stations: ["KSYI", "KLUG", "KMQY"],
+        obsUrl: function (st) { return "https://api.weather.gov/stations/" + st + "/observations?limit=6"; },
         forecast: "https://api.weather.gov/gridpoints/OHX/59,34/forecast",
         alerts: "https://api.weather.gov/alerts/active?point=35.6310,-86.5869",
       };
@@ -746,10 +749,22 @@
           .then(function (r) { return r.ok ? r.json() : null; })
           .catch(function () { return null; });
       }
+      async function nwsObs() {
+        for (var i = 0; i < NWS.stations.length; i++) {
+          var j = await jget(NWS.obsUrl(NWS.stations[i]));
+          var f = j && j.features;
+          if (!f) continue;
+          for (var k = 0; k < f.length; k++) {
+            var pr = f[k].properties;
+            if (pr && pr.temperature && pr.temperature.value != null) return pr;
+          }
+        }
+        return null;
+      }
       async function loadWeather() {
         var got = { now: false, day: false };
-        var res = await Promise.all([jget(NWS.obs), jget(NWS.forecast), jget(NWS.alerts)]);
-        var obs = res[0] && res[0].properties;
+        var res = await Promise.all([nwsObs(), jget(NWS.forecast), jget(NWS.alerts)]);
+        var obs = res[0];
         if (obs && obs.temperature && obs.temperature.value != null) {
           TELEM.tempF = Math.round((obs.temperature.value * 9) / 5 + 32);
           TELEM.sky = obs.textDescription || null;
