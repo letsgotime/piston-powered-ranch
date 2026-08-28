@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Vendor &amp; Sponsor Board · The Piston Powered Ranch</title>
+    <meta name="description" content="The live vendor and sponsor board for The Piston Powered Ranch." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <style>
+      :root {
+        --bg: #0a111a; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --gline: rgba(255, 255, 255, 0.12); --gline2: rgba(255, 255, 255, 0.2);
+        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d; --steel: #a9b4c2;
+        --glass: linear-gradient(157deg, rgba(30, 45, 62, 0.66), rgba(11, 19, 29, 0.64));
+        --glass2: linear-gradient(157deg, rgba(38, 55, 74, 0.56), rgba(16, 26, 38, 0.54));
+        --rim: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+        --e0: 0 2px 12px rgba(0, 0, 0, 0.25); --e1: 0 10px 34px rgba(0, 0, 0, 0.4);
+        --e2: 0 24px 70px rgba(0, 0, 0, 0.6); --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+        --pad: 16px;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 15.5px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: 100%;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+      :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; border-radius: 8px; }
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly { position: absolute; inset: 0;
+        background: url(/events/img/dusk.jpg) center 42% / cover no-repeat; transform: scale(1.04); }
+      .ground .veil { position: absolute; inset: 0;
+        background: linear-gradient(180deg, rgba(10,17,26,0.8), rgba(10,17,26,0.66) 42%, rgba(10,17,26,0.93)); }
+      .rule { height: 4px; position: relative; z-index: 60;
+        background: linear-gradient(90deg, var(--amber) 0 30%, var(--teal) 30% 55%, var(--steel) 55% 100%); }
+      .wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto;
+        padding: 20px var(--pad) calc(70px + env(safe-area-inset-bottom)); }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .glass { background: var(--glass);
+        -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5);
+        border: 1px solid var(--gline); border-radius: 16px; box-shadow: var(--e1), var(--rim); }
+      .head { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+      .head img { height: 28px; flex-shrink: 0; }
+      h1 { margin: 0; font-size: clamp(19px, 5vw, 30px); letter-spacing: -0.02em; line-height: 1.03; }
+      h1 .a { color: var(--amber); }
+      .mode { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 10.5px;
+        font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; color: var(--mute);
+        border: 1px solid var(--gline); padding: 6px 11px; border-radius: 999px; white-space: nowrap; }
+      .mode .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .mode.staff { color: var(--teal); border-color: rgba(0,210,190,0.45); }
+      .mode.staff .d { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+      .sv { margin-left: 10px; font-size: 11px; color: var(--mute); display: flex; align-items: center; gap: 6px; }
+      .sv .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .sv.dirty .dot, .sv.saving .dot { background: var(--amber); }
+      .sv.saving .dot { animation: pulse 1s infinite; }
+      .sv.saved .dot { background: var(--teal); }
+      .sv.error { color: var(--crit); } .sv.error .dot { background: var(--crit); }
+      @keyframes pulse { 50% { opacity: 0.3; } }
+      .sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 10px; margin: 16px 0 8px; }
+      .stat { background: var(--glass2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline); border-radius: 14px; box-shadow: var(--e0), var(--rim);
+        padding: 13px 15px; transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); }
+      .stat b { display: block; font-family: "Arial Black", Arial, sans-serif; font-size: 25px;
+        line-height: 1; font-variant-numeric: tabular-nums; color: var(--amber); }
+      .stat.t b { color: var(--teal); }
+      .stat span { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--mute); display: block; margin-top: 6px; }
+      h2 { font-family: "Arial Black", Arial, sans-serif; font-size: 14px; letter-spacing: 0.14em;
+        text-transform: uppercase; margin: 30px 0 12px; display: flex; align-items: baseline;
+        gap: 12px; flex-wrap: wrap; }
+      h2 em { font-style: normal; font-family: inherit; font-size: 11px; font-weight: 400;
+        letter-spacing: 0.08em; color: var(--mute); }
+      h2 .add { margin-left: auto; font: inherit; font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+        cursor: pointer; color: var(--dim); background: rgba(255,255,255,0.06);
+        border: 1px dashed var(--gline2); border-radius: 999px; padding: 8px 14px; min-height: 38px;
+        text-transform: uppercase; }
+      h2 .add:hover { border-color: var(--amber); color: var(--ink); }
+      .stage { margin-bottom: 18px; }
+      .stage .sh { font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800;
+        color: var(--mute); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+      .stage .sh .n { color: var(--faint); font-variant-numeric: tabular-nums; }
+      .stage .sh .bar { height: 3px; border-radius: 3px; flex: 1; background: var(--gline); }
+      .stage[data-s="committed"] .sh { color: var(--teal); }
+      .stage[data-s="committed"] .sh .bar { background: var(--teal); }
+      .stage[data-s="warm"] .sh { color: var(--amber); }
+      .stage[data-s="warm"] .sh .bar { background: var(--amber); }
+      .rows { display: flex; flex-direction: column; gap: 8px; }
+      .row { background: var(--glass2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline); border-radius: 14px; box-shadow: var(--e0), var(--rim);
+        padding: 11px 13px; display: grid; gap: 8px;
+        grid-template-columns: 1fr; transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+      @media (hover: hover) {
+        .row:hover { transform: translateY(-2px); box-shadow: var(--e1), var(--rim); }
+        .stat:hover { transform: translateY(-3px); box-shadow: var(--e1), var(--rim); }
+      }
+      .row .line1 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .row input, .row textarea, .row select {
+        font: inherit; color: var(--ink); background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--gline); border-radius: 9px; padding: 8px 10px; }
+      .row input:focus, .row textarea:focus, .row select:focus {
+        border-color: rgba(248, 184, 0, 0.6); outline: none; }
+      .row .cat { flex: 1 1 150px; font-weight: 800; font-size: 13px; min-width: 0; }
+      .row .co { flex: 2 1 190px; font-size: 13px; min-width: 0; }
+      .row textarea { width: 100%; font-size: 12.5px; min-height: 38px; resize: vertical; color: var(--dim); }
+      .row select { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+        color: var(--mute); padding: 8px 9px; }
+      .row .del { font: inherit; font-size: 11px; cursor: pointer; color: var(--faint);
+        background: none; border: 0; padding: 8px; min-height: 36px; }
+      .row .del:hover { color: var(--crit); }
+      .lock { margin-top: 20px; padding: 16px 18px; border-radius: 14px; font-size: 13.5px; color: var(--dim);
+        background: var(--glass); border: 1px dashed var(--gline2); box-shadow: var(--e0); }
+      .lock a { color: var(--amber); }
+      .foot { margin-top: 30px; font-size: 12px; color: var(--mute); }
+      .foot a { color: var(--dim); }
+      @media (min-width: 760px) {
+        :root { --pad: 22px; }
+        .row { grid-template-columns: 1fr; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .row, .stat { transition: none; }
+        .row:hover, .stat:hover { transform: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
+    <div class="wrap">
+      <div class="head glass">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <h1 class="display">Vendor &amp; sponsor <span class="a">board</span></h1>
+        <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span></span>
+        <span class="sv" id="sv"><span class="dot"></span><span class="txt">Up to date</span></span>
+      </div>
+      <div class="sum" id="sum"></div>
+      <div id="stage"></div>
+      <p class="foot">
+        This board is the <a href="/journeys/">journeys</a> CRM, not a copy of it. Every edit saves as you
+        type and is the same row the vendor and sponsor lanes count.
+      </p>
+    </div>
+
+    <script type="module">
+      import {
+        createClient,
+        SupabaseAuthAdapter,
+      } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var STAGES = [
+        ["committed", "Committed"],
+        ["warm", "Warm"],
+        ["named", "Named, not asked"],
+        ["open", "Open, no name yet"],
+      ];
+      var STAFF_EMAILS = ["paddock20auto@gmail.com", "gavin@paddock20.com",
+                          "bekah@paddock20.com", "bekahstallard@gmail.com"];
+      var db = null, staff = false, ROWS = [];
+      try {
+        db = createClient({
+          auth: {
+            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+            allowAnonymous: true,
+            adapter: SupabaseAuthAdapter(),
+          },
+          dataApi: { url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1" },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+
+      /* Same save contract as the journeys workbench: serialise per row so two
+         responses cannot land out of order, and treat zero returned rows as a
+         failure, because that is exactly what an RLS refusal looks like. */
+      var Saver = (function () {
+        var chain = {}, timer = {}, pending = {};
+        function paint(state, msg) {
+          var el = document.getElementById("sv");
+          el.className = "sv " + state;
+          el.querySelector(".txt").textContent =
+            { dirty: "Unsaved", saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || "") }[state] || "Up to date";
+        }
+        function flush(id) {
+          var patch = pending[id];
+          if (!patch) return Promise.resolve();
+          delete pending[id];
+          chain[id] = (chain[id] || Promise.resolve())
+            .then(function () { paint("saving"); return db.from("accounts").update(patch).eq("id", id).select("id"); })
+            .then(function (r) {
+              if (r && r.error) throw new Error(r.error.message);
+              if (!r || !r.data || !r.data.length) throw new Error("nothing came back, which is what a permission refusal looks like");
+              paint("saved");
+            })
+            .catch(function (e) { paint("error", e.message || String(e)); });
+          return chain[id];
+        }
+        return {
+          queue: function (id, patch, delay) {
+            pending[id] = Object.assign(pending[id] || {}, patch);
+            clearTimeout(timer[id]); paint("dirty");
+            timer[id] = setTimeout(function () { flush(id); }, delay == null ? 650 : delay);
+          },
+          flushAll: function () {
+            var ids = Object.keys(pending);
+            ids.forEach(function (id) { clearTimeout(timer[id]); });
+            return Promise.all(ids.map(flush));
+          },
+          dirty: function () { return Object.keys(pending).length > 0; },
+          paint: paint,
+        };
+      })();
+
+      function rowHtml(r) {
+        return '<div class="row" data-row="' + r.id + '">' +
+          '<div class="line1">' +
+          '<input class="cat" data-f="category" data-id="' + r.id + '" value="' + esc(r.category || "") +
+          '" placeholder="Category" aria-label="Category" />' +
+          '<input class="co" data-f="company" data-id="' + r.id + '" value="' + esc(r.company || "") +
+          '" placeholder="Who, once you know" aria-label="Company" />' +
+          '<select data-f="pipeline_stage" data-id="' + r.id + '" aria-label="Stage">' +
+          STAGES.map(function (s) {
+            return '<option value="' + s[0] + '"' + (r.pipeline_stage === s[0] ? " selected" : "") + ">" + esc(s[1]) + "</option>";
+          }).join("") + "</select>" +
+          '<button class="del" type="button" data-del="' + r.id + '" aria-label="Delete ' +
+          esc(r.category || r.company || "row") + '">Delete</button>' +
+          "</div>" +
+          '<textarea data-f="note" data-id="' + r.id + '" placeholder="Notes, who knows them, what the ask is" aria-label="Note">' +
+          esc(r.note || "") + "</textarea></div>";
+      }
+
+      function render() {
+        if (!staff) {
+          document.getElementById("sum").innerHTML = "";
+          document.getElementById("stage").innerHTML =
+            '<div class="lock">This board is the working vendor and sponsor pipeline, so it is staff only. ' +
+            'Sign in at the <a href="/">console</a> on this device and it unlocks here automatically.</div>';
+          return;
+        }
+        var v = ROWS.filter(function (r) { return r.type === "vendor"; });
+        var s = ROWS.filter(function (r) { return r.type === "sponsor"; });
+        var named = ROWS.filter(function (r) { return r.company && !/^\(open\)/.test(r.company); });
+        var committed = ROWS.filter(function (r) { return r.pipeline_stage === "committed"; });
+        var warm = ROWS.filter(function (r) { return r.pipeline_stage === "warm"; });
+        document.getElementById("sum").innerHTML =
+          '<div class="stat"><b>' + ROWS.length + "</b><span>Categories</span></div>" +
+          '<div class="stat t"><b>' + committed.length + "</b><span>Committed</span></div>" +
+          '<div class="stat"><b>' + warm.length + "</b><span>Warm</span></div>" +
+          '<div class="stat"><b>' + (named.length - committed.length - warm.length) + "</b><span>Named, not asked</span></div>" +
+          '<div class="stat"><b>' + (ROWS.length - named.length) + "</b><span>No name yet</span></div>";
+
+        document.getElementById("stage").innerHTML = [["vendor", "Vendors", v], ["sponsor", "Sponsors", s]]
+          .map(function (grp) {
+            return "<h2>" + esc(grp[1]) + "<em>" + grp[2].length + " categories</em>" +
+              '<button class="add" type="button" data-addtype="' + grp[0] + '">+ Add category</button></h2>' +
+              STAGES.map(function (st) {
+                var set = grp[2].filter(function (r) { return (r.pipeline_stage || "open") === st[0]; });
+                if (!set.length) return "";
+                return '<div class="stage" data-s="' + st[0] + '"><div class="sh">' + esc(st[1]) +
+                  '<span class="n">' + set.length + '</span><span class="bar"></span></div>' +
+                  '<div class="rows">' + set.map(rowHtml).join("") + "</div></div>";
+              }).join("");
+          }).join("");
+      }
+
+      async function load() {
+        if (!db) return;
+        try {
+          var ses = await db.auth.getSession();
+          var em = ses && ses.data && ses.data.session && ses.data.session.user && ses.data.session.user.email;
+          staff = Boolean(em && STAFF_EMAILS.indexOf(String(em).toLowerCase()) !== -1);
+        } catch (e) { staff = false; }
+        var m = document.getElementById("mode");
+        m.classList.toggle("staff", staff);
+        document.getElementById("modeTxt").textContent = staff ? "Staff · live" : "Public";
+        if (!staff) return render();
+        try {
+          var r = await db.from("accounts").select("*").order("type").order("sort");
+          if (r.error) throw new Error(r.error.message);
+          ROWS = r.data || [];
+        } catch (e) { Saver.paint("error", e.message); return; }
+        var a = document.activeElement;
+        // Never repaint out from under someone mid-sentence.
+        if (!(a && a.getAttribute && a.getAttribute("data-f")) && !Saver.dirty()) render();
+      }
+
+      document.addEventListener("input", function (e) {
+        var f = e.target.getAttribute && e.target.getAttribute("data-f");
+        if (!f) return;
+        var patch = {}; patch[f] = e.target.value;
+        Saver.queue(e.target.getAttribute("data-id"), patch);
+      });
+      document.addEventListener("change", function (e) {
+        var f = e.target.getAttribute && e.target.getAttribute("data-f");
+        if (f !== "pipeline_stage") return;
+        var patch = { pipeline_stage: e.target.value };
+        Saver.queue(e.target.getAttribute("data-id"), patch, 0);
+        setTimeout(load, 400); // it moves to another stage group, so redraw
+      });
+      document.addEventListener("click", async function (e) {
+        var add = e.target.closest("[data-addtype]");
+        if (add) {
+          var t = add.getAttribute("data-addtype");
+          var max = ROWS.filter(function (r) { return r.type === t; })
+            .reduce(function (n, r) { return Math.max(n, r.sort || 0); }, 0);
+          var ins = await db.from("accounts").insert([{ type: t, company: "", category: "",
+            pipeline_stage: "open", status: "applied", event_id: EVENT_ID, sort: max + 10 }]).select("id");
+          if (ins && ins.error) return Saver.paint("error", ins.error.message);
+          if (!ins || !ins.data || !ins.data.length) return Saver.paint("error", "the insert came back empty, which is a permission refusal");
+          await load();
+          var el = document.querySelector('[data-row="' + ins.data[0].id + '"] .cat');
+          el && el.focus();
+          return;
+        }
+        var d = e.target.closest("[data-del]");
+        if (d) {
+          var id = d.getAttribute("data-del");
+          var row = ROWS.filter(function (x) { return x.id === id; })[0];
+          var label = (row && (row.company || row.category)) || "this row";
+          if (!confirm("Delete " + label + " from the board? This removes the row from the CRM.")) return;
+          var del = await db.from("accounts").delete().eq("id", id).select("id");
+          if (del && del.error) return Saver.paint("error", del.error.message);
+          await load();
+        }
+      });
+      window.addEventListener("beforeunload", function (e) {
+        if (!Saver.dirty()) return;
+        Saver.flushAll(); e.preventDefault(); e.returnValue = "";
+      });
+      document.addEventListener("visibilitychange", function () { if (document.hidden) Saver.flushAll(); });
+
+      render();
+      load();
+      setInterval(function () { document.hidden || load(); }, 10e3);
+    </script>
+  </body>
+</html>
