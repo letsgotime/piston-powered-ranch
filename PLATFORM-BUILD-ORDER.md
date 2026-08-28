@@ -20,7 +20,14 @@ migration in P1; the live site stays up throughout and deploys stay git-push.
   use it. Sandbox scaffolding created Aug 28: product prod_V9eQl4XHYCHpnz
   (Vendor Booth Setup Deposit) with price price_1U9L7vF2UEFJidMhUm3FBBCV
   ($250 one-time, 10x10). Additional footprint prices get added as the booth
-  matrix firms up; Checkout sessions in P1 reference these.
+  matrix firms up; Checkout sessions in P1 reference these. Also live in the
+  sandbox: payment link plink_1U9LBYF2UEFJidMh8Nmz1nZM
+  (buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a, redirects to /events after
+  payment) and webhook endpoint we_1U9LDFF2UEFJidMhMXVbfhmk pointed at
+  /api/stripe/webhook for checkout.session.completed. The webhook route ships
+  inert until DATABASE_URL and STRIPE_WEBHOOK_SECRET exist in Vercel env.
+  P1 schema shipped early (Aug 28): profiles, accounts, payments, all RLS'd
+  (owner-scoped reads via auth.user_id(), staff-full via is_staff()).
 - Any new domain or preview URL that serves auth goes into Neon Auth
   trusted_origins first, or logins 403 silently.
 

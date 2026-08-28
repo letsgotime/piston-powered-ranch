@@ -3,8 +3,10 @@
   "private": true,
   "description": "Event console for The Piston Powered Ranch. Static index.html plus serverless upload endpoints, deliberately no build step.",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@vercel/blob": "^2.0.0",
-    "jose": "^6.2.10"
+    "jose": "^6.2.10",
+    "stripe": "^22.6.0"
   },
   "type": "module"
 }
