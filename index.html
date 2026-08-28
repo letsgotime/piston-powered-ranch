@@ -5314,7 +5314,7 @@
           if (!b || b.disabled) return;
           var id = b.getAttribute("data-id"),
             toOpen = "Decided" === b.textContent.trim(),
-            next = toOpen ? "open" : "decided",
+            next = toOpen ? "open" : "resolved",
             prevColor = toOpen ? "var(--accent-2)" : "var(--accent)";
           ((b.disabled = !0),
             (b.style.opacity = "0.6"),

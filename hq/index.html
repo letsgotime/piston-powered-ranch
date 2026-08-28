@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>HQ · PaddockGavin Events</title>
+    <meta name="description" content="The live visitor journey command surface for PaddockGavin Events." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <style>
+      :root {
+        --bg: #0a111a; --glass: rgba(16, 26, 38, 0.6); --glass2: rgba(20, 31, 45, 0.7);
+        --gline: rgba(255, 255, 255, 0.1); --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
+        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d;
+        --e0: 0 2px 12px rgba(0, 0, 0, 0.25); --e1: 0 10px 34px rgba(0, 0, 0, 0.38);
+        --e2: 0 24px 70px rgba(0, 0, 0, 0.5); --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; color: var(--ink); background: var(--bg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 15.5px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+        -webkit-text-size-adjust: 100%;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; }
+      .ground .ly { position: absolute; inset: 0; background: url(/events/img/hero.jpg) center 34% / cover no-repeat; transform: scale(1.04); }
+      .ground .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 17, 26, 0.72), rgba(10, 17, 26, 0.62) 40%, rgba(10, 17, 26, 0.82)); }
+      .rule { height: 4px; position: relative; z-index: 60; background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--mute) 75% 100%); }
+      .wrap { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding: 34px 18px calc(70px + env(safe-area-inset-bottom)); }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .glass {
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.35); backdrop-filter: blur(18px) saturate(1.35);
+        border: 1px solid var(--gline); border-radius: 18px; box-shadow: var(--e1);
+      }
+      .head { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+      .head img { height: 34px; width: auto; }
+      h1 { margin: 0; font-size: clamp(24px, 4.4vw, 36px); letter-spacing: -0.02em; line-height: 1.02; }
+      h1 .a { color: var(--amber); }
+      .mode {
+        margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 11.5px;
+        font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim);
+        padding: 8px 15px; border-radius: 999px;
+      }
+      .mode .d { width: 8px; height: 8px; border-radius: 50%; background: var(--mute); }
+      .mode.staff .d { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+      .mode.staff { color: var(--teal); }
+      .sub { color: var(--dim); font-size: 14px; margin: 12px 0 0; max-width: 70ch; }
+      .lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 24px; }
+      .lane { padding: 16px 18px; }
+      .lane .who { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+      .lane .who b { font-size: 16px; }
+      .badge { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+      .b-spec { color: #04211d; background: var(--teal); }
+      .b-car { color: #151000; background: var(--amber); }
+      .b-biz { color: #eaf4ff; background: #23608c; }
+      .b-staff { color: #1a0b08; background: #d98a3d; }
+      .kpi { font-size: 12px; color: var(--mute); min-height: 18px; margin-bottom: 10px; }
+      .kpi b { color: var(--teal); font-variant-numeric: tabular-nums; }
+      .flow { display: flex; flex-direction: column; }
+      .node {
+        text-align: left; width: 100%; font: inherit; color: var(--dim); cursor: pointer;
+        padding: 10px 40px 10px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--gline); font-size: 13.5px; position: relative;
+        transition: transform 0.18s var(--ease), border-color 0.2s, background 0.2s;
+      }
+      .node:hover { transform: translateY(-2px); border-color: rgba(248, 184, 0, 0.5); background: rgba(255, 255, 255, 0.08); }
+      .node b { color: var(--ink); display: block; font-size: 13.5px; }
+      .node .n { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--mute); transition: color 0.2s; }
+      .node:hover .n { color: var(--amber); }
+      .node .pill { position: absolute; right: 34px; top: -8px; font-size: 10px; font-weight: 800; color: #04211d; background: var(--teal); border-radius: 999px; padding: 2px 8px; display: none; font-variant-numeric: tabular-nums; }
+      .node .pill.on { display: inline-block; }
+      .arrow { align-self: center; height: 16px; width: 2px; background: var(--mute); opacity: 0.4; margin: 2px 0; }
+      /* modal */
+      .scrim { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 14, 0.6); opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease); }
+      .scrim.on { opacity: 1; pointer-events: auto; }
+      .sheet {
+        position: fixed; z-index: 90; left: 50%; bottom: 0; transform: translate(-50%, 105%);
+        width: min(96vw, 560px); max-height: 82vh; max-height: 82dvh; overflow: auto;
+        border-radius: 24px 24px 0 0; padding: 22px 24px calc(26px + env(safe-area-inset-bottom));
+        background: var(--glass2);
+        -webkit-backdrop-filter: blur(24px) saturate(1.4); backdrop-filter: blur(24px) saturate(1.4);
+        border: 1px solid var(--gline); border-bottom: 0; box-shadow: var(--e2);
+        transition: transform 0.42s var(--ease);
+      }
+      .sheet.on { transform: translate(-50%, 0); }
+      @media (min-width: 700px) {
+        .sheet { bottom: auto; top: 50%; border-radius: 24px; border-bottom: 1px solid var(--gline);
+          transform: translate(-50%, -46%) scale(0.96); opacity: 0; transition: transform 0.35s var(--ease), opacity 0.3s var(--ease); }
+        .sheet.on { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      }
+      .sheet .grab { width: 44px; height: 4px; border-radius: 999px; background: var(--gline); margin: 0 auto 14px; }
+      .sheet .eyebrow2 { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 800; color: var(--teal); }
+      .sheet h3 { margin: 4px 0 0; font-size: 20px; font-family: "Arial Black", Helvetica, sans-serif; letter-spacing: -0.01em; }
+      .sheet .body { margin-top: 6px; color: var(--dim); font-size: 13.5px; }
+      .stat-line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--gline); font-size: 13.5px; }
+      .stat-line:last-of-type { border-bottom: 0; }
+      .stat-line .l { color: var(--mute); }
+      .stat-line .v { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+      .stat-line .v.t { color: var(--teal); }
+      .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .acts a, .acts button {
+        font: inherit; font-size: 12.5px; font-weight: 700; text-decoration: none; cursor: pointer;
+        color: var(--ink); background: rgba(255, 255, 255, 0.06); border: 1px solid var(--gline);
+        border-radius: 999px; padding: 9px 16px; transition: border-color 0.2s;
+      }
+      .acts a:hover, .acts button:hover { border-color: var(--amber); }
+      .acts a.primary { background: var(--amber); border-color: var(--amber); color: #151000; }
+      .lock { margin-top: 14px; padding: 10px 14px; border-radius: 10px; font-size: 12.5px; color: var(--mute);
+        background: rgba(255, 255, 255, 0.04); border: 1px dashed var(--gline); }
+      .lock a { color: var(--dim); }
+      .sheet .close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 50%;
+        border: 1px solid var(--gline); background: rgba(255, 255, 255, 0.05); color: var(--dim); font: inherit; font-size: 16px; cursor: pointer; }
+      .foot { margin-top: 26px; font-size: 12px; color: var(--mute); }
+      @media (prefers-reduced-motion: reduce) {
+        .node:hover { transform: none; }
+        .sheet, .scrim { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="ground" aria-hidden="true"><div class="ly"></div><div class="veil"></div></div>
+    <div class="wrap">
+      <div class="head glass" style="padding: 14px 20px; border-radius: 999px">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <h1 class="display">Journey <span class="a">HQ</span></h1>
+        <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public view</span></span>
+      </div>
+      <p class="sub">
+        Every visitor journey, live. Tap any step for its numbers, links, and controls. Staff who
+        are signed in at the console see live admin data here automatically.
+      </p>
+      <div class="lanes" id="lanes"></div>
+      <p class="foot">
+        Numbers refresh every 45 seconds while this tab is open. Rows and totals come straight
+        from the console database; nothing here is simulated.
+      </p>
+    </div>
+    <div class="scrim" id="scrim"></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+      <div class="grab"></div>
+      <button class="close" id="close" aria-label="Close">×</button>
+      <div class="eyebrow2" id="shEyebrow"></div>
+      <h3 id="shTitle"></h3>
+      <div class="body" id="shBody"></div>
+    </div>
+    <script type="module">
+      import {
+        createClient,
+        SupabaseAuthAdapter,
+      } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+      var db = null;
+      try {
+        db = createClient({
+          auth: {
+            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+            allowAnonymous: true,
+            adapter: SupabaseAuthAdapter(),
+          },
+          dataApi: {
+            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
+          },
+        });
+      } catch (e) {}
+      var esc = function (s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      };
+      var ORIGIN = location.origin;
+      var staff = false;
+      var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null, spectators: null, clubs: null };
+
+      /* ---------- the map model: every node declares its own panel ---------- */
+      var LANES = [
+        { who: "Spectator", badge: ["b-spec", "Largest crowd"], kpi: function () {
+            return LIVE.stats ? "<b>" + LIVE.stats.party_headcount + "</b> expected from <b>" + LIVE.stats.spectator_rsvps + "</b> RSVPs" : "";
+          },
+          nodes: [
+            { t: "Lands on /show", d: "Countdown, reels, live telemetry.", panel: "show" },
+            { t: "RSVPs with email", d: "Joins the update list.", panel: "rsvp", pill: function () { return LIVE.stats && LIVE.stats.spectator_rsvps; } },
+            { t: "Gets updates until show day", d: "Parking, schedule, changes.", panel: "updates" },
+          ] },
+        { who: "Vehicle owner / broker", badge: ["b-car", "The field"], kpi: function () {
+            if (LIVE.subs) { var v = LIVE.subs.filter(function (x) { return x.type === "vehicle"; }); return "<b>" + v.length + "</b> submitted · <b>" + v.filter(function (x) { return x.status === "pending"; }).length + "</b> awaiting review"; }
+            return LIVE.stats ? "<b>" + LIVE.stats.vehicle_submissions + "</b> cars submitted" : "";
+          },
+          nodes: [
+            { t: "Submits through Paddock Experience", d: "Up to 50 photos, video, voice.", panel: "submit", pill: function () { return LIVE.subs && LIVE.subs.filter(function (x) { return x.type === "vehicle" && x.status === "pending"; }).length; } },
+            { t: "Holds a private status link", d: "No login, no phone calls.", panel: "status" },
+            { t: "Decision lands", d: "Approved, waitlisted, or declined.", panel: "decision" },
+          ] },
+        { who: "Car club rep", badge: ["b-car", "Brings rows"], kpi: function () {
+            return LIVE.clubs ? "<b>" + LIVE.clubs.length + "</b> blocks · <b>" + LIVE.clubs.filter(function (x) { return x.status === "pending"; }).length + "</b> pending" : LIVE.stats ? "<b>" + LIVE.stats.club_blocks + "</b> club blocks" : "";
+          },
+          nodes: [
+            { t: "Applies for a block", d: "Roster rows, club banner placement.", panel: "clubs", pill: function () { return LIVE.clubs && LIVE.clubs.filter(function (x) { return x.status === "pending"; }).length; } },
+            { t: "Block approved", d: "Roster becomes individual passes.", panel: "clubapprove" },
+          ] },
+        { who: "Vendor", badge: ["b-biz", "Pays to be there"], kpi: function () {
+            if (LIVE.accounts) { var v = LIVE.accounts.filter(function (x) { return x.type === "vendor"; }); return "<b>" + v.length + "</b> vendor accounts"; }
+            return "";
+          },
+          nodes: [
+            { t: "Applies for a booth", d: "Offering, space, power, insurance.", panel: "vendorapply" },
+            { t: "Pays the $250 deposit", d: "Card, through Stripe.", panel: "deposit" },
+            { t: "Books into the ledger", d: "Webhook writes the payment row.", panel: "ledger", pill: function () { return LIVE.payments && LIVE.payments.filter(function (x) { return x.status === "paid"; }).length; } },
+          ] },
+        { who: "Sponsor", badge: ["b-biz", "Buys the title"], kpi: function () {
+            if (LIVE.accounts) { var v = LIVE.accounts.filter(function (x) { return x.type === "sponsor"; }); return "<b>" + v.length + "</b> sponsor accounts"; }
+            return "";
+          },
+          nodes: [
+            { t: "Applies, sees no public price", d: "Numbers live in the proposal only.", panel: "sponsorapply" },
+            { t: "Conversation, tracked", d: "Every touch on the account timeline.", panel: "sponsortrack" },
+            { t: "Commits and activates", d: "Invoice or checkout, then signage.", panel: "sponsorclose" },
+          ] },
+        { who: "Staff", badge: ["b-staff", "Runs all of it"], kpi: function () {
+            return LIVE.decisions ? "<b>" + LIVE.decisions.filter(function (x) { return x.status === "open"; }).length + "</b> decisions open" : "";
+          },
+          nodes: [
+            { t: "Console: Ops and Decision Desk", d: "Saves as you type.", panel: "console", pill: function () { return LIVE.decisions && LIVE.decisions.filter(function (x) { return x.status === "open"; }).length; } },
+            { t: "One sheet per submission", d: "Approve, decline, copy the notice.", panel: "review" },
+            { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
+          ] },
+      ];
+
+      /* ---------- panels: live stats + actions per node ---------- */
+      function money(c) { return "$" + ((c || 0) / 100).toFixed(2); }
+      function copyBtn(label, text) {
+        return '<button data-copy="' + esc(text) + '">' + esc(label) + "</button>";
+      }
+      var PANELS = {
+        show: function () {
+          return { e: "Entry point", t: "The /show landing", body:
+            stat("Live countdown", "ticking") + stat("Reel slots filled", "drop files in show/reels") +
+            (LIVE.stats ? stat("RSVPs so far", LIVE.stats.spectator_rsvps, true) : "") +
+            acts('<a class="primary" href="/show/" target="_blank" rel="noopener">Open /show</a>' + copyBtn("Copy share link", ORIGIN + "/show/")) };
+        },
+        rsvp: function () {
+          var extra = "";
+          if (staff && LIVE.spectators) {
+            extra = LIVE.spectators.slice(0, 5).map(function (r) {
+              return stat(esc(r.name) + (r.source ? " · " + esc(r.source) : ""), r.party_size + (r.party_size === 1 ? " guest" : " guests"));
+            }).join("");
+          }
+          return { e: "Spectators", t: "RSVP and update list", body:
+            (LIVE.stats ? stat("RSVPs", LIVE.stats.spectator_rsvps, true) + stat("Expected heads", LIVE.stats.party_headcount, true) : "") + extra +
+            (staff ? "" : lock()) +
+            acts('<a class="primary" href="/spectate/" target="_blank" rel="noopener">Open /spectate</a>' + copyBtn("Copy RSVP link", ORIGIN + "/spectate/")) };
+        },
+        updates: function () {
+          return { e: "Spectators", t: "The update list", body:
+            "<p>Every RSVP email is an update-list subscriber. Sends go out through Resend from paddockgavin.com once the key is in Vercel; until then this is the export point.</p>" +
+            (staff && LIVE.spectators ? stat("Addresses on the list", LIVE.spectators.length, true) : "") +
+            (staff ? "" : lock()) + acts(copyBtn("Copy RSVP link", ORIGIN + "/spectate/")) };
+        },
+        submit: function () {
+          var v = LIVE.subs ? LIVE.subs.filter(function (x) { return x.type === "vehicle"; }) : null;
+          return { e: "Paddock Experience", t: "Vehicle submissions", body:
+            (v ? stat("Total submitted", v.length, true) + stat("Pending review", v.filter(function (x) { return x.status === "pending"; }).length, true) +
+                 stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true)
+               : LIVE.stats ? stat("Cars submitted", LIVE.stats.vehicle_submissions, true) : "") +
+            (staff ? "" : lock()) +
+            acts('<a class="primary" href="/#submit" target="_blank" rel="noopener">Open submit</a>' + (staff ? '<a href="/#ops" target="_blank" rel="noopener">Review in console</a>' : "") + copyBtn("Copy submit link", ORIGIN + "/#submit")) };
+        },
+        status: function () {
+          return { e: "Paddock Experience", t: "Private status links", body:
+            "<p>Every submission carries a tokened link shown once at submit. Staff can re-copy any entrant's link from their sheet in the console.</p>" +
+            acts('<a class="primary" href="/status/" target="_blank" rel="noopener">Open /status</a>' + copyBtn("Copy status page", ORIGIN + "/status/")) };
+        },
+        decision: function () {
+          var v = LIVE.subs ? LIVE.subs.filter(function (x) { return x.type === "vehicle"; }) : null;
+          return { e: "Paddock Experience", t: "Decisions", body:
+            (v ? stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) +
+                 stat("Waitlisted", v.filter(function (x) { return x.status === "waitlisted"; }).length) +
+                 stat("Declined", v.filter(function (x) { return x.status === "declined"; }).length) : lock()) +
+            "<p style='margin-top:10px'>Approve or decline in the submission sheet; ready-to-send notices are one tap there.</p>" +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open the queue</a>') : "") };
+        },
+        clubs: function () {
+          var extra = "";
+          if (staff && LIVE.clubs) {
+            extra = LIVE.clubs.slice(0, 5).map(function (c) {
+              return stat(esc(c.club_name), c.vehicle_count + " cars · " + esc(c.status));
+            }).join("");
+          }
+          return { e: "Car clubs", t: "Club blocks", body:
+            (LIVE.clubs ? stat("Blocks applied", LIVE.clubs.length, true) + stat("Pending", LIVE.clubs.filter(function (x) { return x.status === "pending"; }).length, true) :
+              LIVE.stats ? stat("Club blocks", LIVE.stats.club_blocks, true) : "") + extra +
+            (staff ? "" : lock()) +
+            acts('<a class="primary" href="/clubs/" target="_blank" rel="noopener">Open /clubs</a>' + copyBtn("Copy club link", ORIGIN + "/clubs/")) };
+        },
+        clubapprove: function () {
+          return { e: "Car clubs", t: "Block approval", body:
+            "<p>Approving a block spawns an individual submission per roster car, so every car still carries its own pass and status link. Approval lives in the console pipeline.</p>" +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : lock()) };
+        },
+        vendorapply: function () {
+          var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "vendor"; }) : null;
+          return { e: "Vendors", t: "Vendor applications", body:
+            (v ? stat("Vendor accounts", v.length, true) + stat("Applied", v.filter(function (x) { return x.status === "applied"; }).length) + stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) : lock()) +
+            acts('<a class="primary" href="/#submit" target="_blank" rel="noopener">Open submit</a>') };
+        },
+        deposit: function () {
+          return { e: "Vendors · money", t: "The $250 deposit", body:
+            stat("Amount", "$250, standard 10x10") + stat("Mode", "Sandbox until live keys") +
+            "<p style='margin-top:10px'>Send the payment link with an approval; the webhook books it the moment it clears.</p>" +
+            acts(copyBtn("Copy deposit link", "https://buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a")) };
+        },
+        ledger: function () {
+          var paid = LIVE.payments ? LIVE.payments.filter(function (x) { return x.status === "paid"; }) : null;
+          return { e: "Vendors · money", t: "Payments ledger", body:
+            (paid ? stat("Payments recorded", LIVE.payments.length, true) + stat("Paid", paid.length, true) +
+                    stat("Collected", money(paid.reduce(function (a, b) { return a + (b.amount_cents || 0); }, 0)), true) : lock()) +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open ledger</a>') : "") };
+        },
+        sponsorapply: function () {
+          var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "sponsor"; }) : null;
+          return { e: "Sponsors", t: "Sponsor interest", body:
+            (v ? stat("Sponsor accounts", v.length, true) : lock()) +
+            "<p style='margin-top:10px'>Tier numbers stay out of every public page. The proposal one-pager carries them.</p>" +
+            acts(copyBtn("Copy collateral link", ORIGIN + "/rancho")) };
+        },
+        sponsortrack: function () {
+          return { e: "Sponsors", t: "Tracked conversations", body:
+            "<p>Every call and email lands on the account timeline in the console pipeline: open the account, type the note, Enter saves it.</p>" +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : lock()) };
+        },
+        sponsorclose: function () {
+          return { e: "Sponsors", t: "Commit and activate", body:
+            stat("Title tiers", "handshake, invoiced from the CRM") + stat("Supporting", "pays by checkout link") +
+            "<p style='margin-top:10px'>Reminder: the secondary title defaults to category-exclusive and non-dealer while the 111 Motorcars exclusivity stands.</p>" };
+        },
+        console: function () {
+          var open = LIVE.decisions ? LIVE.decisions.filter(function (x) { return x.status === "open"; }) : null;
+          var extra = staff && open ? open.slice(0, 5).map(function (d) { return stat(esc(d.label), "open"); }).join("") : "";
+          return { e: "Staff", t: "Console and Decision Desk", body:
+            (open ? stat("Decisions open", open.length, true) : lock()) + extra +
+            acts('<a class="primary" href="/" target="_blank" rel="noopener">Open console</a>') };
+        },
+        review: function () {
+          var pend = LIVE.subs ? LIVE.subs.filter(function (x) { return x.status === "pending"; }) : null;
+          return { e: "Staff", t: "The review queue", body:
+            (pend ? stat("Awaiting a decision", pend.length, true) : lock()) +
+            "<p style='margin-top:10px'>Each sheet carries approve, decline, the status link, and a ready-to-send notice.</p>" +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open the queue</a>') : "") };
+        },
+        pipeline: function () {
+          return { e: "Staff", t: "Pipeline and Ledger", body:
+            (LIVE.accounts ? stat("Accounts in lanes", LIVE.accounts.length, true) : lock()) +
+            (LIVE.payments ? stat("Ledger rows", LIVE.payments.length, true) : "") +
+            (staff ? acts('<a class="primary" href="/#ops" target="_blank" rel="noopener">Open pipeline</a>') : "") };
+        },
+      };
+      function stat(l, v, t) { return '<div class="stat-line"><span class="l">' + l + '</span><span class="v' + (t ? " t" : "") + '">' + v + "</span></div>"; }
+      function acts(inner) { return '<div class="acts">' + inner + "</div>"; }
+      function lock() { return '<div class="lock">Live admin numbers unlock automatically when you are signed in at the <a href="/" target="_blank" rel="noopener">console</a> on this device.</div>'; }
+
+      /* ---------- render lanes ---------- */
+      function render() {
+        document.getElementById("lanes").innerHTML = LANES.map(function (l, li) {
+          return (
+            '<div class="lane glass"><div class="who"><b>' + esc(l.who) + '</b><span class="badge ' + l.badge[0] + '">' + esc(l.badge[1]) + "</span></div>" +
+            '<div class="kpi" data-kpi="' + li + '">' + (l.kpi() || "&nbsp;") + "</div>" +
+            '<div class="flow">' +
+            l.nodes.map(function (n, ni) {
+              return (
+                (ni ? '<div class="arrow"></div>' : "") +
+                '<button class="node" data-panel="' + n.panel + '"><span class="pill" data-pill="' + n.panel + '"></span><b>' + esc(n.t) + "</b>" + esc(n.d) + '<span class="n">›</span></button>'
+              );
+            }).join("") +
+            "</div></div>"
+          );
+        }).join("");
+        refreshPills();
+      }
+      function refreshPills() {
+        LANES.forEach(function (l, li) {
+          var k = document.querySelector('[data-kpi="' + li + '"]');
+          k && (k.innerHTML = l.kpi() || "&nbsp;");
+          l.nodes.forEach(function (n) {
+            if (!n.pill) return;
+            var el = document.querySelector('[data-pill="' + n.panel + '"]');
+            var v = n.pill();
+            el && (el.textContent = v == null ? "" : v, el.classList.toggle("on", v != null && v !== false));
+          });
+        });
+      }
+
+      /* ---------- modal ---------- */
+      var sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim");
+      function openPanel(key) {
+        var p = PANELS[key] && PANELS[key]();
+        if (!p) return;
+        document.getElementById("shEyebrow").textContent = p.e;
+        document.getElementById("shTitle").textContent = p.t;
+        document.getElementById("shBody").innerHTML = p.body;
+        sheet.classList.add("on"); scrim.classList.add("on");
+      }
+      function closePanel() { sheet.classList.remove("on"); scrim.classList.remove("on"); }
+      document.addEventListener("click", function (e) {
+        var n = e.target.closest(".node");
+        if (n) return openPanel(n.getAttribute("data-panel"));
+        if (e.target.closest("#close") || e.target === scrim) return closePanel();
+        var c = e.target.closest("[data-copy]");
+        if (c && navigator.clipboard) {
+          var old = c.textContent;
+          navigator.clipboard.writeText(c.getAttribute("data-copy")).then(function () {
+            c.textContent = "Copied";
+            setTimeout(function () { c.textContent = old; }, 1500);
+          }, function () {});
+        }
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePanel(); });
+
+      /* ---------- live data ---------- */
+      async function loadPublic() {
+        if (!db) return;
+        try {
+          var r = await db.rpc("public_stats", {});
+          var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
+          if (row) LIVE.stats = row;
+        } catch (e) {}
+      }
+      var STAFF_EMAILS = ["paddock20auto@gmail.com", "gavin@paddock20.com", "bekah@paddock20.com", "bekahstallard@gmail.com"];
+      async function loadStaff() {
+        if (!db) return;
+        // Display gate only: RLS enforces the real boundary server-side.
+        // Anonymous sessions carry the authenticated role, so detection must
+        // key off the signed-in email, not query errors.
+        try {
+          var ses = await db.auth.getSession();
+          var em = ses && ses.data && ses.data.session && ses.data.session.user && ses.data.session.user.email;
+          staff = Boolean(em && STAFF_EMAILS.indexOf(String(em).toLowerCase()) !== -1);
+        } catch (e) { staff = false; }
+        if (!staff) return;
+        try {
+          var subs = await db.from("submissions").select("type,status");
+          subs.error || (LIVE.subs = subs.data);
+        } catch (e) {}
+        try {
+          var a = await db.from("accounts").select("type,status");
+          a.error || (LIVE.accounts = a.data);
+          var p = await db.from("payments").select("status,amount_cents");
+          p.error || (LIVE.payments = p.data);
+          var d = await db.from("open_decisions").select("label,status");
+          d.error || (LIVE.decisions = d.data);
+          var sp = await db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25);
+          sp.error || (LIVE.spectators = sp.data);
+          var cs = await db.from("club_submissions").select("status,vehicle_count,club_id");
+          if (!cs.error && cs.data) {
+            var cl = await db.from("clubs").select("id,club_name");
+            var names = {};
+            ((cl && cl.data) || []).forEach(function (c) { names[c.id] = c.club_name; });
+            LIVE.clubs = cs.data.map(function (x) { return { status: x.status, vehicle_count: x.vehicle_count, club_name: names[x.club_id] || "Club" }; });
+          }
+        } catch (e) {}
+        var m = document.getElementById("mode");
+        m.classList.add("staff");
+        document.getElementById("modeTxt").textContent = "Staff · live";
+      }
+      async function tick() {
+        await loadPublic();
+        await loadStaff();
+        refreshPills();
+      }
+      render();
+      tick();
+      setInterval(function () { document.hidden || tick(); }, 45e3);
+    </script>
+  </body>
+</html>
