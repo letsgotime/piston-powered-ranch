@@ -1,14 +1,32 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/rancho", "destination": "/collateral/index.html" },
-    { "source": "/hq", "destination": "/journeys/index.html" },
-    { "source": "/hq/", "destination": "/journeys/index.html" }
+    {
+      "source": "/",
+      "destination": "/show/index.html"
+    },
+    {
+      "source": "/rancho",
+      "destination": "/collateral/index.html"
+    },
+    {
+      "source": "/hq",
+      "destination": "/journeys/index.html"
+    },
+    {
+      "source": "/hq/",
+      "destination": "/journeys/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/collateral/files/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, must-revalidate"
+        }
+      ]
     }
   ]
 }
