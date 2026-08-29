@@ -398,6 +398,7 @@
             { t: "One sheet per submission", d: "Approve, decline, copy the notice.", panel: "review" },
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
             { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
+            { t: "Chat, on the record", d: "Threads attached to the thing being discussed.", panel: "chat" },
             { t: "Targets, by category", d: "Every category the day needs, and who we are chasing.", panel: "targets", pill: function () {
                 if (!LIVE.categories || !LIVE.candidates) return null;
                 var hit = {};
@@ -530,6 +531,15 @@
           return { e: "Sponsors", t: "Commit and activate", body:
             stat("Title tiers", "handshake, invoiced from the CRM") + stat("Supporting", "pays by checkout link") +
             "<p style='margin-top:10px'>Reminder: the secondary title defaults to category-exclusive and non-dealer while the 111 Motorcars exclusivity stands.</p>" };
+        },
+        chat: function () {
+          return { e: "Staff", t: "Chat, on the record", body:
+            stat("Where it lives", "every staff page, bottom right") +
+            stat("Attached to", "categories, prospects, decisions, budget lines") +
+            stat("Carries", "50 photos, 5 min video, 5 min voice, any document") +
+            stat("Installs", "add to home screen, unread count on the icon") +
+            "<p style='margin-top:10px'>Not a general room. A thread hangs off the record it is about, so the conversation and the decision end up in the same place. Cost threads stay with the three who can see cost.</p>" +
+            acts('<a class="primary" href="/chat/" target="_blank" rel="noopener">Open chat</a>') };
         },
         targets: function () {
           /* The pill counts empty categories on purpose. A full list is not the
