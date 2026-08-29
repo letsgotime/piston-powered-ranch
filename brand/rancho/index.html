@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Rancho Jaramillo · Brand Kit</title>
+    <meta name="description" content="The Rancho Jaramillo mark, wordmark, colour family and typeface, with the rules for using them." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0A1523" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/rj-icon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/rj-icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&family=Cinzel:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        /* The mark, sampled from the artwork Oscar supplied. These two are the
+           brand. Everything else on this page exists because these two cannot
+           carry text on a dark ground. */
+        --rj-red: #e5141a;
+        --rj-blue: #1424a1;
+
+        --red-900: #9a0d11; --red-700: #bf1116; --red-500: #e5141a;
+        --red-300: #ea4c51; --red-200: #ef7a7d; --red-100: #f5a8aa;
+        --blue-900: #0b1458; --blue-700: #0f1c7d; --blue-500: #1424a1;
+        --blue-300: #2035d2; --blue-200: #4355e2; --blue-100: #6f7de9;
+
+        --ink: #0a1523; --paper: #faf8f4;
+        --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --gline: rgba(255, 255, 255, 0.11);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        --serif: Cinzel, "Trajan Pro", "Times New Roman", serif;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--ink); color: var(--dim);
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        font-size: 16px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+      }
+      .rule { height: 4px; background: linear-gradient(90deg, var(--rj-red) 0 50%, var(--rj-blue) 50% 100%); }
+      .wrap { max-width: 940px; margin: 0 auto; padding: 40px 20px 90px; }
+      .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--rj-red); font-weight: 600; }
+      h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 6vw, 52px); line-height: 1.04; letter-spacing: .02em; margin: 12px 0 0; color: #fff; }
+      .stand { font-size: 17px; margin: 14px 0 0; max-width: 62ch; color: var(--dim); }
+      h2 { font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase; font-weight: 900; color: var(--mute);
+        margin: 46px 0 6px; padding-bottom: 9px; border-bottom: 1px solid var(--gline); }
+      .card { background: rgba(255,255,255,.035); border: 1px solid var(--gline); border-radius: 14px; padding: 22px; margin-top: 14px; }
+      .lock { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+      .swatchbox { border: 1px solid var(--gline); border-radius: 12px; overflow: hidden; background: rgba(255,255,255,.03); }
+      .swatchbox .top { display: flex; align-items: center; justify-content: center; padding: 26px 12px; }
+      .swatchbox .meta { padding: 11px 13px; border-top: 1px solid var(--gline); }
+      .swatchbox .meta b { display: block; font-size: 14px; color: #fff; }
+      .swatchbox .meta span { font-family: var(--mono); font-size: 11px; color: var(--mute); }
+      .ramp { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--gline); }
+      .ramp div { padding: 18px 8px 14px; text-align: center; }
+      .ramp b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; }
+      .ramp span { display: block; font-family: var(--mono); font-size: 9.5px; opacity: .78; margin-top: 3px; }
+      table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 6px; }
+      th { text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+        color: var(--faint); font-weight: 600; padding: 0 10px 8px 0; border-bottom: 1px solid var(--gline); }
+      td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--gline); vertical-align: top; }
+      td.h { font-family: var(--mono); font-size: 12.5px; color: #fff; white-space: nowrap; }
+      .ok { color: #34d399; } .warn { color: #fbbf24; } .no { color: #f87171; }
+      .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+      .f { border: 1px solid var(--gline); border-radius: 10px; padding: 12px 14px; }
+      .f b { display: block; font-family: var(--mono); font-size: 12.5px; color: #fff; }
+      .f span { font-size: 12.5px; color: var(--mute); line-height: 1.45; }
+      .don { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
+      .don > div { border-radius: 12px; padding: 15px 17px; font-size: 14px; }
+      .do { background: rgba(52,211,153,.09); border: 1px solid rgba(52,211,153,.32); }
+      .dont { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3); }
+      .don b { display: block; margin-bottom: 6px; color: #fff; }
+      .spec { font-family: var(--serif); font-size: clamp(26px, 5vw, 46px); letter-spacing: .06em; color: #fff; margin: 6px 0 0; }
+      .specnote { font-size: 13.5px; color: var(--mute); margin: 8px 0 0; }
+      footer { margin-top: 54px; padding-top: 18px; border-top: 1px solid var(--gline); font-size: 13.5px; color: var(--faint); }
+      footer b { color: var(--dim); }
+      img { max-width: 100%; height: auto; }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="eyebrow">Brand kit</div>
+      <h1>Rancho Jaramillo</h1>
+      <p class="stand">
+        The mark, the wordmark, the colour family and the typeface, with the rules for using them.
+        Every value here was sampled from the artwork itself, not chosen to look close.
+      </p>
+
+      <h2>The lockup</h2>
+      <div class="card" style="background: var(--paper)">
+        <img src="/brand/rancho-jaramillo.png" alt="Rancho Jaramillo full lockup" style="max-height: 220px; display: block; margin: 0 auto" />
+      </div>
+      <div class="card">
+        <img src="/brand/rancho-jaramillo.png" alt="Rancho Jaramillo lockup on the dark ground" style="max-height: 220px; display: block; margin: 0 auto" />
+      </div>
+      <div class="lock" style="margin-top: 14px">
+        <div class="swatchbox"><div class="top" style="background: var(--paper)"><img src="/brand/rj-mark.png" alt="The mark alone" style="max-height: 96px" /></div><div class="meta"><b>The mark</b><span>rj-mark.png</span></div></div>
+        <div class="swatchbox"><div class="top" style="background: var(--paper)"><img src="/brand/rj-wordmark.png" alt="The wordmark alone" style="max-height: 96px" /></div><div class="meta"><b>The wordmark</b><span>rj-wordmark.png</span></div></div>
+        <div class="swatchbox"><div class="top"><img src="/brand/rj-mark-ondark.png" alt="The mark in a single ink" style="max-height: 96px" /></div><div class="meta"><b>Single ink</b><span>rj-mark-ondark.png</span></div></div>
+      </div>
+
+      <h2>Colour</h2>
+      <div class="lock">
+        <div class="swatchbox"><div class="top" style="background: #e5141a; min-height: 96px"></div><div class="meta"><b>Jaramillo Red</b><span>#E5141A &middot; rgb(229, 20, 26)</span></div></div>
+        <div class="swatchbox"><div class="top" style="background: #1424a1; min-height: 96px"></div><div class="meta"><b>Jaramillo Blue</b><span>#1424A1 &middot; rgb(20, 36, 161)</span></div></div>
+        <div class="swatchbox"><div class="top" style="background: #0a1523; min-height: 96px"></div><div class="meta"><b>Ranch Ink</b><span>#0A1523 &middot; the dark ground</span></div></div>
+        <div class="swatchbox"><div class="top" style="background: #faf8f4; min-height: 96px"></div><div class="meta"><b>Ranch Paper</b><span>#FAF8F4 &middot; the light ground</span></div></div>
+      </div>
+
+      <h2>The family, and why it exists</h2>
+      <p style="font-size: 15px; color: var(--dim); margin: 4px 0 0; max-width: 66ch">
+        The two brand colours cannot carry text on the dark ground. Red manages
+        <b>3.89:1</b>, which is large text only. Blue manages <b>1.57:1</b>, which is unreadable.
+        These ramps exist so the brand can be used in interfaces without failing anybody.
+      </p>
+      <div class="ramp" style="margin-top: 14px">
+        <div style="background:#9a0d11;color:#fff"><b>900</b><span>#9A0D11</span></div>
+        <div style="background:#bf1116;color:#fff"><b>700</b><span>#BF1116</span></div>
+        <div style="background:#e5141a;color:#fff"><b>500</b><span>#E5141A</span></div>
+        <div style="background:#ea4c51;color:#180406"><b>300</b><span>#EA4C51</span></div>
+        <div style="background:#ef7a7d;color:#180406"><b>200</b><span>#EF7A7D</span></div>
+        <div style="background:#f5a8aa;color:#180406"><b>100</b><span>#F5A8AA</span></div>
+      </div>
+      <div class="ramp" style="margin-top: 8px">
+        <div style="background:#0b1458;color:#fff"><b>900</b><span>#0B1458</span></div>
+        <div style="background:#0f1c7d;color:#fff"><b>700</b><span>#0F1C7D</span></div>
+        <div style="background:#1424a1;color:#fff"><b>500</b><span>#1424A1</span></div>
+        <div style="background:#2035d2;color:#fff"><b>300</b><span>#2035D2</span></div>
+        <div style="background:#4355e2;color:#fff"><b>200</b><span>#4355E2</span></div>
+        <div style="background:#6f7de9;color:#0a0f2e"><b>100</b><span>#6F7DE9</span></div>
+      </div>
+
+      <h2>Where each step is safe</h2>
+      <table>
+        <thead><tr><th>Colour</th><th>On ranch ink</th><th>On ranch paper</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td class="h">Red 500</td><td class="warn">3.89:1</td><td class="warn">4.45:1</td><td>The mark. Large display type. Rules and fills.</td></tr>
+          <tr><td class="h">Red 300</td><td class="ok">4.94:1</td><td class="no">3.50:1</td><td>Body text and links on the dark ground.</td></tr>
+          <tr><td class="h">Red 700</td><td class="no">2.89:1</td><td class="ok">5.99:1</td><td>Body text on paper, and on print.</td></tr>
+          <tr><td class="h">Blue 500</td><td class="no">1.57:1</td><td class="ok">11.02:1</td><td>The mark. Text on paper only. Never text on dark.</td></tr>
+          <tr><td class="h">Blue 100</td><td class="ok">5.06:1</td><td class="no">3.42:1</td><td>The only blue that carries text on the dark ground.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Typeface</h2>
+      <div class="card">
+        <p class="spec">RANCHO JARAMILLO</p>
+        <p class="specnote">
+          The wordmark is a classical Roman capital in the Trajan manner: high stroke contrast,
+          fine bracketed serifs, no lowercase. <b>Cinzel</b> is the closest freely licensed match and is
+          what this page is set in, so the web can carry the same voice as the artwork.
+          Set it in capitals only, with generous letter spacing, and never below about 14px.
+        </p>
+        <p class="specnote">
+          Everything that is not a heading stays in <b>Archivo</b>, the face the rest of the estate uses.
+          The Roman capital is for the name and for display, not for reading.
+        </p>
+      </div>
+
+      <h2>Files</h2>
+      <div class="files">
+        <div class="f"><b>rancho-jaramillo.png</b><span>Full lockup, 908 by 592, transparent.</span></div>
+        <div class="f"><b>rancho-jaramillo-512 / 256 / 128 / 64</b><span>The lockup, scaled.</span></div>
+        <div class="f"><b>rancho-jaramillo-ondark.png</b><span>Lockup in a single ink for dark grounds.</span></div>
+        <div class="f"><b>rj-mark.png</b><span>The horns alone, 748 by 475.</span></div>
+        <div class="f"><b>rj-wordmark.png</b><span>The name alone, 908 by 84.</span></div>
+        <div class="f"><b>rj-icon-512 / 192 / 180 / 64 / 32 / 16</b><span>Favicons and app icons, cut from the mark.</span></div>
+        <div class="f"><b>rj-mark-ondark / rj-wordmark-ondark</b><span>Single ink versions of each.</span></div>
+      </div>
+
+      <h2>Rules</h2>
+      <div class="don">
+        <div class="do">
+          <b>Do</b>
+          Keep the background transparent, always. Cut favicons from the mark alone.
+          Use Red 300 for text on dark and Red 700 on paper. Give the lockup clear space
+          of at least the height of the horns on every side.
+        </div>
+        <div class="dont">
+          <b>Do not</b>
+          Put the lockup on a white plate. Set text in Blue 500 on the dark ground, at any size.
+          Use the full lockup below about 120px wide, where the wordmark closes up.
+          Recolour the horns, or separate the red from the blue.
+        </div>
+      </div>
+
+      <footer>
+        Colours sampled directly from the artwork Oscar supplied: the median of every opaque
+        pixel in each region of the mark. Contrast figures are WCAG 2.1 ratios against
+        <b>#0A1523</b> and <b>#FAF8F4</b>. The supplied artwork is raster, so the lockup is sharp to
+        roughly 900px wide. <b>For a step and repeat, a banner or vehicle livery, ask Oscar for the
+        vector.</b>
+      </footer>
+    </div>
+  </body>
+</html>
