@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Targets · Who we are chasing</title>
+    <meta name="description" content="Every category the event needs, and every name the team is chasing for it." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#070d14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.42);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg); color: var(--dim); min-height: 100%;
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+      .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
+      .ground i:nth-child(1) { width: 58vw; height: 58vw; left: -14vw; top: -20vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .3; }
+      .ground i:nth-child(2) { width: 64vw; height: 64vw; right: -18vw; top: 20vh; background: radial-gradient(circle, #00d2be, transparent 68%); opacity: .24; }
+      .ground i:nth-child(3) { width: 70vw; height: 70vw; left: 8vw; bottom: -32vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .28; }
+      .ground u { position: absolute; inset: 0; display: block;
+        background: linear-gradient(180deg, rgba(7,13,20,.6), rgba(7,13,20,.5) 42%, rgba(7,13,20,.9)); }
+      .rule { position: relative; z-index: 3; height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
+      .wrap { position: relative; z-index: 2; max-width: 1080px; margin: 0 auto; padding: 28px 16px calc(90px + env(safe-area-inset-bottom)); }
+      .glass { background: var(--glass); border: 1px solid var(--gline); border-radius: 18px; box-shadow: var(--e1);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); }
+      .hero { padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+      .hero img { height: 38px; }
+      .hero .t { flex: 1; min-width: 230px; }
+      .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+      h1 { margin: 7px 0 0; font-weight: 900; font-size: clamp(25px, 5vw, 38px); line-height: 1.03; letter-spacing: -.028em; color: var(--ink); }
+      h1 span { color: var(--amber); }
+      .stand { margin: 9px 0 0; font-size: 15.5px; color: var(--dim); max-width: 62ch; }
+      .who { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+      .who .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .who.on { color: var(--teal); } .who.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .bar { position: sticky; top: 8px; z-index: 6; margin-top: 13px; padding: 11px 17px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+      .bar .n { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+      .bar .n b { display: block; font-size: 18px; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.15; letter-spacing: -.02em; }
+      .bar .n.t b { color: var(--teal); } .bar .n.a b { color: var(--amber); } .bar .n.c b { color: var(--crit); }
+      .sv { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+        color: var(--faint); display: flex; align-items: center; gap: 7px; }
+      .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .lock { margin-top: 15px; padding: 18px 22px; font-size: 15px; }
+      .lock a { color: var(--amber); }
+      .dom { margin-top: 26px; }
+      .domh { display: flex; align-items: baseline; gap: 11px; flex-wrap: wrap; padding-bottom: 8px; border-bottom: 2px solid var(--gline); }
+      .domh h2 { margin: 0; font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase; font-weight: 900; color: var(--tone, var(--amber)); }
+      .domh em { font-style: normal; font-size: 12.5px; color: var(--faint); }
+      .domh .add { margin-left: auto; font: inherit; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; cursor: pointer;
+        color: var(--dim); background: rgba(255,255,255,.05); border: 1px solid var(--gline); border-radius: 999px; padding: 6px 13px; }
+      .domh .add:hover { border-color: var(--tone, var(--amber)); color: var(--ink); }
+      .cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(268px, 1fr)); gap: 11px; margin-top: 12px; }
+      .cat { padding: 14px 16px; cursor: pointer; transition: border-color .2s var(--ease), transform .2s var(--ease); position: relative; overflow: hidden; }
+      .cat:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.26); }
+      .cat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone, var(--amber)); opacity: .8; }
+      .cat.has { border-color: rgba(0,210,190,.4); }
+      .cat b { display: block; font-size: 15.5px; font-weight: 900; color: var(--ink); letter-spacing: -.01em; }
+      .cat .need { display: block; margin-top: 4px; font-size: 12.5px; line-height: 1.45; color: var(--mute); }
+      .cat .cnt { display: flex; gap: 10px; align-items: baseline; margin-top: 9px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+      .cat .cnt b { display: inline; font-size: 13px; color: var(--teal); }
+      .cat .cnt .none { color: var(--crit); }
+      .sheet { position: fixed; inset: 0; z-index: 40; display: none; }
+      .sheet.on { display: block; }
+      .sheet .scrim { position: absolute; inset: 0; background: rgba(4,8,13,.66); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+      .sheet .panel { position: absolute; right: 0; top: 0; bottom: 0; width: min(620px, 100%); overflow: auto;
+        background: rgba(12,20,30,.94); -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5);
+        border-left: 1px solid var(--gline); padding: 22px 22px calc(40px + env(safe-area-inset-bottom)); }
+      .sheet h3 { margin: 6px 0 0; font-size: 22px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); }
+      .sheet .x { position: absolute; right: 16px; top: 14px; width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+        border: 1px solid var(--gline); background: rgba(255,255,255,.06); color: var(--dim); font: inherit; font-size: 17px; }
+      .p { margin-top: 11px; padding: 13px 15px; border-radius: 13px; background: rgba(255,255,255,.045); border: 1px solid var(--gline); }
+      .p .r1 { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; }
+      .p input, .p select, .p textarea { font: inherit; font-size: 14px; color: var(--ink); min-width: 0; width: 100%;
+        background: rgba(0,0,0,.28); border: 1px solid var(--gline); border-radius: 9px; padding: 8px 10px; }
+      .p input:focus, .p select:focus, .p textarea:focus { outline: none; border-color: var(--amber); }
+      .p .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+      .p .x { position: static; width: auto; height: auto; border: 0; background: none; color: var(--mute); font-size: 17px; padding: 0 4px; }
+      .p .x:hover { color: var(--crit); }
+      .p .by { margin-top: 7px; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; color: var(--faint); }
+      .addp { margin-top: 12px; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--dim);
+        background: rgba(255,255,255,.06); border: 1px solid var(--gline); border-radius: 999px; padding: 9px 16px; }
+      .addp:hover { border-color: var(--amber); color: var(--ink); }
+      .empty { margin-top: 12px; font-size: 14px; color: var(--mute); }
+      .foot { margin-top: 28px; padding: 16px 20px; font-size: 13px; color: var(--mute); }
+      .foot a { color: var(--amber); }
+      @media (max-width: 560px) { .wrap { padding: 18px 11px 80px; } .p .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="ground" aria-hidden="true"><i></i><i></i><i></i><u></u></div>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="glass hero">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="t">
+          <div class="eyebrow">The Piston Powered Ranch &middot; targets</div>
+          <h1>Who we are <span>chasing</span></h1>
+          <p class="stand">
+            Every category the day needs, from the title sponsor down to the porta johns, and every
+            name any of us is working for it. If a category is missing, add it and everybody sees it.
+          </p>
+        </div>
+        <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
+      </div>
+
+      <div class="glass bar">
+        <span class="n">Categories<b id="nCats">0</b></span>
+        <span class="n t">With a name<b id="nHas">0</b></span>
+        <span class="n c">Nobody yet<b id="nNone">0</b></span>
+        <span class="n a">Names in play<b id="nProspects">0</b></span>
+        <span class="sv" id="sv"><span class="d"></span><span class="t">Loading</span></span>
+      </div>
+
+      <div id="stage"></div>
+
+      <div class="glass foot">
+        Categories are shared. Anything added here is visible to the whole team at once, and every
+        change is logged with who made it. The board of committed vendors and sponsors stays at
+        <a href="/board/">the board</a>, and the dated plan at <a href="/journeys/">the Ledger</a>.
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet">
+      <div class="scrim" data-close></div>
+      <div class="panel">
+        <button class="x" data-close aria-label="Close">&times;</button>
+        <div class="eyebrow" id="shDom"></div>
+        <h3 id="shName"></h3>
+        <p class="stand" id="shNeed" style="font-size: 14px"></p>
+        <div id="shList"></div>
+        <button class="addp" type="button" id="addProspect">+ Add a name</button>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      var DOMAINS = [
+        ["sponsor", "Sponsors", "var(--amber)", "Brands buying a position on the day"],
+        ["vendor", "Vendors", "var(--teal)", "Sellers on the field"],
+        ["hospitality", "Hospitality", "var(--violet)", "Food, drink and the hosted areas"],
+        ["hard_cost", "Hard costs", "var(--blue)", "Things we buy or hire"],
+        ["facility", "Facility and services", "var(--faint)", "What makes the site work"],
+        ["club", "Car clubs", "var(--teal)", "Blocks arriving together"],
+        ["talent", "Talent", "var(--violet)", "People who bring an audience"],
+        ["media", "Media", "var(--blue)", "Who covers it"],
+      ];
+      var WARMTH = [["", "Not set"], ["cold", "Cold"], ["warm", "Warm"], ["introduced", "Introduced"], ["in-conversation", "In conversation"]];
+      var STATUS = [["considering", "Considering"], ["shortlist", "Shortlist"], ["chosen", "Chosen"], ["passed", "Passed"]];
+
+      var db = null, staff = false, CATS = [], PROS = [], NAMES = {}, openCat = null;
+      var timer = {}, chain = {}, pending = {};
+
+      try {
+        db = createClient({
+          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+          dataApi: { url: DATA_API },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      async function isStaff() {
+        try {
+          var s = await db.auth.getSession();
+          var tok = s && s.data && s.data.session && s.data.session.access_token;
+          if (!tok) return false;
+          var r = await fetch(DATA_API + "/rpc/is_staff", {
+            method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
+          return r.ok && (await r.text()).trim() === "true";
+        } catch (e) { return false; }
+      }
+      function who(email) {
+        if (!email) return "someone";
+        var k = String(email).toLowerCase();
+        return NAMES[k] || k.split("@")[0];
+      }
+      function paint(state, msg) {
+        var el = document.getElementById("sv");
+        el.className = "sv" + (state === "saved" ? " on" : state === "error" ? " err" : "");
+        el.querySelector(".t").textContent =
+          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""), dirty: "Unsaved", ready: "Up to date" }[state] || "";
+      }
+      /* One chain per row so two quick edits cannot land out of order, and zero
+         returned rows is a failure, because that is what an RLS refusal is. */
+      function flush(key) {
+        var patch = pending[key];
+        if (!patch) return Promise.resolve();
+        delete pending[key];
+        var cut = key.indexOf(":"), tbl = key.slice(0, cut), id = key.slice(cut + 1);
+        chain[key] = (chain[key] || Promise.resolve())
+          .then(function () { paint("saving"); return db.from(tbl).update(patch).eq("id", id).select("id"); })
+          .then(function (r) {
+            if (r && r.error) throw new Error(r.error.message);
+            if (!r || !r.data || !r.data.length) throw new Error("nothing came back, which is what a permission refusal looks like");
+            paint("saved");
+          })
+          .catch(function (e) { paint("error", e.message || String(e)); });
+        return chain[key];
+      }
+      function queue(tbl, id, patch, delay) {
+        var key = tbl + ":" + id;
+        pending[key] = Object.assign(pending[key] || {}, patch);
+        clearTimeout(timer[key]); paint("dirty");
+        timer[key] = setTimeout(function () { flush(key); }, delay == null ? 700 : delay);
+      }
+
+      function prospectsFor(catId) {
+        return PROS.filter(function (p) { return String(p.category_id) === String(catId); })
+          .sort(function (a, b) { return (a.sort - b.sort) || String(a.created_at).localeCompare(String(b.created_at)); });
+      }
+
+      function render() {
+        var stage = document.getElementById("stage");
+        if (!staff) {
+          stage.innerHTML = '<div class="glass lock">This is the working target list, so it is staff only. ' +
+            'Sign in at the <a href="/console/">console</a> on this device and it unlocks here automatically.</div>';
+          return;
+        }
+        var withName = CATS.filter(function (c) { return prospectsFor(c.id).length > 0; }).length;
+        document.getElementById("nCats").textContent = CATS.length;
+        document.getElementById("nHas").textContent = withName;
+        document.getElementById("nNone").textContent = CATS.length - withName;
+        document.getElementById("nProspects").textContent = PROS.length;
+
+        stage.innerHTML = DOMAINS.map(function (d) {
+          var set = CATS.filter(function (c) { return c.domain === d[0]; })
+            .sort(function (a, b) { return a.sort - b.sort; });
+          return '<section class="dom" style="--tone:' + d[2] + '">' +
+            '<div class="domh"><h2>' + esc(d[1]) + "</h2><em>" + esc(d[3]) + "</em>" +
+            '<button class="add" type="button" data-adddom="' + d[0] + '">+ Add a category</button></div>' +
+            (set.length
+              ? '<div class="cats">' + set.map(function (c) {
+                  var p = prospectsFor(c.id);
+                  var chosen = p.filter(function (x) { return x.status === "chosen"; }).length;
+                  return '<article class="glass cat' + (p.length ? " has" : "") + '" data-cat="' + c.id + '">' +
+                    "<b>" + esc(c.name) + "</b>" +
+                    (c.need ? '<span class="need">' + esc(c.need) + "</span>" : "") +
+                    '<span class="cnt">' +
+                    (p.length ? "<b>" + p.length + "</b> in play" : '<span class="none">nobody yet</span>') +
+                    (chosen ? " &middot; <b>" + chosen + "</b> chosen" : "") +
+                    "</span></article>";
+                }).join("") + "</div>"
+              : '<p class="empty">Nothing here yet.</p>') + "</section>";
+        }).join("");
+      }
+
+      function renderSheet() {
+        var c = CATS.filter(function (x) { return String(x.id) === String(openCat); })[0];
+        var sheet = document.getElementById("sheet");
+        if (!c) { sheet.classList.remove("on"); return; }
+        sheet.classList.add("on");
+        var dom = DOMAINS.filter(function (d) { return d[0] === c.domain; })[0];
+        document.getElementById("shDom").textContent = dom ? dom[1] : c.domain;
+        document.getElementById("shName").textContent = c.name;
+        document.getElementById("shNeed").textContent = c.need || "";
+        var p = prospectsFor(c.id);
+        document.getElementById("shList").innerHTML = p.length ? p.map(function (x) {
+          return '<div class="p" data-p="' + x.id + '">' +
+            '<div class="r1">' +
+            '<input data-pf="name" data-pid="' + x.id + '" value="' + esc(x.name) + '" placeholder="Who are they" />' +
+            '<select data-pf="status" data-pid="' + x.id + '">' + STATUS.map(function (s) {
+              return '<option value="' + s[0] + '"' + (x.status === s[0] ? " selected" : "") + ">" + s[1] + "</option>"; }).join("") + "</select>" +
+            '<button class="x" type="button" data-pdel="' + x.id + '" aria-label="Remove">&times;</button></div>' +
+            '<div class="grid">' +
+            '<input data-pf="contact_name" data-pid="' + x.id + '" value="' + esc(x.contact_name || "") + '" placeholder="Contact name" />' +
+            '<select data-pf="warmth" data-pid="' + x.id + '">' + WARMTH.map(function (w) {
+              return '<option value="' + w[0] + '"' + ((x.warmth || "") === w[0] ? " selected" : "") + ">" + w[1] + "</option>"; }).join("") + "</select>" +
+            '<input data-pf="contact_email" data-pid="' + x.id + '" value="' + esc(x.contact_email || "") + '" placeholder="Email" />' +
+            '<input data-pf="contact_phone" data-pid="' + x.id + '" value="' + esc(x.contact_phone || "") + '" placeholder="Phone" />' +
+            '<input data-pf="website" data-pid="' + x.id + '" value="' + esc(x.website || "") + '" placeholder="Website" />' +
+            '<input data-pf="owner" data-pid="' + x.id + '" value="' + esc(x.owner || "") + '" placeholder="Whose contact is it" />' +
+            "</div>" +
+            '<textarea data-pf="detail" data-pid="' + x.id + '" placeholder="What we know, and what the ask is" style="margin-top:8px;min-height:44px">' + esc(x.detail || "") + "</textarea>" +
+            (x.created_by ? '<div class="by">Added by ' + esc(who(x.created_by)) + "</div>" : "") +
+            "</div>";
+        }).join("") : '<p class="empty">No names against this yet. If you know somebody, put them in.</p>';
+      }
+
+      async function load() {
+        if (!db) return;
+        staff = await isStaff();
+        document.getElementById("who").classList.toggle("on", staff);
+        if (!staff) { document.getElementById("whoTxt").textContent = "Not signed in"; return render(); }
+        try {
+          var n = await db.from("staff_allowlist").select("email,name");
+          (n.data || []).forEach(function (x) { if (x.name) NAMES[String(x.email).toLowerCase()] = x.name; });
+          var s = await db.auth.getSession();
+          var em = s && s.data && s.data.session && s.data.session.user && s.data.session.user.email;
+          document.getElementById("whoTxt").textContent = who(em);
+        } catch (e) {}
+        var c = await db.from("categories").select("*").order("sort");
+        if (c.error) return paint("error", c.error.message);
+        CATS = c.data || [];
+        var p = await db.from("account_candidates").select("*").order("sort");
+        /* The board keeps its own candidates against accounts. Those belong to
+           the board, not here, so only category backed rows are counted. */
+        if (!p.error) PROS = (p.data || []).filter(function (x) { return x.category_id != null; });
+        paint("ready");
+        var a = document.activeElement;
+        if (!(a && a.getAttribute && a.getAttribute("data-pf")) && !Object.keys(pending).length) { render(); renderSheet(); }
+      }
+
+      document.addEventListener("click", async function (e) {
+        if (e.target.closest("[data-close]")) { openCat = null; return renderSheet(); }
+        var cat = e.target.closest("[data-cat]");
+        if (cat) { openCat = cat.getAttribute("data-cat"); return renderSheet(); }
+
+        var addDom = e.target.closest("[data-adddom]");
+        if (addDom && staff) {
+          var name = prompt("New category. What is it called?");
+          if (!name || !name.trim()) return;
+          var dom = addDom.getAttribute("data-adddom");
+          var mx = CATS.filter(function (x) { return x.domain === dom; }).reduce(function (n2, x) { return Math.max(n2, x.sort || 0); }, 0);
+          var ins = await db.from("categories").insert([{ event_id: EVENT_ID, name: name.trim(), domain: dom, sort: mx + 10 }]).select("id");
+          if (ins && ins.error) return paint("error", ins.error.message);
+          if (!ins || !ins.data || !ins.data.length) return paint("error", "the insert came back empty, which is a permission refusal");
+          await load();
+          openCat = String(ins.data[0].id); renderSheet();
+          return;
+        }
+
+        if (e.target.closest("#addProspect") && staff && openCat) {
+          var mxp = prospectsFor(openCat).reduce(function (n3, x) { return Math.max(n3, x.sort || 0); }, 0);
+          var ip = await db.from("account_candidates")
+            .insert([{ category_id: Number(openCat), name: "", status: "considering", sort: mxp + 10 }]).select("id");
+          if (ip && ip.error) return paint("error", ip.error.message);
+          if (!ip || !ip.data || !ip.data.length) return paint("error", "the insert came back empty, which is a permission refusal");
+          await load(); renderSheet();
+          var el = document.querySelector('[data-pid="' + ip.data[0].id + '"]');
+          el && el.focus();
+          return;
+        }
+
+        var del = e.target.closest("[data-pdel]");
+        if (del && staff) {
+          var id = del.getAttribute("data-pdel");
+          var row = PROS.filter(function (x) { return String(x.id) === String(id); })[0];
+          if (!confirm("Remove " + ((row && row.name) || "this name") + "?")) return;
+          var d = await db.from("account_candidates").delete().eq("id", id).select("id");
+          if (d && d.error) return paint("error", d.error.message);
+          await load(); renderSheet();
+        }
+      });
+
+      document.addEventListener("input", function (e) {
+        var f = e.target.getAttribute && e.target.getAttribute("data-pf");
+        if (!f || !staff) return;
+        var id = e.target.getAttribute("data-pid");
+        var v = e.target.value;
+        PROS.forEach(function (x) { if (String(x.id) === String(id)) x[f] = v; });
+        queue("account_candidates", id, (function () { var o = {}; o[f] = v === "" && f === "warmth" ? null : v; return o; })());
+      });
+      document.addEventListener("change", function (e) {
+        var f = e.target.getAttribute && e.target.getAttribute("data-pf");
+        if (!f || !staff || (f !== "status" && f !== "warmth")) return;
+        var id = e.target.getAttribute("data-pid"), v = e.target.value;
+        PROS.forEach(function (x) { if (String(x.id) === String(id)) x[f] = v; });
+        queue("account_candidates", id, (function () { var o = {}; o[f] = v === "" ? null : v; return o; })(), 0);
+        setTimeout(function () { render(); }, 350);
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") { openCat = null; renderSheet(); } });
+      window.addEventListener("beforeunload", function (e) {
+        if (!Object.keys(pending).length) return;
+        Object.keys(pending).forEach(flush); e.preventDefault(); e.returnValue = "";
+      });
+      document.addEventListener("visibilitychange", function () { if (document.hidden) Object.keys(pending).forEach(flush); });
+
+      render();
+      load();
+      setInterval(function () { document.hidden || load(); }, 20e3);
+    </script>
+  </body>
+</html>
