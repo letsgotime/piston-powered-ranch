@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Journeys · PaddockGavin Events</title>
+    <title>The Ledger · The Piston Powered Ranch</title>
     <meta name="description" content="The live visitor journey command surface for PaddockGavin Events." />
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#0d1620" />
@@ -72,6 +72,19 @@
       .lane { padding: 14px var(--pad) 16px; }
       .lane .who { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
       .lane h2 { margin: 0; font-size: 16px; letter-spacing: -0.01em; }
+      .bad { color: var(--crit); }
+      .ms { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: baseline;
+        padding: 9px 0; border-bottom: 1px solid var(--gline); }
+      .ms:last-of-type { border-bottom: 0; }
+      .ms .dt { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; color: var(--mute); white-space: nowrap; }
+      .ms .dt.late { color: var(--crit); font-weight: 700; }
+      .ms .dt.soon { color: var(--amber); font-weight: 700; }
+      .ms .ttl { font-size: 13.5px; color: var(--ink); font-weight: 700; }
+      .ms .ttl small { display: block; font-weight: 400; color: var(--mute); font-size: 12.5px; line-height: 1.45; margin-top: 2px; }
+      .ms .own { font-size: 11px; font-family: ui-monospace, Menlo, monospace; color: var(--mute); white-space: nowrap; }
+      .lanehead { font-size: 10.5px; letter-spacing: .15em; text-transform: uppercase; font-weight: 800;
+        color: var(--amber); margin: 14px 0 4px; }
+      .lanehead:first-child { margin-top: 0; }
       .badge { font-size: 9.5px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
         padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
       .b-spec { color: #04211d; background: var(--teal); }
@@ -276,13 +289,14 @@
       <div class="col">
         <div class="head glass">
           <img src="/brand/pg-mark.png" alt="PaddockGavin" />
-          <h1 class="display">Visitor <span class="a">Journeys</span></h1>
+          <h1 class="display">The <span class="a">Ledger</span></h1>
           <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span><span class="lbl">&nbsp;view</span></span>
         </div>
         <p class="sub">
-          Every visitor journey, live. Tap any step for its numbers, links, and the workbench
-          where the work for that step gets written down. Staff who are signed in at the console
-          see live admin data and can edit here; everyone edits the same copy.
+          One page for the whole event. Every visitor journey, then the dated plan, the money,
+          the decisions nobody has made yet, and who carries each one. Tap any step for its
+          numbers, links, and the workbench where that work gets written down. Staff signed in at
+          the console see live data and can edit here; everyone edits the same copy.
         </p>
       </div>
       <div id="stage"></div>
@@ -329,7 +343,8 @@
       var staff = false;
       var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
       var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null,
-                   spectators: null, clubs: null, features: null, wb: null, feed: null };
+                   spectators: null, clubs: null, features: null, wb: null, feed: null,
+                   milestones: null, budget: null, roster: null };
 
       /* ---------- the map model: every node declares its own panel ---------- */
       var LANES = [
@@ -388,6 +403,20 @@
       ];
 
       /* ---------- panels: live stats + actions per node ---------- */
+      function msList(set) {
+        var t = ranchToday();
+        return set.map(function (m) {
+          var cls = !m.due ? "" : m.due < t ? " late" : m.due <= addDays(t, 7) ? " soon" : "";
+          return '<div class="ms"><span class="dt' + cls + '">' + (m.due ? esc(m.due.slice(5)) : "no date") + "</span>" +
+            '<span class="ttl">' + esc(m.title) + (m.detail ? "<small>" + esc(m.detail) + "</small>" : "") + "</span>" +
+            '<span class="own">' + esc(m.owner || "") + "</span></div>";
+        }).join("");
+      }
+      function addDays(iso, n) {
+        var d = new Date(iso + "T12:00:00Z");
+        d.setUTCDate(d.getUTCDate() + n);
+        return d.toISOString().slice(0, 10);
+      }
       function money(c) { return "$" + ((c || 0) / 100).toFixed(2); }
       function copyBtn(label, text) {
         return '<button data-copy="' + esc(text) + '">' + esc(label) + "</button>";
@@ -513,6 +542,101 @@
             (LIVE.accounts ? stat("Accounts in lanes", LIVE.accounts.length, true) : lock()) +
             (LIVE.payments ? stat("Ledger rows", LIVE.payments.length, true) : "") +
             (staff ? acts('<a class="primary" href="/console/#ops">Open pipeline</a>') : "") };
+        },
+        timenext: function () {
+          var soon = msSoon(7), late = msLate();
+          return { e: "The plan", t: "Due in the next seven days", body:
+            (late.length ? '<p class="note bad"><b>' + late.length + " past due.</b> Those are listed first.</p>" : "") +
+            (LIVE.milestones
+              ? (soon.length ? msList(soon) : '<p class="note">Nothing falls due in the next seven days.</p>')
+              : lock()) +
+            acts('<a class="primary" href="#" data-panel="timeline">See the whole plan</a>') };
+        },
+        timeline: function () {
+          var LANES_M = [["permits", "Permits and insurance"], ["partners", "Partners"],
+                         ["money", "Money"], ["site", "The site"], ["marketing", "Marketing"], ["people", "People"]];
+          var m = LIVE.milestones;
+          return { e: "The plan", t: "Every milestone", body:
+            (m
+              ? "<p>Back planned from show day. Dates are proposals until you and Oscar confirm them.</p>" +
+                LANES_M.map(function (L) {
+                  var set = m.filter(function (x) { return x.lane === L[0]; })
+                    .sort(function (a, b) { return String(a.due).localeCompare(String(b.due)); });
+                  if (!set.length) return "";
+                  return '<div class="lanehead">' + esc(L[1]) + "</div>" + msList(set);
+                }).join("")
+              : lock()) };
+        },
+        budget: function () {
+          var b = LIVE.budget, un = unpriced();
+          return { e: "The money", t: "Cost lines", body:
+            (b
+              ? stat("Costed", money0(costed()), true) +
+                stat("Lines with a quote", b.length - un.length) +
+                stat("Lines with no quote", un.length) +
+                (un.length
+                  ? '<div class="lanehead">Still unpriced</div>' +
+                    un.map(function (x) { return stat(esc(x.label), "no quote"); }).join("") +
+                    '<p class="note">Those are excluded from the total, so the figure above is better than reality, not worse.</p>'
+                  : "")
+              : lock()) +
+            acts('<a class="primary" href="/console/planning/" target="_blank" rel="noopener">Open the ledger</a>') };
+        },
+        decisions: function () {
+          var d = LIVE.decisions, m = LIVE.milestones || [];
+          var open = d ? d.filter(function (x) { return x.status === "open"; }) : null;
+          return { e: "The operation", t: "Open decisions", body:
+            (open
+              ? open.map(function (x) {
+                  var held = m.filter(function (ms) { return String(ms.decision_id) === String(x.id); });
+                  return '<div class="ms"><span class="dt">#' + x.id + '</span>' +
+                    '<span class="ttl">' + esc(x.label) +
+                    (x.notes ? "<small>" + esc(x.notes) + "</small>" : "") +
+                    (held.length ? "<small class=\"bad\">Holding up: " +
+                      held.map(function (h) { return esc(h.title); }).join(", ") + "</small>" : "") +
+                    "</span><span class=\"own\"></span></div>";
+                }).join("")
+              : lock()) };
+        },
+        roles: function () {
+          var r = LIVE.roster;
+          return { e: "The operation", t: "The roster", body:
+            (r
+              ? r.map(function (x) {
+                  return stat(esc(x.name) + (x.section ? " &middot; " + esc(x.section) : ""), esc(x.role || ""));
+                }).join("") +
+                '<p class="note">Pit Crew is carried as a single line because not one volunteer is named yet.</p>'
+              : lock()) };
+        },
+        byowner: function () {
+          var m = LIVE.milestones;
+          if (!m) return { e: "The operation", t: "Work by owner", body: lock() };
+          var owners = {};
+          m.forEach(function (x) { (owners[x.owner || "unassigned"] = owners[x.owner || "unassigned"] || []).push(x); });
+          return { e: "The operation", t: "Work by owner", body:
+            Object.keys(owners).sort().map(function (o) {
+              var set = owners[o].filter(function (x) { return x.status !== "done"; })
+                .sort(function (a, b) { return String(a.due).localeCompare(String(b.due)); });
+              if (!set.length) return "";
+              var late = set.filter(function (x) { return x.due && x.due < ranchToday(); }).length;
+              return '<div class="lanehead">' + esc(o) + " &middot; " + set.length + " open" +
+                (late ? ", <span class='bad'>" + late + " past due</span>" : "") + "</div>" + msList(set);
+            }).join("") };
+        },
+        board: function () {
+          var a = LIVE.accounts;
+          if (!a) return { e: "The operation", t: "The pipeline", body: lock() };
+          var order = [["committed", "Committed"], ["warm", "Warm"], ["named", "Named, not asked"], ["open", "No name yet"]];
+          return { e: "The operation", t: "Every category, by stage", body:
+            order.map(function (st) {
+              var set = a.filter(function (x) { return (x.pipeline_stage || "open") === st[0]; });
+              if (!set.length) return "";
+              return '<div class="lanehead">' + st[1] + " &middot; " + set.length + "</div>" +
+                set.map(function (x) {
+                  return stat(esc(x.category || "(no category)"), esc(x.company || "&mdash;"));
+                }).join("");
+            }).join("") +
+            acts('<a class="primary" href="/board/" target="_blank" rel="noopener">Edit on the board</a>') };
         },
         grounds: function () {
           var f = LIVE.features;
@@ -825,6 +949,79 @@
       /* The three acts of a show day, each introduced by a full bleed band.
          The image is structural: it announces whose turn it is, so the page
          reads as a story rather than a wall of cards. */
+      /* ---------- the operation: the plan, the money, the decisions, the people ---------- */
+      /* Show day is Central, so "today" has to be Central too or the plan
+         goes red an evening early for anyone east of it. */
+      function ranchToday() {
+        return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago",
+          year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+      }
+      function money0(c) { return "$" + Math.round((c || 0) / 100).toLocaleString("en-US"); }
+      function msOpen() { return (LIVE.milestones || []).filter(function (m) { return m.status !== "done"; }); }
+      function msLate() {
+        var t = ranchToday();
+        return msOpen().filter(function (m) { return m.due && m.due < t; });
+      }
+      function msSoon(n) {
+        var t = ranchToday(), lim = new Date(t + "T12:00:00Z");
+        lim.setUTCDate(lim.getUTCDate() + (n || 7));
+        var end = lim.toISOString().slice(0, 10);
+        return msOpen().filter(function (m) { return m.due && m.due <= end; })
+          .sort(function (a, b) { return String(a.due).localeCompare(String(b.due)); });
+      }
+      function costed() {
+        return (LIVE.budget || []).filter(function (b) { return Number(b.rate_cents) > 0; })
+          .reduce(function (a, b) { return a + Number(b.rate_cents) * Number(b.qty || 0); }, 0);
+      }
+      function unpriced() {
+        return (LIVE.budget || []).filter(function (b) { return !Number(b.rate_cents); });
+      }
+
+      LANES.push(
+        { who: "The plan", badge: ["b-staff", "Dated"], kpi: function () {
+            if (!LIVE.milestones) return "";
+            var late = msLate().length;
+            return "<b>" + msOpen().length + "</b> still open" +
+              (late ? " &middot; <b class='bad'>" + late + "</b> past due" : "");
+          },
+          nodes: [
+            { t: "Due in the next seven days", d: "What actually has to move this week.", panel: "timenext",
+              pill: function () { return LIVE.milestones && msSoon(7).length; } },
+            { t: "The whole plan", d: "Every milestone, back planned from show day.", panel: "timeline" },
+          ] },
+        { who: "The money", badge: ["b-biz", "Budget"], kpi: function () {
+            if (!LIVE.budget) return "";
+            return "<b>" + money0(costed()) + "</b> costed &middot; <b class='bad'>" + unpriced().length + "</b> with no quote";
+          },
+          nodes: [
+            { t: "Cost lines", d: "What is quoted, and what still is not.", panel: "budget",
+              pill: function () { return LIVE.budget && unpriced().length; } },
+            { t: "Payments ledger", d: "Money actually received.", panel: "ledger" },
+          ] },
+        { who: "Open decisions", badge: ["b-car", "Unresolved"], kpi: function () {
+            return LIVE.decisions ? "<b>" + LIVE.decisions.filter(function (d) { return d.status === "open"; }).length +
+              "</b> waiting on somebody" : "";
+          },
+          nodes: [
+            { t: "What is unresolved", d: "And which milestone each one is holding up.", panel: "decisions" },
+          ] },
+        { who: "Who does what", badge: ["b-spec", "Roles"], kpi: function () {
+            return LIVE.roster ? "<b>" + LIVE.roster.length + "</b> on the roster" : "";
+          },
+          nodes: [
+            { t: "The roster", d: "Leadership and the volunteer corps.", panel: "roles" },
+            { t: "Work by owner", d: "Every milestone, grouped by who carries it.", panel: "byowner" },
+          ] },
+        { who: "The pipeline", badge: ["b-biz", "Vendors and sponsors"], kpi: function () {
+            if (!LIVE.accounts) return "";
+            var c = LIVE.accounts.filter(function (a) { return a.pipeline_stage === "committed"; }).length;
+            return "<b>" + LIVE.accounts.length + "</b> categories &middot; <b>" + c + "</b> committed";
+          },
+          nodes: [
+            { t: "Every category, by stage", d: "The whole board, read only here.", panel: "board" },
+          ] }
+      );
+
       var ACTS = [
         { lanes: [0, 1, 2] },
         { lanes: [3, 4], band: { img: "/events/img/ranch.jpg", eye: "Act two",
@@ -833,6 +1030,9 @@
         { lanes: [5], band: { img: "/events/img/walk.jpg", eye: "Act three",
             h: "The people who run it",
             p: "Every decision, every deliverable, every change to this document, logged as it happens." } },
+        { lanes: [6, 7, 8, 9, 10], band: { img: "/events/img/dusk.jpg", eye: "Act four",
+            h: "The plan behind it",
+            p: "The dated plan, the money, the decisions nobody has made yet, and who carries each one." } },
       ];
 
       function laneHtml(l, li) {
@@ -1088,8 +1288,15 @@
           a.error || (LIVE.accounts = a.data);
           var p = await db.from("payments").select("status,amount_cents");
           p.error || (LIVE.payments = p.data);
-          var d = await db.from("open_decisions").select("label,status");
+          /* id and notes as well, so a decision can name the milestone it holds up */
+          var d = await db.from("open_decisions").select("id,label,status,notes").order("sort_order");
           d.error || (LIVE.decisions = d.data);
+          var ms = await db.from("milestones").select("*").order("due");
+          ms.error || (LIVE.milestones = ms.data);
+          var bg = await db.from("budget_items").select("*").order("sort_order");
+          bg.error || (LIVE.budget = bg.data);
+          var rs = await db.from("staff_roster").select("*").order("id");
+          rs.error || (LIVE.roster = rs.data);
           var sp = await db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25);
           sp.error || (LIVE.spectators = sp.data);
           var cs = await db.from("club_submissions").select("status,vehicle_count,club_id");
