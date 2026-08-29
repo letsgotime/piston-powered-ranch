@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Judging · The Piston Powered Ranch</title>
+    <meta name="description" content="The awards, the panel and the ballots." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#070d14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--dim);
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+      .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
+      .ground i:nth-child(1) { width: 56vw; height: 56vw; left: -15vw; top: -20vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .3; }
+      .ground i:nth-child(2) { width: 62vw; height: 62vw; right: -19vw; top: 22vh; background: radial-gradient(circle, #9b7fe0, transparent 68%); opacity: .2; }
+      .ground i:nth-child(3) { width: 70vw; height: 70vw; left: 6vw; bottom: -33vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .27; }
+      .ground u { position: absolute; inset: 0; display: block; background: linear-gradient(180deg, rgba(7,13,20,.6), rgba(7,13,20,.5) 42%, rgba(7,13,20,.9)); }
+      .rule { position: relative; z-index: 3; height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
+      .wrap { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto;
+        padding: 26px 15px calc(90px + env(safe-area-inset-bottom)); }
+      .glass { background: var(--glass); border: 1px solid var(--gline); border-radius: 18px;
+        box-shadow: 0 10px 34px rgba(0,0,0,.42);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); }
+      .hero { padding: 21px 23px; display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; }
+      .hero img { height: 38px; }
+      .hero .t { flex: 1; min-width: 240px; }
+      .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+      h1 { margin: 7px 0 0; font-weight: 900; font-size: clamp(26px, 5vw, 38px); line-height: 1.02; letter-spacing: -.03em; color: var(--ink); }
+      h1 span { color: var(--amber); }
+      .stand { margin: 9px 0 0; font-size: 15.5px; color: var(--dim); max-width: 62ch; }
+      .who { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+      .who .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .who.on { color: var(--teal); } .who.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      h2 { margin: 30px 0 0; font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
+        font-weight: 900; color: var(--amber); padding-bottom: 8px; border-bottom: 2px solid var(--gline); }
+      h2 em { float: right; font-style: normal; font-size: 12px; letter-spacing: .04em;
+        text-transform: none; color: var(--faint); font-weight: 400; }
+      .bar { margin-top: 13px; padding: 12px 18px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+      .bar .n { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+      .bar .n b { display: block; font-size: 19px; font-weight: 900; color: var(--ink);
+        font-variant-numeric: tabular-nums; line-height: 1.15; letter-spacing: -.02em; }
+      .bar .n.t b { color: var(--teal); } .bar .n.a b { color: var(--amber); } .bar .n.c b { color: var(--crit); }
+      .sv { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+        text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
+      .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+
+      .aw { display: grid; gap: 9px; margin-top: 13px; }
+      .a { padding: 15px 18px; position: relative; overflow: hidden; }
+      .a::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone, var(--amber)); }
+      .a .top { display: flex; align-items: baseline; gap: 11px; flex-wrap: wrap; }
+      .a .top b { font-size: 17px; font-weight: 900; color: var(--ink); letter-spacing: -.018em; }
+      .a .top .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+        color: var(--tone, var(--amber)); font-weight: 600; }
+      .a .bl { margin-top: 5px; font-size: 13.5px; color: var(--mute); line-height: 1.5; }
+      .a .st { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+      .a .st select { font: inherit; font-size: 12px; color: var(--ink); background: rgba(0,0,0,.3);
+        border: 1px solid var(--gline); border-radius: 8px; padding: 5px 9px; }
+      .a .picks { display: grid; gap: 7px; margin-top: 11px; }
+      .a .pick { display: grid; grid-template-columns: 38px 1fr; gap: 10px; align-items: center; }
+      .a .pick .r { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+        color: var(--faint); text-align: right; }
+      .a .pick select { width: 100%; font: inherit; font-size: 14px; color: var(--ink); background: rgba(0,0,0,.3);
+        border: 1px solid var(--gline); border-radius: 9px; padding: 8px 10px; }
+      .a .pick select:focus { outline: none; border-color: var(--amber); }
+      .a .tally { margin-top: 11px; display: grid; gap: 5px; }
+      .a .tally .row { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+        font-size: 13.5px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,.04); }
+      .a .tally .row b { font-variant-numeric: tabular-nums; color: var(--teal); }
+      .a .tally .row.win { background: rgba(248,184,0,.12); }
+      .a .tally .row.win b { color: var(--amber); }
+
+      .j { display: grid; grid-template-columns: 1fr auto auto; gap: 11px; align-items: center; padding: 12px 16px; }
+      .j .nm b { display: block; font-size: 15px; font-weight: 900; color: var(--ink); }
+      .j .nm span { display: block; font-family: var(--mono); font-size: 10px; color: var(--faint); }
+      .j select, .j button { font: inherit; font-size: 12px; color: var(--dim); background: rgba(0,0,0,.3);
+        border: 1px solid var(--gline); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+      .add { margin-top: 11px; padding: 16px 18px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 9px; align-items: end; }
+      .add label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--faint); font-weight: 600; }
+      .add input { width: 100%; margin-top: 4px; font: inherit; font-size: 14px; color: var(--ink);
+        background: rgba(0,0,0,.3); border: 1px solid var(--gline); border-radius: 9px; padding: 9px 11px; }
+      .add input:focus { outline: none; border-color: var(--amber); }
+      .add button { font: inherit; font-size: 13.5px; font-weight: 900; cursor: pointer; color: #04211d;
+        background: var(--teal); border: 0; border-radius: 10px; padding: 11px 18px; }
+      .note { margin-top: 13px; padding: 16px 20px; font-size: 13.5px; color: var(--mute); }
+      .note a { color: var(--amber); }
+      .note b { color: var(--amber); font-weight: 700; }
+      @media (max-width: 680px) {
+        .wrap { padding: 18px 11px 80px; }
+        .add { grid-template-columns: 1fr; }
+        .j { grid-template-columns: 1fr auto; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ground" aria-hidden="true"><i></i><i></i><i></i><u></u></div>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="glass hero">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="t">
+          <div class="eyebrow">The Piston Powered Ranch &middot; awards</div>
+          <h1>Seven awards, <span>and a panel</span></h1>
+          <p class="stand">
+            Judging opens at eight and closes at one. Awards are read at half one. A panel that can be
+            seen to be fair matters more than a panel that is merely correct, so every ballot here is
+            recorded against the judge who cast it.
+          </p>
+        </div>
+        <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
+      </div>
+      <div id="stage"></div>
+      <div class="glass note" id="foot"></div>
+    </div>
+
+    <script type="module">
+      import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      var TONE = { judged: "var(--amber)", host: "var(--violet)", popular: "var(--teal)" };
+      var KIND = { judged: "Panel", host: "Host pick", popular: "Everybody" };
+      var STATES = ["draft", "open", "closed", "announced"];
+      var RANKS = ["First", "Second", "Third", "Fourth", "Fifth"];
+
+      var db = null, staff = false, judge = false, ME = "";
+      var AWARDS = [], JUDGES = [], BALLOTS = [], VOTES = [], FIELD = [];
+
+      try {
+        db = createClient({
+          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+          dataApi: { url: DATA_API },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      async function token() {
+        try {
+          var s = await db.auth.getSession();
+          return (s && s.data && s.data.session && s.data.session.access_token) || null;
+        } catch (e) { return null; }
+      }
+      async function rpc(fn) {
+        var tok = await token();
+        if (!tok) return null;
+        var r = await fetch(DATA_API + "/rpc/" + fn, {
+          method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
+        if (!r.ok) return null;
+        var t = await r.text();
+        try { return JSON.parse(t); } catch (e) { return t.trim(); }
+      }
+      function paint(state, msg) {
+        var el = document.getElementById("sv");
+        if (!el) return;
+        el.className = "sv" + (state === "saved" ? " on" : state === "error" ? " err" : "");
+        el.querySelector(".t").textContent =
+          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""), ready: "Up to date" }[state] || "";
+      }
+      /* The field comes from approved vehicle submissions. The details column is
+         free form, so this reads what is there and never invents a car. */
+      function carName(s) {
+        var d = s.details || {};
+        var bits = [d.year, d.make, d.model].filter(Boolean).join(" ");
+        var num = s.foat_id ? "#" + s.foat_id + " " : "";
+        return num + (bits || d.vehicle || d.car || s.applicant_name || "Entry " + String(s.id).slice(0, 8));
+      }
+
+      function myBallot(awardId, rank) {
+        return BALLOTS.filter(function (b) {
+          return String(b.award_id) === String(awardId) && b.rank === rank &&
+            String(b.judge_email).toLowerCase() === ME.toLowerCase();
+        })[0] || null;
+      }
+      /* Borda style: first is worth three, second two, third one. Simple enough
+         to explain from a stage, which is the only test that matters. */
+      function tally(awardId) {
+        var pts = {};
+        BALLOTS.filter(function (b) { return String(b.award_id) === String(awardId); })
+          .forEach(function (b) { pts[b.entry_id] = (pts[b.entry_id] || 0) + Math.max(1, 4 - b.rank); });
+        VOTES.filter(function (v) { return String(v.award_id) === String(awardId); })
+          .forEach(function (v) { pts[v.entry_id] = (pts[v.entry_id] || 0) + 1; });
+        return Object.keys(pts).map(function (k) { return { entry: k, pts: pts[k] }; })
+          .sort(function (a, b) { return b.pts - a.pts; });
+      }
+      function entryName(id) {
+        var e = FIELD.filter(function (x) { return String(x.id) === String(id); })[0];
+        return e ? carName(e) : "entry " + String(id).slice(0, 8);
+      }
+
+      function awardCard(a) {
+        var mine = "";
+        if (judge && a.kind === "judged" && a.state === "open") {
+          mine = '<div class="picks">' + Array.from({ length: a.picks }, function (_, i) {
+            var rank = i + 1, b = myBallot(a.id, rank);
+            return '<div class="pick"><span class="r">' + esc(RANKS[i]) + "</span>" +
+              '<select data-ballot="' + a.id + '" data-rank="' + rank + '">' +
+              '<option value="">Not chosen</option>' +
+              FIELD.map(function (e) {
+                return '<option value="' + esc(e.id) + '"' + (b && b.entry_id === e.id ? " selected" : "") +
+                  ">" + esc(carName(e)) + "</option>";
+              }).join("") + "</select></div>";
+          }).join("") + "</div>";
+        }
+        var res = "";
+        if (staff) {
+          var t = tally(a.id).slice(0, 5);
+          res = t.length
+            ? '<div class="tally">' + t.map(function (r, i) {
+                return '<div class="row' + (i === 0 ? " win" : "") + '"><span>' + esc(entryName(r.entry)) +
+                  "</span><b>" + r.pts + "</b></div>";
+              }).join("") + "</div>"
+            : "<p style='margin:11px 0 0;font-size:13px;color:var(--faint)'>No ballots yet.</p>";
+        }
+        return '<article class="glass a" style="--tone:' + TONE[a.kind] + '">' +
+          '<div class="top"><b>' + esc(a.name) + '</b><span class="k">' + esc(KIND[a.kind]) + "</span>" +
+          (staff
+            ? '<span class="st"><select data-state="' + a.id + '">' + STATES.map(function (s) {
+                return '<option value="' + s + '"' + (a.state === s ? " selected" : "") + ">" + s + "</option>";
+              }).join("") + "</select></span>"
+            : '<span class="st"><span class="k">' + esc(a.state) + "</span></span>") +
+          "</div>" +
+          (a.blurb ? '<div class="bl">' + esc(a.blurb) + "</div>" : "") +
+          mine + res + "</article>";
+      }
+
+      function render() {
+        var stage = document.getElementById("stage");
+        var foot = document.getElementById("foot");
+        if (!staff && !judge) {
+          stage.innerHTML = '<div class="glass note" style="margin-top:20px">' +
+            "The awards board is for the panel and for staff. If you are judging, sign in with the email " +
+            "the invitation went to and your ballots appear here.</div>";
+          foot.innerHTML = "Spectators vote for People's Choice on their own phone at " +
+            '<a href="/vote/">the voting page</a>, no sign in needed.';
+          return;
+        }
+        var open = AWARDS.filter(function (a) { return a.state === "open"; }).length;
+        var cast = BALLOTS.filter(function (b) { return String(b.judge_email).toLowerCase() === ME.toLowerCase(); }).length;
+        stage.innerHTML =
+          "<h2>Awards<em>" + AWARDS.length + " on the sheet</em></h2>" +
+          '<div class="glass bar">' +
+          '<span class="n">Awards<b>' + AWARDS.length + "</b></span>" +
+          '<span class="n a">Open<b>' + open + "</b></span>" +
+          (staff ? '<span class="n t">Judges confirmed<b>' +
+            JUDGES.filter(function (j) { return j.status !== "invited" && j.status !== "declined"; }).length + "</b></span>" : "") +
+          (staff ? '<span class="n">Ballots<b>' + BALLOTS.length + "</b></span>" : "") +
+          (judge ? '<span class="n t">Your picks<b>' + cast + "</b></span>" : "") +
+          '<span class="n' + (FIELD.length ? "" : " c") + '">Cars on the sheet<b>' + FIELD.length + "</b></span>" +
+          '<span class="sv" id="sv"><span class="d"></span><span class="t">Up to date</span></span>' +
+          "</div>" +
+          '<div class="aw">' + AWARDS.map(awardCard).join("") + "</div>" +
+          (staff ? judgesBlock() : "");
+
+        foot.innerHTML = FIELD.length
+          ? "Ballots are recorded against the judge who cast them. First counts three, second two, third one, " +
+            "which is simple enough to explain from a stage."
+          : "<b>No cars are approved yet</b>, so there is nothing to judge against. Approve entries in the " +
+            '<a href="/console/">console</a> and they appear on every ballot here.';
+      }
+
+      function judgesBlock() {
+        return "<h2>The panel<em>" + JUDGES.length + " invited</em></h2>" +
+          '<div class="glass add">' +
+          "<div><label for='jN'>Name</label><input id='jN' /></div>" +
+          "<div><label for='jE'>Email</label><input id='jE' type='email' /></div>" +
+          "<div><label for='jM'>Marques they know</label><input id='jM' placeholder='Ferrari, air cooled Porsche' /></div>" +
+          "<button type='button' id='jAdd'>Invite</button></div>" +
+          (JUDGES.length
+            ? '<div class="aw">' + JUDGES.map(function (j) {
+                return '<article class="glass j"><span class="nm"><b>' + esc(j.name) + "</b><span>" +
+                  esc(j.email) + (j.marque ? " · " + esc(j.marque) : "") + "</span></span>" +
+                  '<select data-jstate="' + j.id + '">' +
+                  ["invited", "confirmed", "declined", "scoring", "done"].map(function (s) {
+                    return '<option value="' + s + '"' + (j.status === s ? " selected" : "") + ">" + s + "</option>";
+                  }).join("") + "</select>" +
+                  '<button type="button" data-jdel="' + j.id + '">Remove</button></article>';
+              }).join("") + "</div>"
+            : "<p style='margin-top:12px;font-size:14px;color:var(--mute)'>Nobody invited yet. A judge signs in " +
+              "with the email you put here and their ballots show up on this page.</p>");
+      }
+
+      async function load() {
+        if (!db) return;
+        var tok = await token();
+        if (tok) {
+          ME = (await rpc("me")) || "";
+          staff = (await rpc("is_staff")) === true;
+          judge = (await rpc("is_judge")) === true;
+        }
+        document.getElementById("who").classList.toggle("on", staff || judge);
+        document.getElementById("whoTxt").textContent =
+          staff ? "Staff" : judge ? "Judge" : ME ? ME.split("@")[0] : "Not signed in";
+
+        var a = await db.from("awards").select("*").order("sort");
+        AWARDS = a.error ? [] : a.data || [];
+        if (staff || judge) {
+          var f = await db.from("submissions").select("id,applicant_name,details,foat_id,status,type")
+            .eq("type", "vehicle").eq("status", "approved");
+          FIELD = f.error ? [] : f.data || [];
+          var b = await db.from("ballots").select("*");
+          BALLOTS = b.error ? [] : b.data || [];
+        }
+        if (staff) {
+          var j = await db.from("judges").select("*").order("name");
+          JUDGES = j.error ? [] : j.data || [];
+          var v = await db.from("popular_votes").select("award_id,entry_id");
+          VOTES = v.error ? [] : v.data || [];
+        }
+        render();
+      }
+
+      document.addEventListener("change", async function (e) {
+        var bal = e.target.getAttribute && e.target.getAttribute("data-ballot");
+        if (bal && judge) {
+          var rank = Number(e.target.getAttribute("data-rank"));
+          var entry = e.target.value;
+          paint("saving");
+          var had = myBallot(bal, rank);
+          if (!entry) {
+            if (had) {
+              var d = await db.from("ballots").delete().eq("id", had.id).select("id");
+              if (d.error) return paint("error", d.error.message);
+              BALLOTS = BALLOTS.filter(function (x) { return String(x.id) !== String(had.id); });
+            }
+            return paint("saved"), render();
+          }
+          var r;
+          if (had) r = await db.from("ballots").update({ entry_id: entry, updated_at: new Date().toISOString() }).eq("id", had.id).select("*");
+          else r = await db.from("ballots").insert([{ award_id: Number(bal), judge_email: ME, entry_id: entry, rank: rank }]).select("*");
+          if (r.error) return paint("error", r.error.message);
+          if (!r.data || !r.data.length) return paint("error", "the write came back empty, which is a permission refusal");
+          BALLOTS = BALLOTS.filter(function (x) { return !(String(x.award_id) === String(bal) && x.rank === rank && String(x.judge_email).toLowerCase() === ME.toLowerCase()); });
+          BALLOTS.push(r.data[0]);
+          paint("saved"); render();
+          return;
+        }
+        var st = e.target.getAttribute && e.target.getAttribute("data-state");
+        if (st && staff) {
+          paint("saving");
+          var u = await db.from("awards").update({ state: e.target.value, updated_at: new Date().toISOString() })
+            .eq("id", st).select("id");
+          if (u.error) return paint("error", u.error.message);
+          if (!u.data || !u.data.length) return paint("error", "the update came back empty, which is a permission refusal");
+          AWARDS = AWARDS.map(function (x) { return String(x.id) === String(st) ? Object.assign({}, x, { state: e.target.value }) : x; });
+          paint("saved");
+          return;
+        }
+        var js = e.target.getAttribute && e.target.getAttribute("data-jstate");
+        if (js && staff) {
+          paint("saving");
+          var uj = await db.from("judges").update({ status: e.target.value }).eq("id", js).select("id");
+          if (uj.error) return paint("error", uj.error.message);
+          paint("saved");
+          JUDGES = JUDGES.map(function (x) { return String(x.id) === String(js) ? Object.assign({}, x, { status: e.target.value }) : x; });
+        }
+      });
+
+      document.addEventListener("click", async function (e) {
+        if (e.target.closest("#jAdd") && staff) {
+          var n = document.getElementById("jN").value.trim();
+          var em = document.getElementById("jE").value.trim().toLowerCase();
+          if (!n || !em) return paint("error", "a name and an email");
+          paint("saving");
+          var i = await db.from("judges").insert([{
+            event_id: EVENT_ID, name: n, email: em,
+            marque: document.getElementById("jM").value.trim() || null,
+            created_by: ME, status: "invited",
+          }]).select("*");
+          if (i.error) return paint("error", i.error.message);
+          if (!i.data || !i.data.length) return paint("error", "the insert came back empty, which is a permission refusal");
+          JUDGES.push(i.data[0]); paint("saved");
+          ["jN", "jE", "jM"].forEach(function (k) { document.getElementById(k).value = ""; });
+          render();
+          return;
+        }
+        var jd = e.target.closest("[data-jdel]");
+        if (jd && staff) {
+          var id = jd.getAttribute("data-jdel");
+          var who = JUDGES.filter(function (x) { return String(x.id) === String(id); })[0];
+          if (!confirm("Remove " + ((who && who.name) || "this judge") + " from the panel?")) return;
+          paint("saving");
+          var d2 = await db.from("judges").delete().eq("id", id).select("id");
+          if (d2.error) return paint("error", d2.error.message);
+          JUDGES = JUDGES.filter(function (x) { return String(x.id) !== String(id); });
+          paint("saved"); render();
+        }
+      });
+
+      load();
+      setInterval(function () { document.hidden || load(); }, 20000);
+    </script>
+    <script type="module" src="/chat/dock.js"></script>
+  </body>
+</html>
