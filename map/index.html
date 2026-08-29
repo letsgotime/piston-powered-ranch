@@ -49,10 +49,14 @@
         background: url(/events/img/arrive.jpg) center 46% / cover no-repeat;
         transform: scale(1.04);
       }
+      /* Light. The card carries its own glass and blur, so the veil only has to
+         stop the photograph fighting the type, not hide it. The first pass ran
+         .7 at mid radius and .9 at the edges and crushed the whole frame to
+         black, which is why the ranch never showed. */
       .land-veil {
         background:
-          radial-gradient(120% 80% at 50% 48%, rgba(10,17,26,.3) 0%, rgba(10,17,26,.7) 62%, rgba(10,17,26,.9) 100%),
-          linear-gradient(180deg, rgba(10,17,26,.48), rgba(10,17,26,.4) 42%, rgba(10,17,26,.86));
+          radial-gradient(130% 90% at 50% 46%, rgba(10,17,26,.08) 0%, rgba(10,17,26,.34) 58%, rgba(10,17,26,.62) 100%),
+          linear-gradient(180deg, rgba(10,17,26,.22), rgba(10,17,26,.12) 40%, rgba(10,17,26,.6));
       }
       .land-card { position: relative; z-index: 1; }
       @media (max-width: 620px) {
