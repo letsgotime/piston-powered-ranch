@@ -44,6 +44,27 @@ const KINDS = {
   },
 };
 
+/**
+ * Chat carries different limits from the public Submit form.
+ *
+ * Gavin asked for 50 photos, five minutes of video, five minutes of voice and
+ * any document type. Duration is not something this endpoint can measure, so
+ * it is enforced in the composer and backed here by a byte ceiling generous
+ * enough for five minutes at phone bitrates: roughly 30 MB/min for 1080p and a
+ * great deal less for voice.
+ *
+ * "Any document type" is taken literally, which is only safe because this
+ * scope demands a verified staff token, writes to a private store, and is read
+ * back exclusively through /api/media.js. Nothing here is ever served from a
+ * guessable URL, and nothing is executed. The cap is size, not type.
+ */
+const CHAT_KINDS = {
+  photo: { max: 25 * 1024 * 1024, types: KINDS.photo.types },
+  video: { max: 400 * 1024 * 1024, types: KINDS.video.types },
+  voice: { max: 40 * 1024 * 1024, types: KINDS.voice.types },
+  doc: { max: 100 * 1024 * 1024, types: null },
+};
+
 const SUBMISSION_TYPES = new Set(["vehicle", "vendor", "sponsor"]);
 
 /**
@@ -131,6 +152,45 @@ export default async function handler(request, response) {
             maximumSizeInBytes: kind.max,
             addRandomSuffix: true,
             tokenPayload: JSON.stringify({ scope: "workbench", kind: payload.kind, item, by: email }),
+          };
+        }
+
+        // Chat scope: staff only, pinned to the sender's own folder, so a
+        // leaked token can write into nobody else's history.
+        if (payload.scope === "chat") {
+          const email = await staffEmail(payload.token);
+          if (!email) throw new Error("Sign in as staff to attach files to chat");
+          const chatKind = CHAT_KINDS[payload.kind];
+          if (!chatKind) throw new Error("Unknown upload kind");
+          const who = email.replace(/[^a-z0-9]+/g, "-");
+          const draft = String(payload.draftId || "").replace(/[^a-zA-Z0-9_-]/g, "");
+          if (draft.length < 8 || draft.length > 64) throw new Error("Invalid draft id");
+          const wanted = `chat/${who}/${draft}/${payload.kind}/`;
+          if (!pathname.startsWith(wanted) || pathname.includes("..")) {
+            throw new Error("Upload path is not allowed for this token");
+          }
+          return {
+            allowedContentTypes: chatKind.types || undefined,
+            maximumSizeInBytes: chatKind.max,
+            addRandomSuffix: true,
+            tokenPayload: JSON.stringify({ scope: "chat", kind: payload.kind, by: email }),
+          };
+        }
+
+        // Avatar scope: staff only, one folder per person, photos only.
+        if (payload.scope === "avatar") {
+          const email = await staffEmail(payload.token);
+          if (!email) throw new Error("Sign in as staff to set a picture");
+          const who = email.replace(/[^a-z0-9]+/g, "-");
+          const wanted = `avatars/${who}/`;
+          if (!pathname.startsWith(wanted) || pathname.includes("..")) {
+            throw new Error("Upload path is not allowed for this token");
+          }
+          return {
+            allowedContentTypes: KINDS.photo.types,
+            maximumSizeInBytes: 12 * 1024 * 1024,
+            addRandomSuffix: true,
+            tokenPayload: JSON.stringify({ scope: "avatar", by: email }),
           };
         }
 

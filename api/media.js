@@ -47,7 +47,7 @@ const JWKS = createRemoteJWKSet(
 );
 
 const URL_TTL_MS = 10 * 60 * 1000;
-const MAX_PER_REQUEST = 60;
+const MAX_PER_REQUEST = 120;
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -86,9 +86,14 @@ export default async function handler(request, response) {
       pathnames.map(async (raw) => {
         const pathname = String(raw || "");
         // Only ever sign things under a namespace this endpoint owns:
-        // submitted entrant media, and staff workbench attachments. Anything
-        // else, including traversal, is refused rather than signed.
-        const allowed = pathname.startsWith("submissions/") || pathname.startsWith("workbench/");
+        // submitted entrant media, staff workbench attachments, chat
+        // attachments and profile avatars. Anything else, including
+        // traversal, is refused rather than signed.
+        const allowed =
+          pathname.startsWith("submissions/") ||
+          pathname.startsWith("workbench/") ||
+          pathname.startsWith("chat/") ||
+          pathname.startsWith("avatars/");
         if (!allowed || pathname.includes("..")) {
           return { pathname, error: "Refused" };
         }

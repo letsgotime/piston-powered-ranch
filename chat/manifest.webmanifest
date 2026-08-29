@@ -1,0 +1,25 @@
+{
+  "name": "Ranch Chat",
+  "short_name": "Ranch Chat",
+  "description": "Team conversation for The Piston Powered Ranch, attached to the thing being discussed.",
+  "id": "/chat/",
+  "start_url": "/chat/",
+  "scope": "/chat/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "portrait-primary",
+  "background_color": "#070d14",
+  "theme_color": "#070d14",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "/brand/pg-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/pg-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/brand/pg-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/brand/pg-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Targets", "url": "/targets/", "description": "Every category and who we are chasing" },
+    { "name": "The Ledger", "url": "/journeys/", "description": "Plan, budget and decisions" },
+    { "name": "The board", "url": "/asks/", "description": "The working board" }
+  ]
+}
