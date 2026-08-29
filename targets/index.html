@@ -207,7 +207,8 @@
         var el = document.getElementById("sv");
         el.className = "sv" + (state === "saved" ? " on" : state === "error" ? " err" : "");
         el.querySelector(".t").textContent =
-          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""), dirty: "Unsaved", ready: "Up to date" }[state] || "";
+          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""),
+            dirty: "Unsaved", ready: "Up to date", locked: "Locked" }[state] || "";
       }
       /* One chain per row so two quick edits cannot land out of order, and zero
          returned rows is a failure, because that is what an RLS refusal is. */
@@ -309,7 +310,11 @@
         if (!db) return;
         staff = await isStaff();
         document.getElementById("who").classList.toggle("on", staff);
-        if (!staff) { document.getElementById("whoTxt").textContent = "Not signed in"; return render(); }
+        if (!staff) {
+          document.getElementById("whoTxt").textContent = "Not signed in";
+          paint("locked");
+          return render();
+        }
         try {
           var n = await db.from("staff_allowlist").select("email,name");
           (n.data || []).forEach(function (x) { if (x.name) NAMES[String(x.email).toLowerCase()] = x.name; });

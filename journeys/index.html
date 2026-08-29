@@ -398,6 +398,12 @@
             { t: "One sheet per submission", d: "Approve, decline, copy the notice.", panel: "review" },
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
             { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
+            { t: "Targets, by category", d: "Every category the day needs, and who we are chasing.", panel: "targets", pill: function () {
+                if (!LIVE.categories || !LIVE.candidates) return null;
+                var hit = {};
+                LIVE.candidates.forEach(function (c) { hit[c.category_id] = 1; });
+                return LIVE.categories.filter(function (c) { return !hit[c.id]; }).length;
+              } },
             { t: "Every change, logged", d: "Who touched what, and when.", panel: "changes", pill: function () { return LIVE.feed && LIVE.feed.length; } },
           ] },
       ];
@@ -524,6 +530,28 @@
           return { e: "Sponsors", t: "Commit and activate", body:
             stat("Title tiers", "handshake, invoiced from the CRM") + stat("Supporting", "pays by checkout link") +
             "<p style='margin-top:10px'>Reminder: the secondary title defaults to category-exclusive and non-dealer while the 111 Motorcars exclusivity stands.</p>" };
+        },
+        targets: function () {
+          /* The pill counts empty categories on purpose. A full list is not the
+             useful number here; the gap is. */
+          var body = "";
+          if (LIVE.categories && LIVE.candidates) {
+            var hit = {};
+            LIVE.candidates.forEach(function (c) { hit[c.category_id] = 1; });
+            var empty = LIVE.categories.filter(function (c) { return !hit[c.id]; });
+            var doms = {};
+            empty.forEach(function (c) { (doms[c.domain] = doms[c.domain] || []).push(c.name); });
+            body = stat("Categories", LIVE.categories.length, true) +
+              stat("With a name against them", LIVE.categories.length - empty.length, true) +
+              stat("Nobody yet", empty.length, true) +
+              Object.keys(doms).sort().map(function (d) {
+                return stat(esc(d.replace(/_/g, " ")), esc(doms[d].slice(0, 4).join(", ")) +
+                  (doms[d].length > 4 ? " and " + (doms[d].length - 4) + " more" : ""));
+              }).join("");
+          } else { body = lock(); }
+          return { e: "Staff", t: "Targets, by category", body: body +
+            "<p style='margin-top:10px'>Anyone on the team can add a category. It writes to the shared list, so it shows up for everybody, not just the person who thought of it.</p>" +
+            acts('<a class="primary" href="/targets/" target="_blank" rel="noopener">Open targets</a>') };
         },
         console: function () {
           var open = LIVE.decisions ? LIVE.decisions.filter(function (x) { return x.status === "open"; }) : null;
@@ -1299,6 +1327,10 @@
           bg.error || (LIVE.budget = bg.data);
           var rs = await db.from("staff_roster").select("*").order("id");
           rs.error || (LIVE.roster = rs.data);
+          var ct = await db.from("categories").select("id,name,domain,sort").order("sort");
+          ct.error || (LIVE.categories = ct.data);
+          var cd = await db.from("account_candidates").select("id,category_id,status");
+          cd.error || (LIVE.candidates = (cd.data || []).filter(function (x) { return x.category_id != null; }));
           var sp = await db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25);
           sp.error || (LIVE.spectators = sp.data);
           var cs = await db.from("club_submissions").select("status,vehicle_count,club_id");
