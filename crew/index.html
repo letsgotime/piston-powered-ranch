@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Crew · The Piston Powered Ranch</title>
+    <meta name="description" content="Where to be, when, and what the job is. Saturday, October 10, 2026 at Rancho Jaramillo." />
+    <meta name="theme-color" content="#070d14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg); color: var(--dim);
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+      .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
+      .ground i:nth-child(1) { width: 58vw; height: 58vw; left: -15vw; top: -21vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .28; }
+      .ground i:nth-child(2) { width: 62vw; height: 62vw; right: -19vw; top: 24vh; background: radial-gradient(circle, #00d2be, transparent 68%); opacity: .22; }
+      .ground i:nth-child(3) { width: 70vw; height: 70vw; left: 7vw; bottom: -33vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .27; }
+      .ground u { position: absolute; inset: 0; display: block; background: linear-gradient(180deg, rgba(7,13,20,.6), rgba(7,13,20,.5) 42%, rgba(7,13,20,.9)); }
+      .rule { position: relative; z-index: 3; height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
+      .wrap { position: relative; z-index: 2; max-width: 980px; margin: 0 auto;
+        padding: 26px 15px calc(90px + env(safe-area-inset-bottom)); }
+      .glass { background: var(--glass); border: 1px solid var(--gline); border-radius: 18px;
+        box-shadow: 0 10px 34px rgba(0,0,0,.42);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); }
+      .hero { padding: 21px 23px; display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; }
+      .hero img { height: 38px; }
+      .hero .t { flex: 1; min-width: 240px; }
+      .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+      h1 { margin: 7px 0 0; font-weight: 900; font-size: clamp(26px, 5.2vw, 40px); line-height: 1.02; letter-spacing: -.03em; color: var(--ink); }
+      h1 span { color: var(--amber); }
+      .stand { margin: 9px 0 0; font-size: 15.5px; color: var(--dim); max-width: 60ch; }
+      .who { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+      .who .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .who.on { color: var(--teal); } .who.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+
+      h2 { margin: 30px 0 0; font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
+        font-weight: 900; color: var(--amber); padding-bottom: 8px; border-bottom: 2px solid var(--gline); }
+      h2 em { float: right; font-style: normal; font-size: 12px; letter-spacing: .04em;
+        text-transform: none; color: var(--faint); font-weight: 400; }
+
+      /* your own shift, the thing a volunteer opens this page for */
+      .mine { margin-top: 13px; padding: 0; overflow: hidden; }
+      .mine .band { display: grid; grid-template-columns: 118px 1fr; gap: 0; border-bottom: 1px solid var(--gline); }
+      .mine .band:last-child { border-bottom: 0; }
+      .mine .tm { padding: 17px 15px; background: rgba(0,0,0,.24); border-right: 1px solid var(--gline); text-align: center; }
+      .mine .tm b { display: block; font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -.02em;
+        font-variant-numeric: tabular-nums; line-height: 1.1; }
+      .mine .tm span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+        text-transform: uppercase; color: var(--faint); margin-top: 3px; }
+      .mine .bd { padding: 15px 18px; }
+      .mine .bd .r { font-size: 17px; font-weight: 900; color: var(--ink); letter-spacing: -.015em; }
+      .mine .bd .w { margin-top: 3px; font-size: 13.5px; color: var(--teal); font-weight: 700; }
+      .mine .bd .br { margin-top: 7px; font-size: 14px; color: var(--dim); line-height: 1.5; }
+      .mine .bd .lead { margin-top: 7px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; color: var(--faint); }
+      .mine .bd .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 11px; }
+      .mine .bd .acts button, .mine .bd .acts a { font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+        text-decoration: none; color: var(--dim); background: rgba(255,255,255,.06);
+        border: 1px solid var(--gline); border-radius: 999px; padding: 8px 15px; }
+      .mine .bd .acts button.yes { background: var(--teal); border-color: var(--teal); color: #04211d; font-weight: 900; }
+      .mine .bd .acts button:hover, .mine .bd .acts a:hover { border-color: var(--amber); color: var(--ink); }
+      .mine .bd .acts button.yes:hover { color: #04211d; }
+      .pill { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+        text-transform: uppercase; border-radius: 999px; padding: 3px 9px; font-weight: 600; }
+      .pill.assigned { background: rgba(248,184,0,.16); color: var(--amber); }
+      .pill.confirmed { background: rgba(0,210,190,.16); color: var(--teal); }
+      .pill.declined { background: rgba(229,72,77,.16); color: var(--crit); }
+
+      /* staff coverage board */
+      .shifts { display: grid; gap: 9px; margin-top: 13px; }
+      .sh { display: grid; grid-template-columns: 96px 1fr auto; gap: 14px; align-items: center; padding: 13px 16px; }
+      .sh .tm { font-family: var(--mono); font-size: 11.5px; color: var(--mute); line-height: 1.35; font-variant-numeric: tabular-nums; }
+      .sh .nm { min-width: 0; }
+      .sh .nm b { display: block; font-size: 15px; font-weight: 900; color: var(--ink); letter-spacing: -.01em; }
+      .sh .nm span { display: block; font-size: 12.5px; color: var(--mute); }
+      .sh .nm .names { margin-top: 5px; font-size: 12px; color: var(--teal); }
+      .sh .cv { text-align: right; white-space: nowrap; }
+      .sh .cv b { font-size: 19px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+      .sh .cv span { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+        text-transform: uppercase; color: var(--faint); }
+      .sh.full .cv b { color: var(--teal); }
+      .sh.part .cv b { color: var(--amber); }
+      .sh.none .cv b { color: var(--crit); }
+      .sh.staffable { cursor: pointer; }
+      .sh.staffable:hover { border-color: rgba(255,255,255,.26); }
+
+      .bar { margin-top: 13px; padding: 12px 18px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+      .bar .n { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+      .bar .n b { display: block; font-size: 19px; font-weight: 900; color: var(--ink);
+        font-variant-numeric: tabular-nums; line-height: 1.15; letter-spacing: -.02em; }
+      .bar .n.t b { color: var(--teal); } .bar .n.a b { color: var(--amber); } .bar .n.c b { color: var(--crit); }
+      .sv { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+        text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
+      .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+
+      /* sign up */
+      .signup { margin-top: 13px; padding: 20px 22px; }
+      .signup .g { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 13px; }
+      .signup label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--faint); font-weight: 600; }
+      .signup input, .signup select, .signup textarea { width: 100%; margin-top: 5px; font: inherit; font-size: 15px;
+        color: var(--ink); background: rgba(0,0,0,.3); border: 1px solid var(--gline); border-radius: 10px; padding: 10px 12px; }
+      .signup input:focus, .signup select:focus, .signup textarea:focus { outline: none; border-color: var(--amber); }
+      .signup .go { margin-top: 15px; font: inherit; font-size: 15px; font-weight: 900; cursor: pointer;
+        color: #04211d; background: var(--teal); border: 0; border-radius: 12px; padding: 13px 26px; }
+      .signup .go:disabled { background: rgba(255,255,255,.08); color: var(--faint); cursor: default; }
+      .signup .said { margin-top: 12px; font-size: 14.5px; color: var(--teal); }
+      .signup .said.bad { color: var(--crit); }
+
+      /* staff assign sheet */
+      .sheet { position: fixed; inset: 0; z-index: 40; display: none; }
+      .sheet.on { display: block; }
+      .sheet .scrim { position: absolute; inset: 0; background: rgba(4,8,13,.66);
+        -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+      .sheet .card { position: absolute; right: 0; top: 0; bottom: 0; width: min(470px, 100%); overflow: auto;
+        background: rgba(12,20,30,.95); border-left: 1px solid var(--gline);
+        -webkit-backdrop-filter: blur(26px) saturate(1.5); backdrop-filter: blur(26px) saturate(1.5);
+        padding: 22px 22px calc(36px + env(safe-area-inset-bottom)); }
+      .sheet h3 { margin: 5px 0 0; font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -.02em; }
+      .sheet .x { position: absolute; right: 15px; top: 14px; width: 32px; height: 32px; border-radius: 50%;
+        cursor: pointer; border: 1px solid var(--gline); background: rgba(255,255,255,.06); color: var(--dim);
+        font: inherit; font-size: 16px; }
+      .sheet .row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 11px;
+        border: 1px solid var(--gline); background: rgba(255,255,255,.04); margin-top: 8px; }
+      .sheet .row .nm { flex: 1; min-width: 0; }
+      .sheet .row .nm b { display: block; font-size: 14.5px; font-weight: 700; color: var(--ink); }
+      .sheet .row .nm span { display: block; font-family: var(--mono); font-size: 10px; color: var(--faint); }
+      .sheet .row button { font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 999px;
+        padding: 7px 13px; color: var(--dim); background: rgba(255,255,255,.07); border: 1px solid var(--gline); }
+      .sheet .row.on { border-color: rgba(0,210,190,.45); background: rgba(0,210,190,.08); }
+      .sheet .row.on button { background: var(--teal); border-color: var(--teal); color: #04211d; font-weight: 900; }
+      .note { margin-top: 13px; padding: 16px 20px; font-size: 13.5px; color: var(--mute); }
+      .note a { color: var(--amber); }
+      @media (max-width: 620px) {
+        .wrap { padding: 18px 11px 80px; }
+        .signup .g { grid-template-columns: 1fr; }
+        .mine .band { grid-template-columns: 92px 1fr; }
+        .sh { grid-template-columns: 80px 1fr; }
+        .sh .cv { grid-column: 2; text-align: left; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ground" aria-hidden="true"><i></i><i></i><i></i><u></u></div>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="glass hero">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="t">
+          <div class="eyebrow">The Piston Powered Ranch &middot; Saturday, October 10, 2026</div>
+          <h1>Where to be, <span>and when</span></h1>
+          <p class="stand">
+            Three hundred cars come onto a working cattle ranch in one morning. This page is your post,
+            your hours and the job, so nobody spends show day asking where they are meant to stand.
+          </p>
+        </div>
+        <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
+      </div>
+
+      <div id="stage"></div>
+
+      <div class="glass note">
+        Rancho Jaramillo, 179 Enon Church Rd, Unionville TN. Gates open to the public at nine, the field
+        is clear by three. Everything here benefits Community Elementary School.
+        <span id="staffLinks"></span>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet">
+      <div class="scrim" data-close></div>
+      <div class="card">
+        <button class="x" type="button" data-close aria-label="Close">&times;</button>
+        <div class="eyebrow" id="shWhen"></div>
+        <h3 id="shRole"></h3>
+        <p class="stand" style="font-size: 14px" id="shBrief"></p>
+        <div id="shPeople"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      var TZ = "America/Chicago";
+
+      var db = null, staff = false, ME = "", MINE = null;
+      var SHIFTS = [], ASSIGN = [], VOLS = [], openShift = null;
+
+      try {
+        db = createClient({
+          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+          dataApi: { url: DATA_API },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      /* Times are stored with an offset and shown at the ranch, never in the
+         reader's own zone. A volunteer in another state still needs to know
+         they are on the gate at seven Central. */
+      function at(iso) {
+        return new Intl.DateTimeFormat("en-US", {
+          timeZone: TZ, hour: "numeric", minute: "2-digit",
+        }).format(new Date(iso)).replace(":00", "").replace(" ", "");
+      }
+      function span(a, b) { return at(a) + " to " + at(b); }
+      function hours(a, b) {
+        var h = (new Date(b) - new Date(a)) / 36e5;
+        return (h % 1 ? h.toFixed(1) : h) + (h === 1 ? " hour" : " hours");
+      }
+      async function token() {
+        try {
+          var s = await db.auth.getSession();
+          return (s && s.data && s.data.session && s.data.session.access_token) || null;
+        } catch (e) { return null; }
+      }
+      async function rpc(fn) {
+        var tok = await token();
+        if (!tok) return null;
+        var r = await fetch(DATA_API + "/rpc/" + fn, {
+          method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
+        if (!r.ok) return null;
+        var t = await r.text();
+        try { return JSON.parse(t); } catch (e) { return t.trim(); }
+      }
+      function paint(state, msg) {
+        var el = document.getElementById("sv");
+        if (!el) return;
+        el.className = "sv" + (state === "saved" ? " on" : state === "error" ? " err" : "");
+        el.querySelector(".t").textContent =
+          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""), ready: "Up to date" }[state] || "";
+      }
+
+      function filled(shiftId) {
+        return ASSIGN.filter(function (a) {
+          return String(a.shift_id) === String(shiftId) && a.status !== "declined";
+        });
+      }
+      function volName(id) {
+        var v = VOLS.filter(function (x) { return String(x.id) === String(id); })[0];
+        return v ? v.name : "someone";
+      }
+
+      /* ---------- what a volunteer sees ---------- */
+      function myShifts() {
+        if (!MINE) return [];
+        var ids = ASSIGN.filter(function (a) { return String(a.volunteer_id) === String(MINE.id); });
+        return ids.map(function (a) {
+          var s = SHIFTS.filter(function (x) { return String(x.id) === String(a.shift_id); })[0];
+          return s ? { s: s, a: a } : null;
+        }).filter(Boolean).sort(function (x, y) { return String(x.s.starts_at).localeCompare(String(y.s.starts_at)); });
+      }
+      function mineBlock() {
+        var set = myShifts();
+        if (!set.length) {
+          return '<h2>Your day</h2><div class="glass note" style="margin-top:13px">' +
+            "You are on the crew list. Nobody has put you on a post yet, so this fills in as the day gets built. " +
+            "We will tell you before show day, not on it.</div>";
+        }
+        return "<h2>Your day<em>" + set.length + (set.length === 1 ? " post" : " posts") + "</em></h2>" +
+          '<div class="glass mine">' + set.map(function (r) {
+            var maps = "https://www.google.com/maps/dir/?api=1&destination=35.63751,-86.59323";
+            return '<div class="band"><div class="tm"><b>' + esc(at(r.s.starts_at)) + "</b>" +
+              "<span>" + esc(hours(r.s.starts_at, r.s.ends_at)) + "</span></div>" +
+              '<div class="bd"><div class="r">' + esc(r.s.role) +
+              ' <span class="pill ' + esc(r.a.status) + '">' + esc(r.a.status) + "</span></div>" +
+              '<div class="w">' + esc(r.s.post) + " &middot; " + esc(span(r.s.starts_at, r.s.ends_at)) + "</div>" +
+              (r.s.brief ? '<div class="br">' + esc(r.s.brief) + "</div>" : "") +
+              (r.s.lead_name ? '<div class="lead">Find ' + esc(r.s.lead_name) +
+                (r.s.lead_phone ? " on " + esc(r.s.lead_phone) : "") + "</div>" : "") +
+              '<div class="acts">' +
+              (r.a.status === "confirmed"
+                ? '<button type="button" data-set="declined" data-a="' + r.a.id + '">I cannot make this</button>'
+                : '<button type="button" class="yes" data-set="confirmed" data-a="' + r.a.id + '">I will be there</button>' +
+                  (r.a.status === "declined" ? "" : '<button type="button" data-set="declined" data-a="' + r.a.id + '">I cannot</button>')) +
+              '<a href="' + maps + '" target="_blank" rel="noopener">Directions</a>' +
+              (r.s.post_slug ? '<a href="/site-plan/#' + esc(r.s.post_slug) + '" target="_blank" rel="noopener">See the spot</a>' : "") +
+              "</div></div></div>";
+          }).join("") + "</div>";
+      }
+
+      /* ---------- what everybody can see ---------- */
+      function boardBlock() {
+        var need = SHIFTS.reduce(function (n, s) { return n + s.needed; }, 0);
+        var got = SHIFTS.reduce(function (n, s) { return n + Math.min(s.needed, filled(s.id).length); }, 0);
+        var open = SHIFTS.filter(function (s) { return filled(s.id).length < s.needed; });
+        return "<h2>The posts<em>" + SHIFTS.length + " through the day</em></h2>" +
+          '<div class="glass bar">' +
+          '<span class="n">People needed<b>' + need + "</b></span>" +
+          '<span class="n t">Filled<b>' + got + "</b></span>" +
+          '<span class="n ' + (need - got > 0 ? "c" : "t") + '">Still open<b>' + (need - got) + "</b></span>" +
+          '<span class="n a">Posts short<b>' + open.length + "</b></span>" +
+          (staff ? '<span class="sv" id="sv"><span class="d"></span><span class="t">Up to date</span></span>' : "") +
+          "</div>" +
+          '<div class="shifts">' + SHIFTS.map(function (s) {
+            var f = filled(s.id).length;
+            var cls = f >= s.needed ? "full" : f ? "part" : "none";
+            var names = staff ? filled(s.id).map(function (a) { return volName(a.volunteer_id); }) : [];
+            return '<article class="glass sh ' + cls + (staff ? " staffable" : "") + '" data-shift="' + s.id + '">' +
+              '<div class="tm">' + esc(at(s.starts_at)) + "<br />" + esc(at(s.ends_at)) + "</div>" +
+              '<div class="nm"><b>' + esc(s.role) + "</b><span>" + esc(s.post) +
+              (s.brief ? " &middot; " + esc(s.brief.slice(0, 92)) + (s.brief.length > 92 ? "…" : "") : "") + "</span>" +
+              (names.length ? '<span class="names">' + esc(names.join(", ")) + "</span>" : "") + "</div>" +
+              '<div class="cv"><b>' + f + "/" + s.needed + "</b><span>" +
+              (f >= s.needed ? "covered" : f ? "short" : "nobody") + "</span></div></article>";
+          }).join("") + "</div>";
+      }
+
+      function signupBlock() {
+        return "<h2>Join the crew</h2>" +
+          '<div class="glass signup">' +
+          "<p style='margin:0;font-size:15px'>Fifty pairs of hands make this work. Tell us how to reach you and " +
+          "which end of the day suits, and somebody will come back with a post and an hour.</p>" +
+          '<div class="g">' +
+          "<div><label for='vName'>Your name</label><input id='vName' autocomplete='name' /></div>" +
+          "<div><label for='vMail'>Email</label><input id='vMail' type='email' autocomplete='email' /></div>" +
+          "<div><label for='vTel'>Phone</label><input id='vTel' type='tel' autocomplete='tel' /></div>" +
+          "<div><label for='vRole'>What suits you</label><select id='vRole'>" +
+          ["Anything", "Gate", "Parking", "Staging", "Show field", "Vendor liaison", "Charity table", "VIP host", "Judging runner", "Awards", "Load out"]
+            .map(function (r) { return "<option>" + r + "</option>"; }).join("") +
+          "</select></div></div>" +
+          "<label for='vNote' style='margin-top:11px'>Anything we should know</label>" +
+          "<textarea id='vNote' rows='2' placeholder='Hours you can do, a friend you want to work with, anything'></textarea>" +
+          '<button class="go" type="button" id="vGo">Put me on the list</button>' +
+          '<div class="said" id="vSaid"></div></div>';
+      }
+
+      /* Volunteers were sent here, not to the staff console, so the way back
+         in is here too. Same email and password flow the console uses, and it
+         creates the account on first go. */
+      function signinBlock() {
+        return "<h2>Already on the list</h2>" +
+          '<div class="glass signup">' +
+          "<p style='margin:0;font-size:15px'>Sign in with the email you signed up with and your post shows up here. " +
+          "First time, pick a password and it makes the account.</p>" +
+          '<div class="g">' +
+          "<div><label for='sMail'>Email</label><input id='sMail' type='email' autocomplete='email' /></div>" +
+          "<div><label for='sPass'>Password</label><input id='sPass' type='password' autocomplete='current-password' /></div>" +
+          "</div>" +
+          '<button class="go" type="button" id="sGo">Sign in</button>' +
+          '<div class="said" id="sSaid"></div></div>';
+      }
+
+      function render() {
+        var out = "";
+        if (MINE) out += mineBlock();
+        if (SHIFTS.length) out += boardBlock();
+        if (!MINE) out += signupBlock();
+        if (!ME) out += signinBlock();
+        if (!SHIFTS.length && !MINE) {
+          out = signupBlock() + (ME ? "" : signinBlock()) +
+            '<div class="glass note" style="margin-top:13px">The posts are still being laid out. ' +
+            "Once they are, this page shows every one of them and which are short.</div>";
+        }
+        document.getElementById("stage").innerHTML = out;
+        document.getElementById("staffLinks").innerHTML = staff
+          ? ' Staff: the plan lives on <a href="/journeys/">the Ledger</a> and the target list on <a href="/targets/">targets</a>.'
+          : "";
+      }
+
+      function renderSheet() {
+        var s = SHIFTS.filter(function (x) { return String(x.id) === String(openShift); })[0];
+        var sheet = document.getElementById("sheet");
+        if (!s || !staff) { sheet.classList.remove("on"); return; }
+        sheet.classList.add("on");
+        document.getElementById("shWhen").textContent = span(s.starts_at, s.ends_at) + " · " + s.post;
+        document.getElementById("shRole").textContent = s.role;
+        document.getElementById("shBrief").textContent = s.brief || "";
+        var on = {};
+        filled(s.id).forEach(function (a) { on[a.volunteer_id] = a; });
+        document.getElementById("shPeople").innerHTML =
+          "<p style='font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:18px 0 0'>" +
+          Object.keys(on).length + " of " + s.needed + " on this post</p>" +
+          (VOLS.length ? VOLS.map(function (v) {
+            return '<div class="row' + (on[v.id] ? " on" : "") + '">' +
+              '<span class="nm"><b>' + esc(v.name) + "</b><span>" +
+              esc(v.role_pref || "any post") + (v.phone ? " · " + esc(v.phone) : "") + "</span></span>" +
+              '<button type="button" data-toggle="' + v.id + '">' + (on[v.id] ? "On" : "Add") + "</button></div>";
+          }).join("")
+            : "<p style='margin-top:12px;font-size:14px;color:var(--mute)'>Nobody has signed up yet. " +
+              "The form on this page is public, so share the link.</p>");
+      }
+
+      async function load() {
+        if (!db) return;
+        var tok = await token();
+        staff = !!tok && (await rpc("is_staff")) === true;
+        if (tok) { ME = (await rpc("me")) || ""; await rpc("ensure_profile"); }
+        document.getElementById("who").classList.toggle("on", !!tok);
+        document.getElementById("whoTxt").textContent =
+          staff ? "Staff" : ME ? ME.split("@")[0] : "Not signed in";
+
+        var s = await db.from("volunteer_shifts").select("*").order("starts_at").order("sort");
+        SHIFTS = s.error ? [] : s.data || [];
+        var a = await db.from("volunteer_assignments").select("*");
+        ASSIGN = a.error ? [] : a.data || [];
+        var v = await db.from("volunteers").select("*").order("name");
+        VOLS = v.error ? [] : v.data || [];
+        MINE = ME ? VOLS.filter(function (x) { return String(x.email).toLowerCase() === ME.toLowerCase(); })[0] || null : null;
+
+        render();
+        if (openShift) renderSheet();
+      }
+
+      document.addEventListener("click", async function (e) {
+        if (e.target.closest("[data-close]")) { openShift = null; return renderSheet(); }
+
+        var set = e.target.closest("[data-set]");
+        if (set) {
+          var id = set.getAttribute("data-a"), want = set.getAttribute("data-set");
+          set.disabled = true;
+          var r = await db.from("volunteer_assignments").update({ status: want }).eq("id", id).select("id");
+          if (r.error || !r.data || !r.data.length) {
+            set.disabled = false;
+            set.textContent = "Did not save";
+            return;
+          }
+          ASSIGN = ASSIGN.map(function (x) { return String(x.id) === String(id) ? Object.assign({}, x, { status: want }) : x; });
+          return render();
+        }
+
+        var sh = e.target.closest("[data-shift]");
+        if (sh && staff) { openShift = sh.getAttribute("data-shift"); return renderSheet(); }
+
+        var tg = e.target.closest("[data-toggle]");
+        if (tg && staff && openShift) {
+          var vid = tg.getAttribute("data-toggle");
+          var have = ASSIGN.filter(function (x) {
+            return String(x.shift_id) === String(openShift) && String(x.volunteer_id) === String(vid);
+          })[0];
+          paint("saving");
+          if (have) {
+            var d = await db.from("volunteer_assignments").delete().eq("id", have.id).select("id");
+            if (d.error) return paint("error", d.error.message);
+            ASSIGN = ASSIGN.filter(function (x) { return String(x.id) !== String(have.id); });
+          } else {
+            var i = await db.from("volunteer_assignments")
+              .insert([{ shift_id: Number(openShift), volunteer_id: vid, assigned_by: ME }]).select("*");
+            if (i.error) return paint("error", i.error.message);
+            if (!i.data || !i.data.length) return paint("error", "the insert came back empty, which is a permission refusal");
+            ASSIGN.push(i.data[0]);
+          }
+          paint("saved");
+          render(); renderSheet();
+          return;
+        }
+
+        if (e.target.closest("#sGo")) {
+          var em = document.getElementById("sMail").value.trim();
+          var pw = document.getElementById("sPass").value;
+          var sd = document.getElementById("sSaid");
+          if (!em || !pw) { sd.className = "said bad"; sd.textContent = "Both fields, please."; return; }
+          var sb = document.getElementById("sGo");
+          sb.disabled = true; sb.textContent = "Signing in";
+          var r1 = await db.auth.signInWithPassword({ email: em, password: pw });
+          if (r1.error) {
+            var r2 = await db.auth.signUp({ email: em, password: pw });
+            if (r2.error) {
+              sb.disabled = false; sb.textContent = "Sign in";
+              sd.className = "said bad";
+              sd.textContent = r2.error.message || r1.error.message || "Could not sign in.";
+              return;
+            }
+            if (!r2.data || !r2.data.session) {
+              var r3 = await db.auth.signInWithPassword({ email: em, password: pw });
+              if (r3.error) {
+                sb.disabled = false; sb.textContent = "Sign in";
+                sd.className = "said bad";
+                sd.textContent = "Account made. Press Sign in once more.";
+                return;
+              }
+            }
+          }
+          sd.className = "said"; sd.textContent = "In.";
+          await load();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+
+        if (e.target.closest("#vGo")) {
+          var name = document.getElementById("vName").value.trim();
+          var mail = document.getElementById("vMail").value.trim();
+          var said = document.getElementById("vSaid");
+          if (!name || !mail) { said.className = "said bad"; said.textContent = "A name and an email, and you are on the list."; return; }
+          var btn = document.getElementById("vGo");
+          btn.disabled = true; btn.textContent = "Sending";
+          var row = {
+            event_id: EVENT_ID, name: name, email: mail.toLowerCase(),
+            phone: document.getElementById("vTel").value.trim() || null,
+            role_pref: document.getElementById("vRole").value,
+            note: document.getElementById("vNote").value.trim() || null,
+            status: "applied",
+          };
+          var ins = await db.from("volunteers").insert([row]);
+          btn.disabled = false; btn.textContent = "Put me on the list";
+          if (ins && ins.error) {
+            said.className = "said bad";
+            said.textContent = /duplicate|unique/i.test(ins.error.message)
+              ? "That email is already on the list, which is the right answer."
+              : "That did not send: " + ins.error.message;
+            return;
+          }
+          said.className = "said";
+          said.textContent = "You are on the list, " + name.split(" ")[0] + ". Somebody will come back with a post and an hour.";
+          ["vName", "vMail", "vTel", "vNote"].forEach(function (k) { document.getElementById(k).value = ""; });
+          load();
+        }
+      });
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") { openShift = null; renderSheet(); } });
+
+      load();
+      setInterval(function () { document.hidden || load(); }, 30000);
+    </script>
+  </body>
+</html>

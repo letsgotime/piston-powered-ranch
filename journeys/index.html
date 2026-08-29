@@ -399,6 +399,12 @@
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
             { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
             { t: "Chat, on the record", d: "Threads attached to the thing being discussed.", panel: "chat" },
+            { t: "Crew, posted and timed", d: "Every post, who is on it, who is short.", panel: "crew", pill: function () {
+                if (!LIVE.shifts || !LIVE.assigns) return null;
+                var by = {};
+                LIVE.assigns.forEach(function (a) { if (a.status !== "declined") by[a.shift_id] = (by[a.shift_id] || 0) + 1; });
+                return LIVE.shifts.reduce(function (n, s2) { return n + Math.max(0, s2.needed - (by[s2.id] || 0)); }, 0);
+              } },
             { t: "Targets, by category", d: "Every category the day needs, and who we are chasing.", panel: "targets", pill: function () {
                 if (!LIVE.categories || !LIVE.candidates) return null;
                 var hit = {};
@@ -531,6 +537,27 @@
           return { e: "Sponsors", t: "Commit and activate", body:
             stat("Title tiers", "handshake, invoiced from the CRM") + stat("Supporting", "pays by checkout link") +
             "<p style='margin-top:10px'>Reminder: the secondary title defaults to category-exclusive and non-dealer while the 111 Motorcars exclusivity stands.</p>" };
+        },
+        crew: function () {
+          var body = "";
+          if (LIVE.shifts && LIVE.assigns) {
+            var by = {};
+            LIVE.assigns.forEach(function (a) { if (a.status !== "declined") by[a.shift_id] = (by[a.shift_id] || 0) + 1; });
+            var need = LIVE.shifts.reduce(function (n, s2) { return n + s2.needed; }, 0);
+            var got = LIVE.shifts.reduce(function (n, s2) { return n + Math.min(s2.needed, by[s2.id] || 0); }, 0);
+            var short = LIVE.shifts.filter(function (s2) { return (by[s2.id] || 0) < s2.needed; });
+            body = stat("Posts", LIVE.shifts.length, true) +
+              stat("People needed", need, true) + stat("Filled", got, true) +
+              stat("Still open", need - got, true) +
+              stat("Signed up", (LIVE.volunteers || []).length, true) +
+              short.slice(0, 6).map(function (s2) {
+                return stat(esc(s2.role) + " · " + esc(s2.post), ((by[s2.id] || 0) + "/" + s2.needed));
+              }).join("");
+          } else { body = lock(); }
+          return { e: "Volunteers", t: "Crew, posted and timed", body: body +
+            "<p style='margin-top:10px'>Posts run from half six to five. A volunteer signs in and sees their own hours, their spot and the brief, then confirms or says they cannot. The sign up form on that page is public, so the link is the recruiting tool.</p>" +
+            acts('<a class="primary" href="/crew/" target="_blank" rel="noopener">Open the crew page</a>' +
+              copyBtn("Copy the sign up link", ORIGIN + "/crew/")) };
         },
         chat: function () {
           return { e: "Staff", t: "Chat, on the record", body:
@@ -1337,6 +1364,12 @@
           bg.error || (LIVE.budget = bg.data);
           var rs = await db.from("staff_roster").select("*").order("id");
           rs.error || (LIVE.roster = rs.data);
+          var vs = await db.from("volunteer_shifts").select("id,role,post,needed,starts_at").order("starts_at");
+          vs.error || (LIVE.shifts = vs.data);
+          var va = await db.from("volunteer_assignments").select("shift_id,volunteer_id,status");
+          va.error || (LIVE.assigns = va.data);
+          var vv = await db.from("volunteers").select("id,name,status");
+          vv.error || (LIVE.volunteers = vv.data);
           var ct = await db.from("categories").select("id,name,domain,sort").order("sort");
           ct.error || (LIVE.categories = ct.data);
           var cd = await db.from("account_candidates").select("id,category_id,status");
