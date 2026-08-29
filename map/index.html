@@ -555,7 +555,14 @@
       async function boot() {
         var key = null;
         try {
-          var c = await fetch("/api/config").then(function (r) { return r.ok ? r.json() : null; });
+          /* A hanging fetch is not a caught error: without a deadline this
+             await never settles and the page sits on "loading" with dead
+             doors, which is exactly what it did. */
+          var ctl = new AbortController();
+          var bail = setTimeout(function () { ctl.abort(); }, 3500);
+          var c = await fetch("/api/config", { signal: ctl.signal })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .finally(function () { clearTimeout(bail); });
           key = c && c.gmapsKey;
         } catch (e) {}
         if (key) {
@@ -1594,7 +1601,13 @@
       })();
 
       /* ---------- boot ---------- */
-      await boot();
+      /* Whatever happens in here, the doors must end up usable. */
+      try {
+        await boot();
+      } catch (e) {
+        console.warn("map engine failed to boot", e);
+        engineTag("Nav engine: <b>links only</b> · the map could not load");
+      }
       ENGINE.addPPR();
       ENGINE.onClick(function (lat, lng) { if (mode === "create") placePin(lat, lng); });
       ENGINE.autocomplete && ENGINE.autocomplete(document.getElementById("rvSpot"), function (lat, lng) {
