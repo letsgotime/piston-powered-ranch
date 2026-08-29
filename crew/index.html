@@ -530,10 +530,14 @@
               : "That did not send: " + ins.error.message;
             return;
           }
-          said.className = "said";
-          said.textContent = "You are on the list, " + name.split(" ")[0] + ". Somebody will come back with a post and an hour.";
+          /* load() re-renders the page, which threw this message away before
+             anybody could read it. Hold it, then put it back after the paint. */
+          var joined = "You are on the list, " + name.split(" ")[0] +
+            ". Somebody will come back with a post and an hour.";
           ["vName", "vMail", "vTel", "vNote"].forEach(function (k) { document.getElementById(k).value = ""; });
-          load();
+          await load();
+          var again = document.getElementById("vSaid");
+          if (again) { again.className = "said"; again.textContent = joined; }
         }
       });
       document.addEventListener("keydown", function (e) { if (e.key === "Escape") { openShift = null; renderSheet(); } });
