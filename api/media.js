@@ -9,20 +9,36 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
  * verified Neon Auth token belonging to a staff address, mirroring what
  * is_staff() enforces in Postgres. This is deliberately a second, independent
  * check: RLS protects the rows, this protects the pixels.
- *
- * Keep this set in step with public.staff_allowlist. It drifted once already:
- * the table had bekahstallard@gmail.com (the address she actually signs in
- * with) while this list only had bekah@paddock20.com, so her session verified
- * and was then refused here. Once DATABASE_URL is in the Vercel env this
- * should read the allowlist table instead of duplicating it.
- */
+ * */
 
-const STAFF = new Set([
-  "paddock20auto@gmail.com",
-  "gavin@paddock20.com",
-  "bekah@paddock20.com",
-  "bekahstallard@gmail.com",
-]);
+const DATA_API =
+  "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+
+/**
+ * Authorisation comes from public.staff_allowlist, never from a list in code.
+ *
+ * We still verify the token ourselves above: that is authentication, and it is
+ * cryptographic. This asks the database the separate question of whether the
+ * verified person is staff, by replaying their own token against is_staff().
+ * The row-level policy and this check therefore read the same table, so
+ * adding somebody to the allowlist is the whole job. It used to mean editing
+ * every function too, which drifted once and locked Bekah out of her own
+ * uploads.
+ */
+async function isStaff(bearer) {
+  let res;
+  try {
+    res = await fetch(`${DATA_API}/rpc/is_staff`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/json" },
+      body: "{}",
+    });
+  } catch {
+    return false;
+  }
+  if (!res.ok) return false;
+  return (await res.text()).trim() === "true";
+}
 
 const JWKS = createRemoteJWKSet(
   new URL(
@@ -51,7 +67,7 @@ export default async function handler(request, response) {
     return response.status(401).json({ error: "Invalid or expired session" });
   }
 
-  if (!STAFF.has(email)) {
+  if (!(await isStaff(bearer))) {
     return response.status(403).json({ error: "Not authorised for submitted media" });
   }
 

@@ -52,15 +52,30 @@ const SUBMISSION_TYPES = new Set(["vehicle", "vendor", "sponsor"]);
  * The submissions scope below is deliberately open, because the Submit form is
  * public. The workbench is not: it is internal working material, so this scope
  * demands a verified Neon Auth token on a staff address before it will mint a
- * token, and confines that token to one workbench item's folder. Keep STAFF in
- * step with public.staff_allowlist and with api/media.js.
+ * token, and confines that token to one workbench item's folder.
  */
-const STAFF = new Set([
-  "paddock20auto@gmail.com",
-  "gavin@paddock20.com",
-  "bekah@paddock20.com",
-  "bekahstallard@gmail.com",
-]);
+const DATA_API =
+  "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+
+/**
+ * Authorisation comes from public.staff_allowlist, never from a list in code.
+ * The token is verified cryptographically first; this then replays it against
+ * is_staff() so the function and the row-level policy read one table.
+ */
+async function isStaff(bearer) {
+  let res;
+  try {
+    res = await fetch(`${DATA_API}/rpc/is_staff`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/json" },
+      body: "{}",
+    });
+  } catch {
+    return false;
+  }
+  if (!res.ok) return false;
+  return (await res.text()).trim() === "true";
+}
 
 const JWKS = createRemoteJWKSet(
   new URL(
@@ -73,7 +88,7 @@ async function staffEmail(token) {
   try {
     const { payload } = await jwtVerify(String(token), JWKS);
     const email = String(payload.email || payload.sub_email || "").toLowerCase();
-    return STAFF.has(email) ? email : "";
+    return (await isStaff(String(token))) ? email : "";
   } catch {
     return "";
   }

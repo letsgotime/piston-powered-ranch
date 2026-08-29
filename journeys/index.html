@@ -1037,16 +1037,33 @@
           mf.error || (LIVE.features = mf.data);
         } catch (e) {}
       }
-      var STAFF_EMAILS = ["paddock20auto@gmail.com", "gavin@paddock20.com", "bekah@paddock20.com", "bekahstallard@gmail.com"];
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      /* Staff is decided by public.staff_allowlist, never by a list in this
+         file. Replaying the session token against is_staff() means the display
+         gate and the row-level policy read the same table. Note the raw fetch:
+         db.rpc("is_staff") returns false for a genuine staff session because
+         the client wrapper does not attach the token to that call. */
+      async function isStaff(db) {
+        try {
+          var s = await db.auth.getSession();
+          var tok = s && s.data && s.data.session && s.data.session.access_token;
+          if (!tok) return false;
+          var r = await fetch(DATA_API + "/rpc/is_staff", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" },
+            body: "{}",
+          });
+          if (!r.ok) return false;
+          return (await r.text()).trim() === "true";
+        } catch (e) { return false; }
+      }
       async function loadStaff() {
         if (!db) return;
         // Display gate only: RLS enforces the real boundary server-side.
         // Anonymous sessions carry the authenticated role, so detection must
         // key off the signed-in email, not query errors.
         try {
-          var ses = await db.auth.getSession();
-          var em = ses && ses.data && ses.data.session && ses.data.session.user && ses.data.session.user.email;
-          staff = Boolean(em && STAFF_EMAILS.indexOf(String(em).toLowerCase()) !== -1);
+          staff = await isStaff(db);
         } catch (e) { staff = false; }
         if (!staff) return;
         try {
