@@ -373,9 +373,14 @@
         if (!MINE) out += signupBlock();
         if (!ME) out += signinBlock();
         if (!SHIFTS.length && !MINE) {
+          /* Signed out the posts are hidden, not missing. Saying they do not
+             exist yet would be a lie to anyone reading this page cold. */
           out = signupBlock() + (ME ? "" : signinBlock()) +
-            '<div class="glass note" style="margin-top:13px">The posts are still being laid out. ' +
-            "Once they are, this page shows every one of them and which are short.</div>";
+            '<div class="glass note" style="margin-top:13px">' +
+            (ME
+              ? "The posts are still being laid out. Once they are, this page shows every one of them and which are short."
+              : "The posts are set. They show up here once you are on the list and signed in, so nobody reading this page cold sees where the crew will be.") +
+            "</div>";
         }
         document.getElementById("stage").innerHTML = out;
         document.getElementById("staffLinks").innerHTML = staff
