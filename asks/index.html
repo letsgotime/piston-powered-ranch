@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>The Asks · Working Session</title>
+    <meta name="description" content="The outreach asks for The Piston Powered Ranch, decided in one sitting." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#070d14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d;
+        --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.42); --e2: 0 26px 74px rgba(0, 0, 0, 0.56);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--bg); color: var(--dim); min-height: 100%;
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+        font-size: 16px; line-height: 1.62; -webkit-font-smoothing: antialiased;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+      }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: var(--bg); }
+      .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
+      .ground i:nth-child(1) { width: 60vw; height: 60vw; left: -16vw; top: -22vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .34; }
+      .ground i:nth-child(2) { width: 66vw; height: 66vw; right: -20vw; top: 18vh; background: radial-gradient(circle, #00d2be, transparent 68%); opacity: .26; }
+      .ground i:nth-child(3) { width: 72vw; height: 72vw; left: 6vw; bottom: -34vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .3; }
+      .ground u { position: absolute; inset: 0; display: block;
+        background: linear-gradient(180deg, rgba(7,13,20,.6), rgba(7,13,20,.5) 42%, rgba(7,13,20,.88)); }
+      .rule { position: relative; z-index: 3; height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
+      .wrap { position: relative; z-index: 2; max-width: 860px; margin: 0 auto; padding: 30px 18px calc(90px + env(safe-area-inset-bottom)); }
+      .glass { background: var(--glass); border: 1px solid var(--gline); border-radius: 18px; box-shadow: var(--e1);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); }
+      .hero { padding: 22px 24px; display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+      .hero img { height: 42px; width: auto; }
+      .hero .t { flex: 1; min-width: 240px; }
+      .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+      h1 { margin: 8px 0 0; font-weight: 900; font-size: clamp(26px, 5.4vw, 40px); line-height: 1.03; letter-spacing: -.028em; color: var(--ink); }
+      h1 span { color: var(--amber); }
+      .stand { margin: 10px 0 0; font-size: 16px; color: var(--dim); max-width: 60ch; }
+      .who { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10.5px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+      .who .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .who.on { color: var(--teal); } .who.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .bar { position: sticky; top: 8px; z-index: 6; margin-top: 14px; padding: 12px 18px;
+        display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+      .bar .n { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+      .bar .n b { display: block; font-size: 19px; font-weight: 900; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.15; letter-spacing: -.02em; }
+      .bar .n.t b { color: var(--teal); } .bar .n.a b { color: var(--amber); } .bar .n.c b { color: var(--crit); }
+      .sv { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em;
+        text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
+      .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .lock { margin-top: 16px; padding: 18px 22px; font-size: 15px; }
+      .lock a { color: var(--amber); }
+      .card { margin-top: 15px; padding: 20px 22px; position: relative; overflow: hidden;
+        transition: border-color .3s var(--ease); }
+      .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone, var(--amber)); opacity: .85; }
+      .card[data-d="send"] { border-color: rgba(0,210,190,.5); }
+      .card[data-d="hold"] { border-color: rgba(229,72,77,.45); }
+      .card[data-d="edit"] { border-color: rgba(61,143,214,.45); }
+      .ch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+      .ch h2 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); }
+      .chip { font-family: var(--mono); font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase;
+        padding: 4px 10px; border-radius: 999px; font-weight: 700; color: #0b1119; background: var(--tone, var(--amber)); }
+      .mail { margin: 13px 0 0; white-space: pre-wrap; font-size: 15px; color: var(--dim);
+        max-height: 15em; overflow: hidden; position: relative; transition: max-height .4s var(--ease); }
+      .mail.open { max-height: 200em; }
+      .mail:not(.open)::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4em;
+        background: linear-gradient(180deg, transparent, rgba(13,20,30,.96)); }
+      .more { margin-top: 8px; font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .06em;
+        text-transform: uppercase; cursor: pointer; color: var(--amber); background: none; border: 0; padding: 4px 0; }
+      .ask { margin: 14px 0 0; padding: 12px 15px; border-radius: 11px; background: rgba(248,184,0,.09);
+        border: 1px solid rgba(248,184,0,.3); }
+      .ask span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em;
+        text-transform: uppercase; color: var(--amber); margin-bottom: 5px; }
+      .ask p { margin: 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+      .acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+      .acts button { font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--dim);
+        background: rgba(255,255,255,.055); border: 1px solid var(--gline); border-radius: 999px; padding: 9px 17px;
+        transition: background .2s var(--ease), color .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease); }
+      .acts button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,.3); color: var(--ink); }
+      .acts button:disabled { opacity: .45; cursor: default; }
+      .acts button[data-v="send"][aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #04211d; }
+      .acts button[data-v="edit"][aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #04141f; }
+      .acts button[data-v="hold"][aria-pressed="true"] { background: var(--crit); border-color: var(--crit); color: #fff; }
+      .note { width: 100%; margin-top: 11px; padding: 11px 13px; font: inherit; font-size: 14.5px; color: var(--ink);
+        resize: vertical; min-height: 46px; background: rgba(0,0,0,.26); border: 1px solid var(--gline); border-radius: 11px; }
+      .note:focus { outline: none; border-color: var(--amber); }
+      .note::placeholder { color: var(--faint); }
+      .by { margin-top: 8px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; color: var(--faint); }
+      .foot { margin-top: 26px; padding: 18px 22px; font-size: 13.5px; color: var(--mute); }
+      .foot b { color: var(--dim); }
+      .foot a { color: var(--amber); }
+      @media (prefers-reduced-motion: no-preference) {
+        .card { animation: rise .5s var(--ease) both; }
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+      }
+      @media (max-width: 560px) { .wrap { padding: 20px 12px 80px; } .hero, .card { padding: 17px; } .bar { gap: 13px; } }
+    </style>
+  </head>
+  <body>
+    <div class="ground" aria-hidden="true"><i></i><i></i><i></i><u></u></div>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="glass hero">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="t">
+          <div class="eyebrow">The Piston Powered Ranch &middot; working session</div>
+          <h1>The <span>Asks</span></h1>
+          <p class="stand">
+            Every account with a name against it that has never been contacted. Each carries the question
+            it is actually waiting on. Decisions save to the event database as you make them, so whoever
+            is signed in sees the same board.
+          </p>
+        </div>
+        <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
+      </div>
+
+      <div class="glass bar">
+        <span class="n">Decided<b id="nDone">0 / 0</b></span>
+        <span class="n t">To send<b id="nSend">0</b></span>
+        <span class="n c">Held<b id="nHold">0</b></span>
+        <span class="n a">Days out<b id="nDays">-</b></span>
+        <span class="sv" id="sv"><span class="d"></span><span class="t">Loading</span></span>
+      </div>
+
+      <div id="stage"></div>
+
+      <div class="glass foot">
+        Every draft holds only facts already on file: <b>Saturday, October 10, 2026</b>, nine to three,
+        Rancho Jaramillo, Unionville, three hundred collector cars on twelve acres, complimentary admission,
+        benefiting Community Elementary School. No sponsor tier figure appears anywhere.
+        <b>Nothing has been sent.</b> These same drafts live in the workbench on
+        <a href="/journeys/">the Ledger</a>, under the Vendor and Sponsor lanes.
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      var SHOW = "2026-10-10";
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      var DEC = [["send", "Send as written"], ["edit", "Needs edits"], ["hold", "Hold"]];
+      var TONE = { sponsorapply: "var(--amber)", vendorapply: "var(--teal)" };
+
+      var db = null, staff = false, ROWS = [], NAMES = {}, timer = {}, chain = {}, pending = {};
+
+      try {
+        db = createClient({
+          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+          dataApi: { url: DATA_API },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      /* Staff comes from the allowlist, never from a list in this file. The raw
+         fetch is deliberate: db.rpc does not attach the session token. */
+      async function isStaff() {
+        try {
+          var s = await db.auth.getSession();
+          var tok = s && s.data && s.data.session && s.data.session.access_token;
+          if (!tok) return false;
+          var r = await fetch(DATA_API + "/rpc/is_staff", {
+            method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
+          return r.ok && (await r.text()).trim() === "true";
+        } catch (e) { return false; }
+      }
+      async function loadNames() {
+        try {
+          var r = await db.from("staff_allowlist").select("email,name");
+          (r.data || []).forEach(function (x) { if (x.name) NAMES[String(x.email).toLowerCase()] = x.name; });
+        } catch (e) {}
+      }
+      function who(email) {
+        if (!email) return "someone";
+        var k = String(email).toLowerCase();
+        return NAMES[k] || k.split("@")[0];
+      }
+      function ago(iso) {
+        if (!iso) return "";
+        var s = (Date.now() - new Date(iso).getTime()) / 1000;
+        if (s < 60) return "just now";
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+      function paint(state, msg) {
+        var el = document.getElementById("sv");
+        el.className = "sv" + (state === "saved" ? " on" : state === "error" ? " err" : "");
+        el.querySelector(".t").textContent =
+          { saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || ""), dirty: "Unsaved", ready: "Up to date" }[state] || "";
+      }
+
+      /* One promise chain per row so two quick clicks cannot land out of order,
+         and a returned row count of zero is a failure, because that is exactly
+         what an RLS refusal looks like. */
+      function flush(id) {
+        var patch = pending[id];
+        if (!patch) return Promise.resolve();
+        delete pending[id];
+        chain[id] = (chain[id] || Promise.resolve())
+          .then(function () { paint("saving"); return db.from("workbench_items").update(patch).eq("id", id).select("id"); })
+          .then(function (r) {
+            if (r && r.error) throw new Error(r.error.message);
+            if (!r || !r.data || !r.data.length) throw new Error("nothing came back, which is what a permission refusal looks like");
+            paint("saved");
+          })
+          .catch(function (e) { paint("error", e.message || String(e)); });
+        return chain[id];
+      }
+      function queue(id, patch, delay) {
+        pending[id] = Object.assign(pending[id] || {}, patch);
+        clearTimeout(timer[id]); paint("dirty");
+        timer[id] = setTimeout(function () { flush(id); }, delay == null ? 700 : delay);
+      }
+
+      function daysOut() {
+        var d = Math.ceil((new Date(SHOW + "T09:00:00-05:00") - Date.now()) / 864e5);
+        return Math.max(0, d);
+      }
+      function splitBody(body) {
+        var i = body.indexOf("WAITING ON:");
+        return i === -1 ? { mail: body, ask: "" } : { mail: body.slice(0, i).trim(), ask: body.slice(i + 11).trim() };
+      }
+
+      function render() {
+        var stage = document.getElementById("stage");
+        document.getElementById("nDays").textContent = daysOut();
+        if (!staff) {
+          stage.innerHTML = '<div class="glass lock">This is the working board for the outreach asks, so it is staff only. ' +
+            'Sign in at the <a href="/console/">console</a> on this device and it unlocks here automatically.</div>';
+          document.getElementById("nDone").textContent = "0 / 0";
+          return;
+        }
+        var done = ROWS.filter(function (r) { return r.decision; }).length;
+        document.getElementById("nDone").textContent = done + " / " + ROWS.length;
+        document.getElementById("nSend").textContent = ROWS.filter(function (r) { return r.decision === "send"; }).length;
+        document.getElementById("nHold").textContent = ROWS.filter(function (r) { return r.decision === "hold"; }).length;
+
+        stage.innerHTML = ROWS.map(function (r, i) {
+          var parts = splitBody(r.body || "");
+          var open = r._open ? " open" : "";
+          return '<div class="glass card" data-d="' + esc(r.decision || "") + '" style="--tone:' +
+            (TONE[r.panel] || "var(--amber)") + ';animation-delay:' + Math.min(i * 45, 360) + 'ms">' +
+            '<div class="ch"><h2>' + esc(r.title) + '</h2><span class="chip">' +
+            (r.panel === "vendorapply" ? "Vendor" : "Sponsor") + "</span></div>" +
+            '<div class="mail' + open + '" data-mail="' + r.id + '">' + esc(parts.mail) + "</div>" +
+            '<button class="more" type="button" data-more="' + r.id + '">' + (r._open ? "Show less" : "Read the whole draft") + "</button>" +
+            (parts.ask ? '<div class="ask"><span>What this one is waiting on</span><p>' + esc(parts.ask) + "</p></div>" : "") +
+            '<div class="acts">' + DEC.map(function (d) {
+              return '<button type="button" data-dec="' + r.id + '" data-v="' + d[0] + '" aria-pressed="' +
+                (r.decision === d[0] ? "true" : "false") + '">' + d[1] + "</button>";
+            }).join("") + "</div>" +
+            '<textarea class="note" data-note="' + r.id + '" placeholder="What was decided, and why">' +
+            esc(r.decision_note || "") + "</textarea>" +
+            (r.decided_by ? '<div class="by">' + esc(who(r.decided_by)) + " decided this " + ago(r.decided_at) + "</div>" : "") +
+            "</div>";
+        }).join("");
+      }
+
+      async function load() {
+        if (!db) return;
+        staff = await isStaff();
+        var w = document.getElementById("who");
+        w.classList.toggle("on", staff);
+        if (staff) {
+          await loadNames();
+          try {
+            var s = await db.auth.getSession();
+            var em = s && s.data && s.data.session && s.data.session.user && s.data.session.user.email;
+            document.getElementById("whoTxt").textContent = who(em);
+          } catch (e) { document.getElementById("whoTxt").textContent = "Staff"; }
+          var r = await db.from("workbench_items").select("*")
+            .eq("event_id", EVENT_ID).eq("kind", "deliverable").order("panel").order("sort");
+          if (r.error) { paint("error", r.error.message); return; }
+          var open = {};
+          ROWS.forEach(function (x) { if (x._open) open[x.id] = true; });
+          ROWS = (r.data || []).map(function (x) { return Object.assign(x, { _open: !!open[x.id] }); });
+          paint("ready");
+        } else {
+          document.getElementById("whoTxt").textContent = "Not signed in";
+        }
+        var a = document.activeElement;
+        if (!(a && a.getAttribute && a.getAttribute("data-note")) && !Object.keys(pending).length) render();
+      }
+
+      document.addEventListener("click", function (e) {
+        var m = e.target.closest("[data-more]");
+        if (m) {
+          var id = m.getAttribute("data-more");
+          ROWS.forEach(function (r) { if (r.id === id) r._open = !r._open; });
+          return render();
+        }
+        var b = e.target.closest("[data-dec]");
+        if (!b || !staff) return;
+        var id = b.getAttribute("data-dec"), v = b.getAttribute("data-v");
+        ROWS.forEach(function (r) { if (r.id === id) r.decision = r.decision === v ? null : v; });
+        var row = ROWS.filter(function (r) { return r.id === id; })[0];
+        queue(id, { decision: row.decision }, 0);
+        render();
+      });
+      document.addEventListener("input", function (e) {
+        var t = e.target.closest("[data-note]");
+        if (!t || !staff) return;
+        var id = t.getAttribute("data-note");
+        ROWS.forEach(function (r) { if (r.id === id) r.decision_note = t.value; });
+        queue(id, { decision_note: t.value });
+      });
+      window.addEventListener("beforeunload", function (e) {
+        if (!Object.keys(pending).length) return;
+        Object.keys(pending).forEach(flush);
+        e.preventDefault(); e.returnValue = "";
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.hidden) Object.keys(pending).forEach(flush);
+      });
+
+      render();
+      load();
+      setInterval(function () { document.hidden || load(); }, 15e3);
+    </script>
+  </body>
+</html>

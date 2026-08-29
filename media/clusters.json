@@ -1,0 +1,180 @@
+[
+ {
+  "kept": "ranch-007",
+  "sharpness": 3612.9,
+  "others": [
+   {
+    "slug": "ranch-008",
+    "sharpness": 3573.4
+   },
+   {
+    "slug": "ranch-009",
+    "sharpness": 3489.6
+   },
+   {
+    "slug": "ranch-006",
+    "sharpness": 2834.1
+   }
+  ]
+ },
+ {
+  "kept": "ranch-038",
+  "sharpness": 24282.9,
+  "others": [
+   {
+    "slug": "ranch-039",
+    "sharpness": 21975.2
+   },
+   {
+    "slug": "ranch-040",
+    "sharpness": 21536.9
+   },
+   {
+    "slug": "ranch-045",
+    "sharpness": 17455.0
+   },
+   {
+    "slug": "ranch-044",
+    "sharpness": 16034.6
+   },
+   {
+    "slug": "ranch-043",
+    "sharpness": 12517.2
+   },
+   {
+    "slug": "ranch-046",
+    "sharpness": 11893.2
+   },
+   {
+    "slug": "ranch-041",
+    "sharpness": 6169.8
+   }
+  ]
+ },
+ {
+  "kept": "ranch-066",
+  "sharpness": 3895.9,
+  "others": [
+   {
+    "slug": "ranch-065",
+    "sharpness": 3895.9
+   },
+   {
+    "slug": "ranch-064",
+    "sharpness": 3728.2
+   },
+   {
+    "slug": "ranch-063",
+    "sharpness": 3728.2
+   }
+  ]
+ },
+ {
+  "kept": "ranch-070",
+  "sharpness": 16172.9,
+  "others": [
+   {
+    "slug": "ranch-069",
+    "sharpness": 16172.9
+   },
+   {
+    "slug": "ranch-068",
+    "sharpness": 15578.9
+   },
+   {
+    "slug": "ranch-067",
+    "sharpness": 15578.9
+   }
+  ]
+ },
+ {
+  "kept": "ranch-078",
+  "sharpness": 11116.5,
+  "others": [
+   {
+    "slug": "ranch-077",
+    "sharpness": 11116.5
+   },
+   {
+    "slug": "ranch-076",
+    "sharpness": 10892.3
+   },
+   {
+    "slug": "ranch-075",
+    "sharpness": 10892.3
+   }
+  ]
+ },
+ {
+  "kept": "ranch-098",
+  "sharpness": 3876.0,
+  "others": [
+   {
+    "slug": "ranch-097",
+    "sharpness": 3876.0
+   },
+   {
+    "slug": "ranch-096",
+    "sharpness": 3860.7
+   },
+   {
+    "slug": "ranch-095",
+    "sharpness": 3860.7
+   }
+  ]
+ },
+ {
+  "kept": "ranch-100",
+  "sharpness": 3726.9,
+  "others": [
+   {
+    "slug": "ranch-099",
+    "sharpness": 3726.9
+   },
+   {
+    "slug": "ranch-102",
+    "sharpness": 3640.9
+   },
+   {
+    "slug": "ranch-101",
+    "sharpness": 3640.9
+   }
+  ]
+ },
+ {
+  "kept": "ranch-161",
+  "sharpness": 6076.3,
+  "others": [
+   {
+    "slug": "ranch-160",
+    "sharpness": 6076.3
+   },
+   {
+    "slug": "ranch-159",
+    "sharpness": 6010.8
+   },
+   {
+    "slug": "ranch-158",
+    "sharpness": 6010.8
+   }
+  ]
+ },
+ {
+  "kept": "ranch-258",
+  "sharpness": 13115.7,
+  "others": [
+   {
+    "slug": "ranch-261",
+    "sharpness": 11640.6
+   },
+   {
+    "slug": "ranch-260",
+    "sharpness": 9954.9
+   },
+   {
+    "slug": "ranch-259",
+    "sharpness": 8326.0
+   }
+  ]
+ }
+]

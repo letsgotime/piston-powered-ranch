@@ -3,3 +3,9 @@ HANDOFF.local.md
 .env*
 node_modules
 .next
+
+# Full resolution graded masters and culled duplicates: these are the negatives.
+# 1.2GB of them, kept locally and backed up by Gavin, never committed. Only the
+# derivatives actually placed on a page belong in the repo.
+media/_masters/
+media/_culled/

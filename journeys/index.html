@@ -507,11 +507,13 @@
             (staff ? acts('<a class="primary" href="/console/#ops">Open ledger</a>') : "") };
         },
         sponsorapply: function () {
+          /* the working board for the asks lives on its own page now */
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "sponsor"; }) : null;
           return { e: "Sponsors", t: "Sponsor interest", body:
             (v ? stat("Sponsor categories", v.length, true) + pipeline(v) : lock()) +
             "<p style='margin-top:10px'>Tier numbers stay out of every public page. The proposal one-pager carries them.</p>" +
-            acts(copyBtn("Copy collateral link", ORIGIN + "/rancho")) };
+            acts('<a class="primary" href="/asks/">Open the working board</a>' +
+              copyBtn("Copy collateral link", ORIGIN + "/rancho")) };
         },
         sponsortrack: function () {
           return { e: "Sponsors", t: "Tracked conversations", body:
