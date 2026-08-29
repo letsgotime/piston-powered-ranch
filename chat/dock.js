@@ -117,12 +117,13 @@ function label() {
   }
 }
 
-function src() {
+function src(embed) {
+  var base = "/chat/" + (embed ? "?embed=1" : "");
   if (subject) {
-    return "/chat/#s=" + subject.kind + ":" + encodeURIComponent(subject.id) +
+    return base + "#s=" + subject.kind + ":" + encodeURIComponent(subject.id) +
       ":" + encodeURIComponent(subject.title || "");
   }
-  return "/chat/";
+  return base;
 }
 
 function show(on) {
@@ -130,11 +131,11 @@ function show(on) {
   panel.classList.toggle("on", on);
   scrim.classList.toggle("on", on);
   panel.querySelector(".rcTitle").textContent = subject ? subject.title : "Team chat";
-  panel.querySelector(".rcFull").href = src();
+  panel.querySelector(".rcFull").href = src(false);
   if (on) {
     /* Reload on every open so a subject change lands, and so the thread is
        never a stale copy from the last time the panel was used. */
-    frame.src = src();
+    frame.src = src(true);
   } else {
     frame.src = "about:blank";
     setTimeout(count, 900);

@@ -266,6 +266,17 @@
         .th, .msg, .send { -webkit-user-select: none; user-select: none; }
         .msg .bub { -webkit-user-select: text; user-select: text; }
       }
+      /* Inside the floating dock the page is already sitting on glass, so it
+         drops its own ground, borders and radius rather than stacking a second
+         card inside the first. */
+      body.embed .ground, body.embed .rule, body.embed .install { display: none; }
+      body.embed .app { padding: 0; gap: 0; height: 100%; grid-template-columns: 1fr; max-width: none; }
+      body.embed .glass { background: transparent; border: 0; border-radius: 0; box-shadow: none;
+        -webkit-backdrop-filter: none; backdrop-filter: none; }
+      body.embed .main { display: none; }
+      body.embed .app.open .main { display: flex; }
+      body.embed .app.open .side { display: none; }
+      body.embed .mainh .back { display: block; }
       .install { position: fixed; z-index: 30; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom));
         display: none; align-items: center; gap: 9px; padding: 11px 17px; border-radius: 999px; cursor: pointer;
         font: inherit; font-size: 13.5px; font-weight: 700; color: var(--ink);
@@ -394,6 +405,10 @@
          document. Duration is checked here because the upload endpoint can only
          see bytes; bytes are capped there as the backstop. */
       var LIMITS = { photo: 50, videoSec: 300, voiceSec: 300 };
+
+      if (location.search.indexOf("embed=1") > -1 || window.self !== window.top) {
+        document.body.classList.add("embed");
+      }
 
       var db = null, staff = false, ME = "", NAMES = {}, ROSTER = [], PEOPLE = {}, MY = null;
       var ATT = {}, SIGNED = {}, PEND = [], LB = [], lbAt = 0;
