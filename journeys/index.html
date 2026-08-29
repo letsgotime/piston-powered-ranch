@@ -399,6 +399,9 @@
             { t: "Pipeline and Ledger", d: "Money and lanes, live.", panel: "pipeline" },
             { t: "Grounds and site plan", d: "Zones, gate, crowd line, print sheet.", panel: "grounds", pill: function () { return LIVE.features && LIVE.features.filter(function (x) { return x.kind === "zone"; }).length; } },
             { t: "Chat, on the record", d: "Threads attached to the thing being discussed.", panel: "chat" },
+            { t: "Awards and the panel", d: "Ten awards, judges, and a vote that needs no account.", panel: "awards", pill: function () {
+                return LIVE.awards ? LIVE.awards.filter(function (a) { return a.state === "draft"; }).length : null;
+              } },
             { t: "Crew, posted and timed", d: "Every post, who is on it, who is short.", panel: "crew", pill: function () {
                 if (!LIVE.shifts || !LIVE.assigns) return null;
                 var by = {};
@@ -537,6 +540,24 @@
           return { e: "Sponsors", t: "Commit and activate", body:
             stat("Title tiers", "handshake, invoiced from the CRM") + stat("Supporting", "pays by checkout link") +
             "<p style='margin-top:10px'>Reminder: the secondary title defaults to category-exclusive and non-dealer while the 111 Motorcars exclusivity stands.</p>" };
+        },
+        awards: function () {
+          var body = "";
+          if (LIVE.awards) {
+            var byKind = {};
+            LIVE.awards.forEach(function (a) { byKind[a.kind] = (byKind[a.kind] || 0) + 1; });
+            body = stat("Awards on the sheet", LIVE.awards.length, true) +
+              stat("Judged by the panel", byKind.judged || 0, true) +
+              stat("Host picks", byKind.host || 0, true) +
+              stat("Voted by the crowd", byKind.popular || 0, true) +
+              stat("Still in draft", LIVE.awards.filter(function (a) { return a.state === "draft"; }).length, true) +
+              stat("Judges invited", (LIVE.judges || []).length, true);
+          } else { body = lock(); }
+          return { e: "Show", t: "Awards and the panel", body: body +
+            "<p style='margin-top:10px'>First counts three, second two, third one, which is simple enough to explain from a stage. People's Choice runs on phones with no sign in, so it is a crowd prize and not a judged one. Awards stay in draft until somebody opens them.</p>" +
+            acts('<a class="primary" href="/judging/" target="_blank" rel="noopener">Open judging</a>' +
+              '<a href="/vote/" target="_blank" rel="noopener">The vote page</a>' +
+              copyBtn("Copy the vote link", ORIGIN + "/vote/")) };
         },
         crew: function () {
           var body = "";
@@ -1364,6 +1385,10 @@
           bg.error || (LIVE.budget = bg.data);
           var rs = await db.from("staff_roster").select("*").order("id");
           rs.error || (LIVE.roster = rs.data);
+          var aw = await db.from("awards").select("id,name,kind,state,sort").order("sort");
+          aw.error || (LIVE.awards = aw.data);
+          var jg = await db.from("judges").select("id,name,status");
+          jg.error || (LIVE.judges = jg.data);
           var vs = await db.from("volunteer_shifts").select("id,role,post,needed,starts_at").order("starts_at");
           vs.error || (LIVE.shifts = vs.data);
           var va = await db.from("volunteer_assignments").select("shift_id,volunteer_id,status");
