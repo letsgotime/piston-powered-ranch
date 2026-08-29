@@ -131,7 +131,6 @@ const CATALOG = [
 const CHIPS = [
   ["all", "Everything"],
   ["ranch", "For the ranch"],
-  ["title", "Title sponsor"],
   ["sponsors", "Sponsors"],
   ["vendors", "Vendors"],
   ["community", "Car community"],
@@ -189,49 +188,65 @@ function assetsFor(it) {
   return out;
 }
 
-const groups = new Map();
-let total = 0;
-for (const it of CATALOG) {
-  const assets = assetsFor(it);
-  if (!assets.length) continue;
-  total += assets.length;
-  if (!groups.has(it.group)) groups.set(it.group, []);
-  const thumb = thumbFor(it.base);
-  groups.get(it.group).push({ ...it, assets, thumb, preview: previewFor(it.base, thumb) });
+/** Renders the group/card markup for a slice of the catalog. Shared by the
+ *  public gallery and the unlisted sensitive-pitch page so a card looks
+ *  identical wherever it's served from. */
+function renderCards(catalog) {
+  const groups = new Map();
+  let total = 0;
+  for (const it of catalog) {
+    const assets = assetsFor(it);
+    if (!assets.length) continue;
+    total += assets.length;
+    if (!groups.has(it.group)) groups.set(it.group, []);
+    const thumb = thumbFor(it.base);
+    groups.get(it.group).push({ ...it, assets, thumb, preview: previewFor(it.base, thumb) });
+  }
+
+  let cards = "";
+  for (const [group, items] of groups) {
+    cards += `\n        <section class="group" data-group="${esc(group)}">\n          <h2>${esc(group)}</h2>\n          <div class="grid">`;
+    for (const it of items) {
+      const btns = it.assets
+        .map(
+          (a) =>
+            `<a class="dl ${a.kind}" href="files/${encodeURIComponent(a.name)}" download title="${esc(a.hint)}">` +
+            `<span class="k">${esc(a.label)}</span><span class="s">${esc(a.sizeLabel)}</span></a>`,
+        )
+        .join("");
+      cards +=
+        `\n            <article class="card" data-aud="${it.aud}" data-name="${esc((it.title + " " + it.blurb).toLowerCase())}">` +
+        (it.thumb
+          ? `<button class="thumb ${it.shape || ""}" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
+            `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>` : ``) +
+        `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">` +
+        (it.pageHref
+          ? `<a class="dl page" href="${esc(it.pageHref)}"><span class="k">${esc(it.pageLabel)}</span><span class="s">Copy per platform</span></a>`
+          : "") +
+        `${btns}</div>` +
+        `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
+        `</div></article>`;
+    }
+    cards += `\n          </div>\n        </section>`;
+  }
+  return { cards, total };
 }
 
-let cards = "";
-for (const [group, items] of groups) {
-  cards += `\n        <section class="group" data-group="${esc(group)}">\n          <h2>${esc(group)}</h2>\n          <div class="grid">`;
-  for (const it of items) {
-    const btns = it.assets
-      .map(
-        (a) =>
-          `<a class="dl ${a.kind}" href="files/${encodeURIComponent(a.name)}" download title="${esc(a.hint)}">` +
-          `<span class="k">${esc(a.label)}</span><span class="s">${esc(a.sizeLabel)}</span></a>`,
-      )
-      .join("");
-    cards +=
-      `\n            <article class="card" data-aud="${it.aud}" data-name="${esc((it.title + " " + it.blurb).toLowerCase())}">` +
-      (it.thumb
-        ? `<button class="thumb ${it.shape || ""}" data-full="${esc(it.preview)}" aria-label="Preview ${esc(it.title)}">` +
-          `<img src="${esc(it.thumb)}" alt="" decoding="async" /></button>` : ``) +
-      `<div class="body"><h3>${esc(it.title)}</h3><p>${esc(it.blurb)}</p><div class="btns">` +
-      (it.pageHref
-        ? `<a class="dl page" href="${esc(it.pageHref)}"><span class="k">${esc(it.pageLabel)}</span><span class="s">Copy per platform</span></a>`
-        : "") +
-      `${btns}</div>` +
-      `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
-      `</div></article>`;
-  }
-  cards += `\n          </div>\n        </section>`;
-}
+// Named-prospect material (currently just the 111 Motorcars title-sponsor
+// pitch) never appears in the public gallery — a visitor browsing collateral
+// should never learn who's being pitched. It still needs to be downloadable
+// by direct link so it can be sent to the prospect and to Gavin/Bekah, so it
+// renders onto its own unlisted page instead of being deleted or hidden
+// behind auth.
+const publicCatalog = CATALOG.filter((it) => !it.sensitive);
+const sensitiveCatalog = CATALOG.filter((it) => it.sensitive);
+
+const tpl = readFileSync(join("tools", "collateral-template.html"), "utf8");
 
 const chips = CHIPS.map(
   (c, i) => `<button class="chip${i === 0 ? " on" : ""}" data-f="${c[0]}">${esc(c[1])}</button>`,
 ).join("");
-
-const tpl = readFileSync(join("tools", "collateral-template.html"), "utf8");
+const { cards, total } = renderCards(publicCatalog);
 writeFileSync(
   join(DIR, "index.html"),
   tpl
@@ -239,4 +254,19 @@ writeFileSync(
     .replace("<!--CARDS-->", cards)
     .replace("<!--COUNT-->", String(total)),
 );
-console.log(`collateral/index.html: ${groups.size} groups, ${total} downloadable files`);
+
+if (sensitiveCatalog.length) {
+  const soloChip = `<button class="chip on" data-f="all">Everything</button>`;
+  const { cards: sensitiveCards, total: sensitiveTotal } = renderCards(sensitiveCatalog);
+  writeFileSync(
+    join(DIR, "sponsor-title-pitch.html"),
+    tpl
+      .replace("<!--CHIPS-->", soloChip)
+      .replace("<!--CARDS-->", sensitiveCards)
+      .replace("<!--COUNT-->", String(sensitiveTotal)),
+  );
+}
+console.log(`collateral/index.html: ${total} downloadable files`);
+if (sensitiveCatalog.length) {
+  console.log(`collateral/sponsor-title-pitch.html: unlisted, ${sensitiveCatalog.length} item(s)`);
+}
