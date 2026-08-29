@@ -40,22 +40,23 @@
         transition: opacity 0.5s var(--ease); overflow: auto;
       }
       /* The arrival shot from the 28 August ranch shoot, behind the glass.
-         Two layers rather than one: the photograph, then a veil that is heavy
-         at the edges and light through the middle, so the card has something
-         to sit on without the picture being flattened. */
-      .landing::before {
-        content: ""; position: fixed; inset: 0; z-index: -2;
+         These are real elements, not pseudo-elements at a negative z-index:
+         .landing carries z-index 30 and so establishes a stacking context, and
+         a negative child paints behind its own parent, which is why the first
+         attempt showed nothing at all. */
+      .land-photo, .land-veil { position: absolute; inset: 0; }
+      .land-photo {
         background: url(/events/img/arrive.jpg) center 46% / cover no-repeat;
         transform: scale(1.04);
       }
-      .landing::after {
-        content: ""; position: fixed; inset: 0; z-index: -1;
+      .land-veil {
         background:
-          radial-gradient(120% 80% at 50% 48%, rgba(10,17,26,.34) 0%, rgba(10,17,26,.72) 62%, rgba(10,17,26,.9) 100%),
-          linear-gradient(180deg, rgba(10,17,26,.5), rgba(10,17,26,.42) 42%, rgba(10,17,26,.86));
+          radial-gradient(120% 80% at 50% 48%, rgba(10,17,26,.3) 0%, rgba(10,17,26,.7) 62%, rgba(10,17,26,.9) 100%),
+          linear-gradient(180deg, rgba(10,17,26,.48), rgba(10,17,26,.4) 42%, rgba(10,17,26,.86));
       }
+      .land-card { position: relative; z-index: 1; }
       @media (max-width: 620px) {
-        .landing::before { background-image: url(/events/img/arrive-sm.jpg); }
+        .land-photo { background-image: url(/events/img/arrive-sm.jpg); }
       }
       .landing.off { opacity: 0; pointer-events: none; }
       .land-card {
@@ -388,6 +389,8 @@
     </div>
 
     <div class="landing" id="landing">
+      <div class="land-photo" aria-hidden="true"></div>
+      <div class="land-veil" aria-hidden="true"></div>
       <div class="land-card">
         <img src="/brand/pg-mark.png" alt="PaddockGavin" />
         <div class="eyebrow">Rancho Jaramillo · October 10</div>
