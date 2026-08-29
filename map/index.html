@@ -37,15 +37,33 @@
       .landing {
         position: fixed; inset: 0; z-index: 30; display: flex; align-items: center;
         justify-content: center; padding: 20px;
-        background: linear-gradient(180deg, rgba(10, 17, 26, 0.55), rgba(10, 17, 26, 0.75));
         transition: opacity 0.5s var(--ease); overflow: auto;
+      }
+      /* The arrival shot from the 28 August ranch shoot, behind the glass.
+         Two layers rather than one: the photograph, then a veil that is heavy
+         at the edges and light through the middle, so the card has something
+         to sit on without the picture being flattened. */
+      .landing::before {
+        content: ""; position: fixed; inset: 0; z-index: -2;
+        background: url(/events/img/arrive.jpg) center 46% / cover no-repeat;
+        transform: scale(1.04);
+      }
+      .landing::after {
+        content: ""; position: fixed; inset: 0; z-index: -1;
+        background:
+          radial-gradient(120% 80% at 50% 48%, rgba(10,17,26,.34) 0%, rgba(10,17,26,.72) 62%, rgba(10,17,26,.9) 100%),
+          linear-gradient(180deg, rgba(10,17,26,.5), rgba(10,17,26,.42) 42%, rgba(10,17,26,.86));
+      }
+      @media (max-width: 620px) {
+        .landing::before { background-image: url(/events/img/arrive-sm.jpg); }
       }
       .landing.off { opacity: 0; pointer-events: none; }
       .land-card {
         width: 100%; max-width: 460px; padding: 30px 32px 26px; border-radius: 26px;
-        background: var(--glass);
-        -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
-        border: 1px solid var(--gline); box-shadow: var(--e2);
+        background: rgba(13, 22, 33, 0.52);
+        -webkit-backdrop-filter: blur(26px) saturate(1.55); backdrop-filter: blur(26px) saturate(1.55);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: var(--e2), 0 2px 0 rgba(255, 255, 255, 0.05) inset;
       }
       .land-card img { height: 40px; width: auto; margin-bottom: 14px; }
       .eyebrow { font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 700; color: var(--teal); }
