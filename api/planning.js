@@ -24,10 +24,10 @@ const DATA_API =
  * every function too, which drifted once and locked Bekah out of her own
  * uploads.
  */
-async function isStaff(bearer) {
+async function canSeeMoney(bearer) {
   let res;
   try {
-    res = await fetch(`${DATA_API}/rpc/is_staff`, {
+    res = await fetch(`${DATA_API}/rpc/can_see_money`, {
       method: "POST",
       headers: { Authorization: `Bearer ${bearer}`, "Content-Type": "application/json" },
       body: "{}",
@@ -68,8 +68,8 @@ export default async function handler(request, response) {
     return response.status(401).json({ error: "Invalid or expired session" });
   }
 
-  if (!(await isStaff(bearer))) {
-    return response.status(403).json({ error: "Not authorised for planning documents" });
+  if (!(await canSeeMoney(bearer))) {
+    return response.status(403).json({ error: "Not authorised for cost and margin" });
   }
 
   // Never let a shared cache hold these.
