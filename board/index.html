@@ -110,6 +110,40 @@
       .row .del { font: inherit; font-size: 11px; cursor: pointer; color: var(--faint);
         background: none; border: 0; padding: 8px; min-height: 36px; }
       .row .del:hover { color: var(--crit); }
+      .row .foot { display: flex; align-items: center; gap: 10px; margin-top: 7px; flex-wrap: wrap; }
+      .row .foot button { font: inherit; font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+        cursor: pointer; color: var(--dim); background: rgba(255,255,255,.05);
+        border: 1px solid var(--gline); border-radius: 999px; padding: 5px 12px; }
+      .row .foot button:hover { border-color: var(--amber); color: var(--ink); }
+      .row .foot .cnt { font-size: 11.5px; color: var(--mute); font-variant-numeric: tabular-nums; }
+      .row .foot .cnt b { color: var(--teal); }
+      .drill { margin-top: 10px; padding: 12px 13px; border-radius: 12px;
+        background: rgba(0,0,0,.22); border: 1px solid var(--gline); }
+      .drill[hidden] { display: none; }
+      .drill h4 { margin: 0 0 8px; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+        color: var(--mute); font-weight: 800; }
+      .drill h4.second { margin-top: 16px; }
+      .drill .empty { font-size: 12.5px; color: var(--mute); margin: 0 0 8px; }
+      .cand { display: grid; grid-template-columns: 1fr 1fr auto auto; gap: 7px; margin-bottom: 6px; align-items: center; }
+      .cand input, .cand select { font: inherit; font-size: 13px; color: var(--ink); min-width: 0;
+        background: rgba(255,255,255,.05); border: 1px solid var(--gline); border-radius: 8px; padding: 7px 9px; }
+      .cand input:focus, .cand select:focus { outline: none; border-color: var(--amber); }
+      .cand .x { cursor: pointer; color: var(--mute); background: none; border: 0; font-size: 16px; padding: 0 4px; }
+      .cand .x:hover { color: var(--crit); }
+      .cand[data-st="chosen"] input.nm { border-color: rgba(0, 210, 190, 0.55); }
+      .cand[data-st="passed"] input.nm { opacity: .55; text-decoration: line-through; }
+      .note { padding: 7px 0; border-bottom: 1px solid var(--gline); font-size: 13px; white-space: pre-wrap; }
+      .note:last-of-type { border-bottom: 0; }
+      .note .m { font-size: 11px; color: var(--mute); margin-bottom: 2px; }
+      .noteAdd { display: flex; gap: 7px; margin-top: 8px; }
+      .noteAdd textarea { flex: 1; font: inherit; font-size: 13px; color: var(--ink); resize: vertical;
+        min-height: 38px; background: rgba(255,255,255,.05); border: 1px solid var(--gline);
+        border-radius: 8px; padding: 7px 9px; }
+      .noteAdd textarea:focus { outline: none; border-color: var(--amber); }
+      @media (max-width: 640px) {
+        .cand { grid-template-columns: 1fr auto auto; }
+        .cand .dt { grid-column: 1 / -1; }
+      }
       .lock { margin-top: 20px; padding: 16px 18px; border-radius: 14px; font-size: 13.5px; color: var(--dim);
         background: var(--glass); border: 1px dashed var(--gline2); box-shadow: var(--e0); }
       .lock a { color: var(--amber); }
@@ -176,7 +210,9 @@
           return (await r.text()).trim() === "true";
         } catch (e) { return false; }
       }
-      var db = null, staff = false, ROWS = [];
+      var db = null, staff = false, ROWS = [], CANDS = [], NOTES = [], OPEN = {};
+      var CAND_ST = [["considering", "Considering"], ["shortlist", "Shortlist"],
+                     ["chosen", "Chosen"], ["passed", "Passed"]];
       try {
         db = createClient({
           auth: {
@@ -197,6 +233,10 @@
       /* Same save contract as the journeys workbench: serialise per row so two
          responses cannot land out of order, and treat zero returned rows as a
          failure, because that is exactly what an RLS refusal looks like. */
+      /* Keyed by table:id so candidates and accounts queue independently.
+         Same contract as before: one promise chain per key so responses cannot
+         reorder, and a returned row count of zero is a failure, because that is
+         exactly what an RLS refusal looks like. */
       var Saver = (function () {
         var chain = {}, timer = {}, pending = {};
         function paint(state, msg) {
@@ -205,30 +245,33 @@
           el.querySelector(".txt").textContent =
             { dirty: "Unsaved", saving: "Saving", saved: "Saved", error: "Not saved: " + (msg || "") }[state] || "Up to date";
         }
-        function flush(id) {
-          var patch = pending[id];
+        function flush(key) {
+          var patch = pending[key];
           if (!patch) return Promise.resolve();
-          delete pending[id];
-          chain[id] = (chain[id] || Promise.resolve())
-            .then(function () { paint("saving"); return db.from("accounts").update(patch).eq("id", id).select("id"); })
+          delete pending[key];
+          var cut = key.indexOf(":"), tbl = key.slice(0, cut), id = key.slice(cut + 1);
+          chain[key] = (chain[key] || Promise.resolve())
+            .then(function () { paint("saving"); return db.from(tbl).update(patch).eq("id", id).select("id"); })
             .then(function (r) {
               if (r && r.error) throw new Error(r.error.message);
               if (!r || !r.data || !r.data.length) throw new Error("nothing came back, which is what a permission refusal looks like");
               paint("saved");
             })
             .catch(function (e) { paint("error", e.message || String(e)); });
-          return chain[id];
+          return chain[key];
         }
         return {
-          queue: function (id, patch, delay) {
-            pending[id] = Object.assign(pending[id] || {}, patch);
-            clearTimeout(timer[id]); paint("dirty");
-            timer[id] = setTimeout(function () { flush(id); }, delay == null ? 650 : delay);
+          queue: function (id, patch, delay) { return this.queueIn("accounts", id, patch, delay); },
+          queueIn: function (tbl, id, patch, delay) {
+            var key = tbl + ":" + id;
+            pending[key] = Object.assign(pending[key] || {}, patch);
+            clearTimeout(timer[key]); paint("dirty");
+            timer[key] = setTimeout(function () { flush(key); }, delay == null ? 650 : delay);
           },
           flushAll: function () {
-            var ids = Object.keys(pending);
-            ids.forEach(function (id) { clearTimeout(timer[id]); });
-            return Promise.all(ids.map(flush));
+            var keys = Object.keys(pending);
+            keys.forEach(function (k) { clearTimeout(timer[k]); });
+            return Promise.all(keys.map(flush));
           },
           dirty: function () { return Object.keys(pending).length > 0; },
           paint: paint,
@@ -249,8 +292,79 @@
           '<button class="del" type="button" data-del="' + r.id + '" aria-label="Delete ' +
           esc(r.category || r.company || "row") + '">Delete</button>' +
           "</div>" +
+          drillFoot(r) +
           '<textarea data-f="note" data-id="' + r.id + '" placeholder="Notes, who knows them, what the ask is" aria-label="Note">' +
           esc(r.note || "") + "</textarea></div>";
+      }
+
+      function candsFor(id) {
+        return CANDS.filter(function (c) { return c.account_id === id; })
+          .sort(function (a, b) { return (a.sort - b.sort) || a.created_at.localeCompare(b.created_at); });
+      }
+      function notesFor(id) {
+        return NOTES.filter(function (n) { return n.subject_kind === "account" && n.subject_key === id; })
+          .sort(function (a, b) { return b.created_at.localeCompare(a.created_at); });
+      }
+      function ago(iso) {
+        var s = (Date.now() - new Date(iso).getTime()) / 1000;
+        if (s < 60) return "just now";
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+      function drillFoot(r) {
+        var c = candsFor(r.id), n = notesFor(r.id);
+        var chosen = c.filter(function (x) { return x.status === "chosen"; }).length;
+        return '<div class="foot">' +
+          '<button type="button" data-drill="' + r.id + '">' + (OPEN[r.id] ? "Hide names" : "Names &amp; notes") + "</button>" +
+          '<span class="cnt">' + (c.length ? "<b>" + c.length + "</b> under consideration" : "no names yet") +
+          (chosen ? " &middot; <b>" + chosen + "</b> chosen" : "") +
+          (n.length ? " &middot; " + n.length + " note" + (n.length === 1 ? "" : "s") : "") +
+          "</span></div>" +
+          '<div class="drill" data-drillfor="' + r.id + '"' + (OPEN[r.id] ? "" : " hidden") + ">" +
+          (OPEN[r.id] ? drillBody(r) : "") + "</div>";
+      }
+      function drillBody(r) {
+        var c = candsFor(r.id), n = notesFor(r.id);
+        return "<h4>Names under consideration</h4>" +
+          (c.length ? c.map(function (x) {
+            return '<div class="cand" data-st="' + esc(x.status) + '">' +
+              '<input class="nm" data-cf="name" data-cid="' + x.id + '" value="' + esc(x.name) + '" placeholder="Business name" aria-label="Name">' +
+              '<input class="dt" data-cf="detail" data-cid="' + x.id + '" value="' + esc(x.detail || "") + '" placeholder="Who they are, who knows them" aria-label="Detail">' +
+              '<select data-cf="status" data-cid="' + x.id + '" aria-label="Status">' +
+              CAND_ST.map(function (st) {
+                return '<option value="' + st[0] + '"' + (x.status === st[0] ? " selected" : "") + ">" + st[1] + "</option>";
+              }).join("") + "</select>" +
+              '<button class="x" type="button" data-cdel="' + x.id + '" aria-label="Remove">&times;</button></div>';
+          }).join("") : '<p class="empty">Nobody listed yet. Add the businesses you are weighing against each other.</p>') +
+          '<div class="foot"><button type="button" data-cadd="' + r.id + '">+ Add a name</button></div>' +
+          '<h4 class="second">Notes</h4>' +
+          (n.length ? n.map(function (x) {
+            return '<div class="note"><div class="m">' + esc(who(x.author)) + " &middot; " + ago(x.created_at) + "</div>" + esc(x.body) + "</div>";
+          }).join("") : '<p class="empty">No notes yet.</p>') +
+          '<div class="noteAdd"><textarea data-nfor="' + r.id + '" placeholder="What was said, what was decided, what is next" aria-label="New note"></textarea>' +
+          '<button type="button" data-npost="' + r.id + '">Post</button></div>';
+      }
+      var NAMES = {};
+      function who(email) {
+        if (!email) return "someone";
+        var k = String(email).toLowerCase();
+        return NAMES[k] || k.split("@")[0];
+      }
+      async function loadNames() {
+        try {
+          var r = await db.from("staff_allowlist").select("email,name");
+          if (r.error || !r.data) return;
+          r.data.forEach(function (x) { if (x.name) NAMES[String(x.email).toLowerCase()] = x.name; });
+        } catch (e) {}
+      }
+      function repaintDrill(id) {
+        var host = document.querySelector('[data-drillfor="' + id + '"]');
+        if (!host) return;
+        host.hidden = !OPEN[id];
+        host.innerHTML = OPEN[id] ? drillBody(ROWS.filter(function (r) { return r.id === id; })[0]) : "";
+        var btn = document.querySelector('[data-drill="' + id + '"]');
+        if (btn) btn.innerHTML = OPEN[id] ? "Hide names" : "Names &amp; notes";
       }
 
       function render() {
@@ -292,6 +406,7 @@
         try {
           staff = await isStaff(db);
         } catch (e) { staff = false; }
+        if (staff && !Object.keys(NAMES).length) await loadNames();
         var m = document.getElementById("mode");
         m.classList.toggle("staff", staff);
         document.getElementById("modeTxt").textContent = staff ? "Staff · live" : "Public";
@@ -300,19 +415,49 @@
           var r = await db.from("accounts").select("*").order("type").order("sort");
           if (r.error) throw new Error(r.error.message);
           ROWS = r.data || [];
+          var c = await db.from("account_candidates").select("*");
+          if (!c.error) CANDS = c.data || [];
+          var n = await db.from("board_notes").select("*").eq("subject_kind", "account");
+          if (!n.error) NOTES = n.data || [];
         } catch (e) { Saver.paint("error", e.message); return; }
         var a = document.activeElement;
         // Never repaint out from under someone mid-sentence.
-        if (!(a && a.getAttribute && a.getAttribute("data-f")) && !Saver.dirty()) render();
+        var typing = a && a.getAttribute &&
+          (a.getAttribute("data-f") || a.getAttribute("data-cf") || a.getAttribute("data-nfor"));
+        if (!typing && !Saver.dirty()) render();
       }
 
       document.addEventListener("input", function (e) {
+        var cf = e.target.getAttribute && e.target.getAttribute("data-cf");
+        if (cf) {
+          var patch = {}; patch[cf] = e.target.value;
+          return Saver.queueIn("account_candidates", e.target.getAttribute("data-cid"), patch);
+        }
         var f = e.target.getAttribute && e.target.getAttribute("data-f");
         if (!f) return;
         var patch = {}; patch[f] = e.target.value;
         Saver.queue(e.target.getAttribute("data-id"), patch);
       });
       document.addEventListener("change", function (e) {
+        if (e.target.getAttribute && e.target.getAttribute("data-cf") === "status") {
+          var cid = e.target.getAttribute("data-cid"), val = e.target.value;
+          Saver.queueIn("account_candidates", cid, { status: val }, 0);
+          var host = e.target.closest(".cand");
+          if (host) host.setAttribute("data-st", val);
+          CANDS.forEach(function (x) { if (x.id === cid) x.status = val; });
+          var row = e.target.closest("[data-row]");
+          if (row) {
+            // the count strip above reports chosen, so keep it honest
+            var id = row.getAttribute("data-row");
+            var strip = row.querySelector(".foot .cnt");
+            var c = candsFor(id), ch = c.filter(function (x) { return x.status === "chosen"; }).length,
+                nn = notesFor(id).length;
+            if (strip) strip.innerHTML = (c.length ? "<b>" + c.length + "</b> under consideration" : "no names yet") +
+              (ch ? " &middot; <b>" + ch + "</b> chosen" : "") +
+              (nn ? " &middot; " + nn + " note" + (nn === 1 ? "" : "s") : "");
+          }
+          return;
+        }
         var f = e.target.getAttribute && e.target.getAttribute("data-f");
         if (f !== "pipeline_stage") return;
         var patch = { pipeline_stage: e.target.value };
@@ -332,6 +477,54 @@
           await load();
           var el = document.querySelector('[data-row="' + ins.data[0].id + '"] .cat');
           el && el.focus();
+          return;
+        }
+        var tog = e.target.closest("[data-drill]");
+        if (tog) {
+          var tid = tog.getAttribute("data-drill");
+          OPEN[tid] = !OPEN[tid];
+          return repaintDrill(tid);
+        }
+        var cadd = e.target.closest("[data-cadd]");
+        if (cadd) {
+          var aid = cadd.getAttribute("data-cadd");
+          var mx = candsFor(aid).reduce(function (n, x) { return Math.max(n, x.sort || 0); }, 0);
+          var ins = await db.from("account_candidates")
+            .insert([{ account_id: aid, name: "", status: "considering", sort: mx + 10 }]).select("id");
+          if (ins && ins.error) return Saver.paint("error", ins.error.message);
+          if (!ins || !ins.data || !ins.data.length) return Saver.paint("error", "the insert came back empty, which is a permission refusal");
+          await load();
+          repaintDrill(aid);
+          var el = document.querySelector('[data-cid="' + ins.data[0].id + '"]');
+          el && el.focus();
+          return;
+        }
+        var cdel = e.target.closest("[data-cdel]");
+        if (cdel) {
+          var xid = cdel.getAttribute("data-cdel");
+          var cand = CANDS.filter(function (x) { return x.id === xid; })[0];
+          if (!confirm("Remove " + ((cand && cand.name) || "this name") + " from the shortlist?")) return;
+          var dl = await db.from("account_candidates").delete().eq("id", xid).select("id");
+          if (dl && dl.error) return Saver.paint("error", dl.error.message);
+          var acc = cand && cand.account_id;
+          await load();
+          if (acc) repaintDrill(acc);
+          return;
+        }
+        var np = e.target.closest("[data-npost]");
+        if (np) {
+          var nid = np.getAttribute("data-npost");
+          var ta = document.querySelector('[data-nfor="' + nid + '"]');
+          var body = (ta && ta.value || "").trim();
+          if (!body) return;
+          var row = ROWS.filter(function (x) { return x.id === nid; })[0];
+          var ni = await db.from("board_notes").insert([{ subject_kind: "account", subject_key: nid,
+            subject_label: (row && (row.company || row.category)) || "", body: body }]).select("id");
+          if (ni && ni.error) return Saver.paint("error", ni.error.message);
+          if (!ni || !ni.data || !ni.data.length) return Saver.paint("error", "the note came back empty, which is a permission refusal");
+          if (ta) ta.value = "";
+          await load();
+          repaintDrill(nid);
           return;
         }
         var d = e.target.closest("[data-del]");
