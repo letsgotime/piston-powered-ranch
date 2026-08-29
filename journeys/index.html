@@ -703,11 +703,23 @@
         if (s < 86400) return Math.floor(s / 3600) + "h ago";
         return Math.floor(s / 86400) + "d ago";
       }
+      /* Display names come from staff_allowlist, so a new colleague reads as
+         their own name the moment they are added, with no edit here. Falls
+         back to the address local part before the names land. */
+      var NAMES = {};
       function who(email) {
         if (!email) return "someone";
-        var m = { "paddock20auto@gmail.com": "Gavin", "gavin@paddock20.com": "Gavin",
-                  "bekah@paddock20.com": "Bekah", "bekahstallard@gmail.com": "Bekah" };
-        return m[String(email).toLowerCase()] || String(email).split("@")[0];
+        var k = String(email).toLowerCase();
+        return NAMES[k] || k.split("@")[0];
+      }
+      async function loadNames() {
+        try {
+          var r = await db.from("staff_allowlist").select("email,name");
+          if (r.error || !r.data) return;
+          r.data.forEach(function (x) {
+            if (x.name) NAMES[String(x.email).toLowerCase()] = x.name;
+          });
+        } catch (e) {}
       }
       function itemsFor(panel) {
         return (LIVE.wb || []).filter(function (x) { return x.panel === panel; })
@@ -1066,6 +1078,7 @@
           staff = await isStaff(db);
         } catch (e) { staff = false; }
         if (!staff) return;
+        await loadNames();
         try {
           var subs = await db.from("submissions").select("type,status");
           subs.error || (LIVE.subs = subs.data);
