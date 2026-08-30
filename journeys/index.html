@@ -290,7 +290,7 @@
         <div class="head glass">
           <img src="/brand/pg-mark.png" alt="PaddockGavin" />
           <h1 class="display">The <span class="a">Ledger</span></h1>
-          <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span><span class="lbl">&nbsp;view</span></span>
+          <span class="mode" id="mode"><span class="d"></span><span id="modeTxt">Public</span><span class="lbl">&nbsp;view</span></span><span class="lbl" id="fresh" style="opacity:.62;margin-left:10px">updated&nbsp;<span id="freshAt">&middot;&middot;</span></span>
         </div>
         <p class="sub">
           One page for the whole event. Every visitor journey, then the dated plan, the money,
@@ -1328,15 +1328,19 @@
       /* ---------- live data ---------- */
       async function loadPublic() {
         if (!db) return;
-        try {
-          var r = await db.rpc("public_stats", {});
+        var pr = await Promise.allSettled([
+          db.rpc("public_stats", {}),
+          db.from("map_features").select("kind,status,geometry").eq("event_id", EVENT_ID),
+        ]);
+        if (pr[0].status === "fulfilled") {
+          var r = pr[0].value;
           var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
           if (row) LIVE.stats = row;
-        } catch (e) {}
-        try {
-          var mf = await db.from("map_features").select("kind,status,geometry").eq("event_id", EVENT_ID);
+        }
+        if (pr[1].status === "fulfilled") {
+          var mf = pr[1].value;
           mf.error || (LIVE.features = mf.data);
-        } catch (e) {}
+        }
       }
       var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
       /* Staff is decided by public.staff_allowlist, never by a list in this
@@ -1363,53 +1367,78 @@
         // Display gate only: RLS enforces the real boundary server-side.
         // Anonymous sessions carry the authenticated role, so detection must
         // key off the signed-in email, not query errors.
-        try {
-          staff = await isStaff(db);
-        } catch (e) { staff = false; }
+        /* One round trip, not one per tick. Once a session is staff it stays
+           staff; while it is not we keep asking, so signing in takes effect on
+           the next tick rather than on a reload. */
+        if (!staff) {
+          try { staff = await isStaff(db); } catch (e) { staff = false; }
+        }
         if (!staff) return;
-        await loadNames();
-        try {
-          var subs = await db.from("submissions").select("type,status");
-          subs.error || (LIVE.subs = subs.data);
-        } catch (e) {}
-        try {
-          var a = await db.from("accounts").select("type,status,company,category,pipeline_stage,note").order("sort");
-          a.error || (LIVE.accounts = a.data);
-          var p = await db.from("payments").select("status,amount_cents");
-          p.error || (LIVE.payments = p.data);
+        /* Seventeen queries used to run one after another inside a single try.
+           Two faults in that: at 142ms a round trip it cost three seconds of
+           waterfall before a number appeared, and one failing table silently
+           took every query below it with it, leaving most of the dashboard
+           blank with nothing said.
+
+           allSettled fixes both. One round trip instead of seventeen, and a
+           table that fails takes only itself down. */
+        var Q = [
+          ["names", loadNames()],
+          ["subs", db.from("submissions").select("type,status")],
+          ["accounts", db.from("accounts").select("type,status,company,category,pipeline_stage,note").order("sort")],
+          ["payments", db.from("payments").select("status,amount_cents")],
           /* id and notes as well, so a decision can name the milestone it holds up */
-          var d = await db.from("open_decisions").select("id,label,status,notes").order("sort_order");
-          d.error || (LIVE.decisions = d.data);
-          var ms = await db.from("milestones").select("*").order("due");
-          ms.error || (LIVE.milestones = ms.data);
-          var bg = await db.from("budget_items").select("*").order("sort_order");
-          bg.error || (LIVE.budget = bg.data);
-          var rs = await db.from("staff_roster").select("*").order("id");
-          rs.error || (LIVE.roster = rs.data);
-          var aw = await db.from("awards").select("id,name,kind,state,sort").order("sort");
-          aw.error || (LIVE.awards = aw.data);
-          var jg = await db.from("judges").select("id,name,status");
-          jg.error || (LIVE.judges = jg.data);
-          var vs = await db.from("volunteer_shifts").select("id,role,post,needed,starts_at").order("starts_at");
-          vs.error || (LIVE.shifts = vs.data);
-          var va = await db.from("volunteer_assignments").select("shift_id,volunteer_id,status");
-          va.error || (LIVE.assigns = va.data);
-          var vv = await db.from("volunteers").select("id,name,status");
-          vv.error || (LIVE.volunteers = vv.data);
-          var ct = await db.from("categories").select("id,name,domain,sort").order("sort");
-          ct.error || (LIVE.categories = ct.data);
-          var cd = await db.from("account_candidates").select("id,category_id,status");
-          cd.error || (LIVE.candidates = (cd.data || []).filter(function (x) { return x.category_id != null; }));
-          var sp = await db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25);
-          sp.error || (LIVE.spectators = sp.data);
-          var cs = await db.from("club_submissions").select("status,vehicle_count,club_id");
-          if (!cs.error && cs.data) {
-            var cl = await db.from("clubs").select("id,club_name");
-            var names = {};
-            ((cl && cl.data) || []).forEach(function (c) { names[c.id] = c.club_name; });
-            LIVE.clubs = cs.data.map(function (x) { return { status: x.status, vehicle_count: x.vehicle_count, club_name: names[x.club_id] || "Club" }; });
-          }
-        } catch (e) {}
+          ["decisions", db.from("open_decisions").select("id,label,status,notes").order("sort_order")],
+          ["milestones", db.from("milestones").select("*").order("due")],
+          ["budget", db.from("budget_items").select("*").order("sort_order")],
+          ["roster", db.from("staff_roster").select("*").order("id")],
+          ["awards", db.from("awards").select("id,name,kind,state,sort").order("sort")],
+          ["judges", db.from("judges").select("id,name,status")],
+          ["shifts", db.from("volunteer_shifts").select("id,role,post,needed,starts_at").order("starts_at")],
+          ["assigns", db.from("volunteer_assignments").select("shift_id,volunteer_id,status")],
+          ["volunteers", db.from("volunteers").select("id,name,status")],
+          ["categories", db.from("categories").select("id,name,domain,sort").order("sort")],
+          ["candidates", db.from("account_candidates").select("id,category_id,status")],
+          ["spectators", db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25)],
+          ["clubSubs", db.from("club_submissions").select("status,vehicle_count,club_id")],
+          ["clubNames", db.from("clubs").select("id,club_name")],
+        ];
+        var settled = await Promise.allSettled(Q.map(function (q) { return q[1]; }));
+        var got = {};
+        var failed = [];
+        settled.forEach(function (s, i) {
+          var key = Q[i][0];
+          if (s.status !== "fulfilled") { failed.push(key); return; }
+          var r = s.value;
+          if (r && r.error) { failed.push(key); return; }
+          got[key] = r && r.data;
+        });
+        if (failed.length) console.warn("[ledger] tables that did not load:", failed.join(", "));
+
+        got.subs && (LIVE.subs = got.subs);
+        got.accounts && (LIVE.accounts = got.accounts);
+        got.payments && (LIVE.payments = got.payments);
+        got.decisions && (LIVE.decisions = got.decisions);
+        got.milestones && (LIVE.milestones = got.milestones);
+        got.budget && (LIVE.budget = got.budget);
+        got.roster && (LIVE.roster = got.roster);
+        got.awards && (LIVE.awards = got.awards);
+        got.judges && (LIVE.judges = got.judges);
+        got.shifts && (LIVE.shifts = got.shifts);
+        got.assigns && (LIVE.assigns = got.assigns);
+        got.volunteers && (LIVE.volunteers = got.volunteers);
+        got.categories && (LIVE.categories = got.categories);
+        got.candidates && (LIVE.candidates = got.candidates.filter(function (x) { return x.category_id != null; }));
+        got.spectators && (LIVE.spectators = got.spectators);
+        /* The club join happens here rather than in a second round trip: both
+           tables were fetched above, so this is memory work, not network. */
+        if (got.clubSubs) {
+          var names = {};
+          (got.clubNames || []).forEach(function (c) { names[c.id] = c.club_name; });
+          LIVE.clubs = got.clubSubs.map(function (x) {
+            return { status: x.status, vehicle_count: x.vehicle_count, club_name: names[x.club_id] || "Club" };
+          });
+        }
         var m = document.getElementById("mode");
         m.classList.add("staff");
         document.getElementById("modeTxt").textContent = "Staff · live";
@@ -1421,6 +1450,10 @@
       }
       async function loadWorkbench() {
         if (!db || !staff) return;
+        /* Both requests leave together. The feed is not needed to decide whether
+           the items loaded, so awaiting it second costs nothing. */
+        var WB_FEED = db.from("workbench_activity").select("*").eq("event_id", EVENT_ID)
+          .order("at", { ascending: false }).limit(60);
         try {
           var w = await db.from("workbench_items").select("*").eq("event_id", EVENT_ID).order("sort");
           if (w.error) {
@@ -1434,8 +1467,7 @@
           LIVE.wb = w.data || [];
         } catch (e) { return; }
         try {
-          var a = await db.from("workbench_activity").select("*").eq("event_id", EVENT_ID)
-            .order("at", { ascending: false }).limit(60);
+          var a = await WB_FEED;
           a.error || (LIVE.feed = a.data || []);
         } catch (e) {}
         // Repaint only when it cannot steal a caret or overwrite an unsaved edit.
@@ -1445,10 +1477,13 @@
         refreshPills();
       }
       async function tick() {
-        await loadPublic();
-        await loadStaff();
+        // Public and staff share nothing, so they go together. The workbench
+        // waits only because it needs to know whether this session is staff.
+        await Promise.allSettled([loadPublic(), loadStaff()]);
         await loadWorkbench();
         refreshPills();
+        var s = document.getElementById("freshAt");
+        if (s) s.textContent = new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
       }
       // Never lose an edit to a closing tab.
       window.addEventListener("beforeunload", function (e) {
