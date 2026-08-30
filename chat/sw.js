@@ -7,14 +7,14 @@
  * every API call goes to the network and fails loudly rather than serving a
  * stale conversation that looks live.
  */
-var SHELL = "ranch-chat-shell-v3";
+var SHELL = "ranch-chat-shell-v4";
 var FILES = [
   "/chat/",
   "/chat/index.html",
   "/chat/manifest.webmanifest",
   "/brand/pg-mark.png",
-  "/brand/pg-icon-192.png",
-  "/brand/pg-icon-512.png",
+  "/brand/rj-icon-192.png",
+  "/brand/rj-icon-512.png",
 ];
 
 self.addEventListener("install", function (e) {
