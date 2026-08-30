@@ -53,6 +53,9 @@
       .swatchbox .meta b { display: block; font-size: 14px; color: #fff; }
       .swatchbox .meta span { font-family: var(--mono); font-size: 11px; color: var(--mute); }
       .ramp { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--gline); }
+      /* Six swatches across a phone is 65px each, and every one of them holds
+         a seven character hex code. Three across gives it room. */
+      @media (max-width: 560px) { .ramp { grid-template-columns: repeat(3, 1fr); } }
       .ramp div { padding: 18px 8px 14px; text-align: center; }
       .ramp b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; }
       .ramp span { display: block; font-family: var(--mono); font-size: 9.5px; opacity: .78; margin-top: 3px; }
