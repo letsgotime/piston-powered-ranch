@@ -1,25 +1,62 @@
 {
   "name": "Ranch Team",
   "short_name": "Ranch Team",
-  "description": "The toolset for The Piston Powered Ranch. The Ledger, Targets, the Console and everything behind the Team rail.",
+  "description": "The toolset for The Piston Powered Ranch. Journeys, Targets, the Console and everything behind the Team rail.",
   "id": "/team.webmanifest",
   "start_url": "/journeys/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
   "orientation": "portrait-primary",
   "background_color": "#0A1523",
   "theme_color": "#0A1523",
-  "categories": ["productivity", "business"],
+  "categories": [
+    "productivity",
+    "business"
+  ],
   "icons": [
-    { "src": "/brand/rj-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/brand/rj-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/brand/rj-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/brand/rj-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/rj-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/rj-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "The Ledger", "url": "/journeys/", "description": "The whole plan, every job, in order" },
-    { "name": "Targets", "url": "/targets/", "description": "Who we are chasing" },
-    { "name": "Console", "url": "/console/", "description": "Entries, accounts and the run of show" },
-    { "name": "Chat", "url": "/chat/", "description": "The team conversation" }
+    {
+      "name": "Journeys",
+      "url": "/journeys/",
+      "description": "The whole plan, every job, in order"
+    },
+    {
+      "name": "Targets",
+      "url": "/targets/",
+      "description": "Who we are chasing"
+    },
+    {
+      "name": "Console",
+      "url": "/console/",
+      "description": "Entries, accounts and the run of show"
+    },
+    {
+      "name": "Chat",
+      "url": "/chat/",
+      "description": "The team conversation"
+    }
   ]
 }

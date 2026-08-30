@@ -2,9 +2,9 @@
  * The team rail.
  *
  * Every staff tool was built as its own page with its own design, and that was
- * right: the board, the Ledger, the map and the awards want different shapes.
+ * right: the board, Journeys, the map and the awards want different shapes.
  * What they never had was a shared edge, so moving between them meant knowing
- * the URL or going back through the Ledger.
+ * the URL or going back through Journeys.
  *
  * This adds one: a glass rail down the left on a laptop, a pill at the top on a
  * phone, carrying every destination and live counts of the three things that
@@ -25,7 +25,7 @@ var W = 60, WIDE = 208;
 
 /* label, href, glyph, and which badge it carries */
 var NAV = [
-  ["The Ledger", "/ledger", "M4 5h16M4 12h16M4 19h10", "decisions"],
+  ["Journeys", "/journeys/", "M4 5h16M4 12h16M4 19h10", "decisions"],
   ["Console", "/console/", "M4 6h16v12H4z M8 10h8 M8 14h5", "queue"],
   ["Targets", "/targets/", "M12 3v18 M3 12h18 M12 7a5 5 0 100 10 5 5 0 000-10z", "empty"],
   ["Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
@@ -56,10 +56,10 @@ var NAV = [
 var FOCUS = {
   Owner: null,
   /* Oscar owns the ground. The land, who is standing on it, and the plan. */
-  "Property Owner": ["/ledger", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
+  "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
   /* Bekah carries the brand and everyone we are talking to. */
   "Brand Director": ["/console/", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
-  /* Arnie and Josh work the chase and the day itself. The Ledger sits below
+  /* Arnie and Josh work the chase and the day itself. Journeys sits below
      the divider for them rather than being hidden: they can open it, and the
      money columns are withheld by can_see_money() rather than by this file. */
   Member: ["/targets/", "/crew/", "/board/", "/asks/", "/chat/"],
@@ -169,10 +169,9 @@ scrim.className = "tScrim";
 
 function here(href) {
   var p = location.pathname;
-  /* The Ledger answers on two paths: /ledger, which is what it is called, and
-     /journeys/, which is what the directory was named before the label settled.
-     Both highlight, so the rail is right whichever way somebody arrived. */
-  if (href === "/ledger") return p.indexOf("/ledger") === 0 || p.indexOf("/journeys") === 0;
+  /* Journeys answers on both paths: /journeys/, which is the name, and /ledger,
+     which was briefly the label. Both highlight, so an old link is not punished. */
+  if (href === "/journeys/") return p.indexOf("/journeys") === 0 || p.indexOf("/ledger") === 0;
   return p.indexOf(href) === 0;
 }
 
