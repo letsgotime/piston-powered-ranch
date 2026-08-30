@@ -105,7 +105,7 @@ phase.
 
 ## Decisions Gavin owes the build (defaults in effect)
 
-1. Platform domain (default: pistonpoweredranch.com until chosen;
+1. Platform domain (default: piston-powered-ranch.vercel.app until chosen;
    new domain requires a Neon Auth trusted origin). Note: paddockgavin.com is
    already owned and verified for sending in Resend, making it the natural
    candidate; pointing it at this Vercel project is a dashboard action plus
