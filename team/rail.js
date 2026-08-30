@@ -17,7 +17,7 @@
  * renders nothing at all, which is why it is safe on pages that also have a
  * public face.
  */
-import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
 
 var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 var AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
