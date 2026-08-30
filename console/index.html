@@ -3356,7 +3356,7 @@
         createClient,
         SupabaseAuthAdapter,
       } from "/vendor/neon-js.js";
-      import { upload as __blobUpload } from "https://esm.sh/@vercel/blob@2.8.0/client";
+      import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
       try {
         ((window.__pgdb = createClient({
