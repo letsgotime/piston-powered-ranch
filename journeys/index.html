@@ -442,7 +442,8 @@
           return { e: "Entry point", t: "The /show landing", body:
             stat("Live countdown", "ticking") + stat("Reel slots filled", "drop files in show/reels") +
             (LIVE.stats ? stat("RSVPs so far", LIVE.stats.spectator_rsvps, true) : "") +
-            acts('<a class="primary" href="/show/">Open /show</a>' + copyBtn("Copy share link", ORIGIN + "/show/")) };
+            acts('<a class="primary" href="https://paddockgavin.com/events/pistonpoweredranch" target="_blank" rel="noopener">Open the event page</a>' +
+              copyBtn("Copy the public link", "https://paddockgavin.com/events/pistonpoweredranch")) };
         },
         rsvp: function () {
           var extra = "";

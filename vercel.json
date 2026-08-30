@@ -2,10 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/show/index.html"
-    },
-    {
       "source": "/rancho",
       "destination": "/collateral/index.html"
     },
@@ -27,6 +23,33 @@
           "value": "public, max-age=3600, must-revalidate"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://paddockgavin.com/events/pistonpoweredranch",
+      "permanent": true
+    },
+    {
+      "source": "/show",
+      "destination": "https://paddockgavin.com/events/pistonpoweredranch",
+      "permanent": true
+    },
+    {
+      "source": "/show/",
+      "destination": "https://paddockgavin.com/events/pistonpoweredranch",
+      "permanent": true
+    },
+    {
+      "source": "/events",
+      "destination": "https://paddockgavin.com/events",
+      "permanent": true
+    },
+    {
+      "source": "/events/",
+      "destination": "https://paddockgavin.com/events",
+      "permanent": true
     }
   ]
 }

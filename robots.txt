@@ -1,4 +1,15 @@
+# This domain is infrastructure, not a brand surface.
+#
+# The event lives at paddockgavin.com/events/pistonpoweredranch, and that is
+# the only URL that should ever rank. What remains here is the submission
+# form, the club application, the RSVP and the staff tools. They need to be
+# reachable, they do not need to be indexed, and each carries its own noindex.
+#
+# There is deliberately no Sitemap line: this domain used to advertise /,
+# /events/ and /spectate/ while every page on it carried a canonical pointing
+# somewhere else, which told search engines two opposite things at once.
+
 User-agent: *
 Allow: /
 Disallow: /collateral/
-Sitemap: https://piston-powered-ranch.vercel.app/sitemap.xml
+Disallow: /console/planning/
