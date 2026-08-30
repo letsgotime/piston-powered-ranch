@@ -15,9 +15,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Ranch Chat" />
     <meta name="application-name" content="Ranch Chat" />
-    <link rel="preload" as="image"
-      imagesrcset="/img/chat-900.webp 900w, /img/chat-1600.webp 1600w"
-      imagesizes="100vw" href="/img/chat-1600.webp" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
@@ -38,10 +35,13 @@
         font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow: hidden;
       }
       /* the dark horse in the stall, which sits behind a dark interface without fighting it. */
-      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden;
-        background-color: var(--bg); background-image: url("/img/chat-900.webp");
-        background-size: cover; background-position: center; }
-      @media (min-width: 760px) { .ground { background-image: url("/img/chat-1600.webp"); } }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; background-color: var(--bg); }
+      /* A real element, not a CSS background: the preload scanner finds
+         it in the markup and picks one width, where a background image
+         waits for the stylesheet and a preload link fetched the wrong
+         file alongside it. */
+      .ground .shot { position: absolute; inset: 0; width: 100%; height: 100%;
+        object-fit: cover; display: block; }
 
       .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
       .ground i:nth-child(1) { width: 56vw; height: 56vw; left: -16vw; top: -22vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .14; }
@@ -302,7 +302,7 @@
     </style>
   </head>
   <body>
-    <div class="ground" aria-hidden="true"><i></i><i></i><i></i><u></u></div>
+    <div class="ground" aria-hidden="true"><img class="shot" alt="" fetchpriority="high" decoding="async" src="/img/chat-1600.webp" srcset="/img/chat-900.webp 900w, /img/chat-1600.webp 1600w" sizes="100vw" /><i></i><i></i><i></i><u></u></div>
     <div class="rule"></div>
     <div class="app" id="app">
       <aside class="glass side">
