@@ -520,7 +520,8 @@
           return { e: "Vendors · money", t: "The $250 deposit", body:
             stat("Amount", "$250, standard 10x10") + stat("Mode", "Sandbox until live keys") +
             "<p style='margin-top:10px'>Send the payment link with an approval; the webhook books it the moment it clears.</p>" +
-            acts(copyBtn("Copy deposit link", "https://buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a")) };
+            acts(copyBtn("Copy TEST deposit link", "https://buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a")) +
+            "<p style='margin-top:8px;color:var(--amber);font-size:13px'>This is a sandbox link. Money does not move. Do not send it to a vendor until the live key is in and this line is gone.</p>" };
         },
         ledger: function () {
           var paid = LIVE.payments ? LIVE.payments.filter(function (x) { return x.status === "paid"; }) : null;

@@ -25,7 +25,7 @@ var W = 60, WIDE = 208;
 
 /* label, href, glyph, and which badge it carries */
 var NAV = [
-  ["The Ledger", "/journeys/", "M4 5h16M4 12h16M4 19h10", "decisions"],
+  ["The Ledger", "/ledger", "M4 5h16M4 12h16M4 19h10", "decisions"],
   ["Console", "/console/", "M4 6h16v12H4z M8 10h8 M8 14h5", "queue"],
   ["Targets", "/targets/", "M12 3v18 M3 12h18 M12 7a5 5 0 100 10 5 5 0 000-10z", "empty"],
   ["Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
@@ -56,7 +56,7 @@ var NAV = [
 var FOCUS = {
   Owner: null,
   /* Oscar owns the ground. The land, who is standing on it, and the plan. */
-  "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
+  "Property Owner": ["/ledger", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
   /* Bekah carries the brand and everyone we are talking to. */
   "Brand Director": ["/console/", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
   /* Arnie and Josh work the chase and the day itself. The Ledger sits below
@@ -169,7 +169,10 @@ scrim.className = "tScrim";
 
 function here(href) {
   var p = location.pathname;
-  if (href === "/journeys/") return p.indexOf("/journeys") === 0;
+  /* The Ledger answers on two paths: /ledger, which is what it is called, and
+     /journeys/, which is what the directory was named before the label settled.
+     Both highlight, so the rail is right whichever way somebody arrived. */
+  if (href === "/ledger") return p.indexOf("/ledger") === 0 || p.indexOf("/journeys") === 0;
   return p.indexOf(href) === 0;
 }
 

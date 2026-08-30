@@ -12,6 +12,14 @@
     {
       "source": "/hq/",
       "destination": "/journeys/index.html"
+    },
+    {
+      "source": "/ledger",
+      "destination": "/journeys/index.html"
+    },
+    {
+      "source": "/ledger/",
+      "destination": "/journeys/index.html"
     }
   ],
   "headers": [
