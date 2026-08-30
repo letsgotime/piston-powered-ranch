@@ -40,13 +40,38 @@ var NAV = [
   ["Chat", "/chat/", "M21 11.5a8.4 8.4 0 01-9 8.4 9.9 9.9 0 01-3.8-.7L3 21l1.9-4.9A8.3 8.3 0 013.6 11.5a8.4 8.4 0 019-8.4 8.4 8.4 0 018.4 8.4z", "chat"],
 ];
 
+/* Who owns what, in the order that person should meet it.
+ *
+ * This ranks attention. It does not remove access: anything not listed for a
+ * role still appears below a divider, because at six in the morning on the
+ * tenth somebody will need a page that is not theirs, and a menu that hid it
+ * would be a menu they route around. Thinner, not weaker.
+ *
+ * Owner is deliberately null: Gavin carries all of it, so splitting his rail
+ * would be pretending otherwise.
+ *
+ * Roles come from public.staff_allowlist, the same table is_staff() reads, so
+ * the menu and the row level policies can never disagree about who someone is.
+ */
+var FOCUS = {
+  Owner: null,
+  /* Oscar owns the ground. The land, who is standing on it, and the plan. */
+  "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
+  /* Bekah carries the brand and everyone we are talking to. */
+  "Brand Director": ["/console/", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
+  /* Arnie and Josh work the chase and the day itself. The Ledger sits below
+     the divider for them rather than being hidden: they can open it, and the
+     money columns are withheld by can_see_money() rather than by this file. */
+  Member: ["/targets/", "/crew/", "/board/", "/asks/", "/chat/"],
+};
+
 /* The chat runs inside the floating dock's iframe. A rail in there would be a
    rail inside a panel inside a page, so it stops before it builds anything. */
 if (window.self !== window.top || location.search.indexOf("embed=1") > -1) {
   throw new Error("team rail: not in an embedded frame");
 }
 
-var db = null, counts = {}, me = "", people = {};
+var db = null, counts = {}, me = "", role = "", people = {};
 
 try {
   db = createClient({
@@ -88,6 +113,18 @@ css.textContent = [
   ".tRail a b.at{background:#f8b800;color:#2a1e00}",
   ".tRail a b.warn{background:#e5484d;color:#fff}",
   ".tRail:hover a b,.tRail:focus-within a b{left:auto;right:14px;top:13px}",
+  /* Group headings. Collapsed to a hairline when the rail is narrow, so the
+     icons stay evenly spaced and the words appear with everything else. */
+  ".tRail .tGrp{margin:14px 0 5px;padding:0 0 0 2px;font:700 9px/1 Archivo,system-ui,sans-serif;",
+  "letter-spacing:.18em;text-transform:uppercase;color:#5d6875;white-space:nowrap;",
+  "opacity:0;transition:opacity .16s ease}",
+  ".tRail .tGrp:first-child{margin-top:2px}",
+  ".tRail:hover .tGrp,.tRail:focus-within .tGrp{opacity:1}",
+  /* Narrow rail: a rule instead of a word, so the split still reads. */
+  ".tRail .tGrp::after{content:\"\";display:block;height:1px;background:rgba(255,255,255,.13);",
+  "margin-top:5px}",
+  ".tRail .tMe i{display:block;font:600 9.5px/1.5 Archivo,system-ui,sans-serif;font-style:normal;",
+  "letter-spacing:.13em;text-transform:uppercase;color:#5d6875}",
   ".tRail .tMe{flex:0 0 auto;display:flex;align-items:center;gap:11px;padding:11px 0 ",
   "calc(11px + env(safe-area-inset-bottom));padding-left:17px;",
   "border-top:1px solid rgba(255,255,255,.09);white-space:nowrap}",
@@ -143,15 +180,36 @@ function paint() {
     var cls = kind === "chat" ? (counts.mentioned ? " at" : "") : kind === "empty" || kind === "short" ? " warn" : " at";
     return "<b class='" + cls.trim() + "'>" + (n > 99 ? "99+" : n) + "</b>";
   };
+  var link = function (n) {
+    return "<a href='" + n[1] + "'" + (here(n[1]) ? " class='here'" : "") + " title='" + n[0] + "'>" +
+      "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' " +
+      "stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='" + n[2] + "'/></svg>" +
+      "<span>" + n[0] + "</span>" + (n[3] ? badge(n[3]) : "") + "</a>";
+  };
+
+  /* Rank by responsibility. An unknown role falls through to the full list
+     rather than to an empty rail: failing open is right for navigation, where
+     failing closed strands somebody mid job. */
+  var want = Object.prototype.hasOwnProperty.call(FOCUS, role) ? FOCUS[role] : null;
+  var body;
+  if (!want) {
+    body = NAV.map(link).join("");
+  } else {
+    var mine = [];
+    want.forEach(function (href) {
+      NAV.forEach(function (n) { if (n[1] === href) mine.push(n); });
+    });
+    var rest = NAV.filter(function (n) { return want.indexOf(n[1]) === -1; });
+    body =
+      "<p class='tGrp'>Yours</p>" + mine.map(link).join("") +
+      (rest.length ? "<p class='tGrp'>Everything else</p>" + rest.map(link).join("") : "");
+  }
+
   rail.innerHTML =
     "<div class='tTop'><img src='/brand/pg-mark.png' alt='' /><span class='tWord'>The Ranch</span></div><nav>" +
-    NAV.map(function (n) {
-      return "<a href='" + n[1] + "'" + (here(n[1]) ? " class='here'" : "") + " title='" + n[0] + "'>" +
-        "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' " +
-        "stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='" + n[2] + "'/></svg>" +
-        "<span>" + n[0] + "</span>" + (n[3] ? badge(n[3]) : "") + "</a>";
-    }).join("") +
-    "</nav><div class='tMe'>" + avatar() + "<span>" + esc(nameOf(me)) + "</span></div>";
+    body +
+    "</nav><div class='tMe'>" + avatar() + "<span>" + esc(nameOf(me)) +
+    (role ? "<i>" + esc(role) + "</i>" : "") + "</span></div>";
 
   var tot = (counts.decisions || 0) + (counts.chat || 0) + (counts.short || 0);
   pill.innerHTML = "<span>Team</span>" + (tot ? "<b>" + (tot > 99 ? "99+" : tot) + "</b>" : "");
@@ -202,6 +260,15 @@ async function load() {
   if (window.innerWidth > 900) document.body.style.paddingLeft = W + "px";
 
   me = (await rpc("me", tok)) || "";
+  /* One row, the signed in person's. RLS on staff_allowlist already limits
+     this to staff, so a filter here is for bytes rather than for safety. */
+  try {
+    var al = await db.from("staff_allowlist").select("email,role");
+    var mine = (al.data || []).filter(function (x) {
+      return String(x.email).toLowerCase() === String(me).toLowerCase();
+    })[0];
+    role = (mine && mine.role) || "";
+  } catch (e) { role = ""; }
   try {
     var pr = await db.from("profiles").select("email,full_name,avatar_path");
     (pr.data || []).forEach(function (x) { people[String(x.email).toLowerCase()] = x; });
