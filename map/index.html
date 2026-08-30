@@ -382,10 +382,39 @@
         .fart .sig.draw, .cb.pop, .pi.pop, .cb.flip .num, .fart .leader,
         .fart .zg.st-open .zn-glow, .ticker .msg { animation: none; }
       }
+      /* ---- surface and tyre card ---- */
+      #surfaceCard { position: absolute; left: 16px; bottom: 16px; z-index: 620; width: min(320px, calc(100vw - 32px));
+        background: rgba(10,21,35,.9); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+        border: 1px solid rgba(255,255,255,.14); border-radius: 14px; overflow: hidden;
+        box-shadow: 0 14px 40px rgba(0,0,0,.45); font-family: var(--arch, Archivo, system-ui, sans-serif); }
+      #surfaceToggle { width: 100%; display: block; text-align: left; cursor: pointer; border: 0;
+        background: rgba(255,255,255,.05); color: #EDF1F6; font: 700 10.5px/1 inherit;
+        letter-spacing: .18em; text-transform: uppercase; padding: 12px 14px; }
+      #surfaceToggle:hover { background: rgba(255,255,255,.1); }
+      #surfaceRead { padding: 13px 15px 15px; }
+      #surfaceCard[data-shut="1"] #surfaceRead { display: none; }
+      .srHead { font: 800 15.5px/1.25 inherit; color: #00D2BE; margin-bottom: 10px; }
+      .srRow { display: flex; align-items: baseline; gap: 8px; padding: 5px 0;
+        border-bottom: 1px solid rgba(255,255,255,.08); }
+      .srRow:last-of-type { border-bottom: 0; }
+      .srRow span { flex: 0 0 62px; font: 600 9.5px/1 inherit; letter-spacing: .14em;
+        text-transform: uppercase; color: #7f8a99; }
+      .srRow b { font: 800 16px/1 inherit; color: #EDF1F6; font-variant-numeric: tabular-nums; }
+      .srRow i { margin-left: auto; font: 500 9.5px/1 inherit; font-style: normal; letter-spacing: .1em;
+        text-transform: uppercase; color: #5d6875; }
+      .srNote { margin: 11px 0 0; font: 400 13.5px/1.55 inherit; color: #a9b4c2; }
+      .srFoot { margin: 9px 0 0; font: 400 11.5px/1.5 inherit; color: #6b7684; }
+      @media (max-width: 640px) { #surfaceCard { left: 10px; right: 10px; bottom: 10px; width: auto; } }
     </style>
   </head>
   <body>
     <div id="theMap"></div>
+    <!-- Surface and tyres. Sits over the map because it describes the road you
+         are looking at, and collapses on a phone so it never eats the map. -->
+    <aside id="surfaceCard" aria-label="Surface conditions">
+      <button type="button" id="surfaceToggle" aria-expanded="true">Surface &amp; tyres</button>
+      <div id="surfaceRead"><div class="srHead">Reading the road&hellip;</div></div>
+    </aside>
 
     <!-- field mode: its own Leaflet world, always filterable -->
     <div class="fwrap program" id="fwrap">
@@ -574,6 +603,8 @@
 
       /* ---------- nav engine adapter: Google when keyed, Leaflet fallback ---------- */
       var ENGINE = { kind: null, map: null, api: null };
+      var ROUTE_LAYER = null;
+      var ENGINE_ROUTES = null;
       var rvLayerItems = [], meLayer = null, pinItem = null, routeRenderer = null, trafficLayer = null;
 
       function engineTag(t) { document.getElementById("engineTag").innerHTML = t; }
@@ -696,12 +727,49 @@
 
       async function bootLeaflet() {
         var L = await getLeaflet();
+        var DRIVE = await import("/map/drive.js");
         var map = L.map("theMap", { zoomControl: false }).setView([PPR.lat, PPR.lng], 15);
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19, attribution: "Imagery © Esri · © OpenStreetMap contributors" }).addTo(map);
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19 }).addTo(map);
+
+        /* Four bases, because one is never right for two jobs. Satellite reads
+           the field; a coloured route only reads against greyscale; dark is for
+           a phone at dawn; roads is for anyone actually navigating. */
+        var BASES = DRIVE.baseLayers(L);
+        BASES.Satellite.addTo(map);
+        var LABELS = DRIVE.labelLayer(L).addTo(map);
+        L.control.layers(BASES, { Labels: LABELS }, { position: "topright", collapsed: true }).addTo(map);
+        /* Labels belong over imagery and are noise over a drawn base. */
+        map.on("baselayerchange", function (e) {
+          if (e.name === "Satellite") { if (!map.hasLayer(LABELS)) LABELS.addTo(map); }
+          else if (map.hasLayer(LABELS)) map.removeLayer(LABELS);
+        });
         L.control.zoom({ position: "bottomright" }).addTo(map);
+
+        /* Surface and tyres. One measured number, one modelled, one derived,
+           and the panel says which is which rather than presenting three
+           figures as if they carry the same weight. */
+        DRIVE.surfaceRead(PPR.lat, PPR.lng).then(function (s) {
+          var el = document.getElementById("surfaceRead");
+          if (!el) return;
+          var tone = s.tyre.level === "stop" ? "#EF6D70" : s.tyre.level === "caution" ? "#F8B800" : "#00D2BE";
+          el.innerHTML =
+            '<div class="srHead" style="color:' + tone + '">' + s.tyre.head + "</div>" +
+            '<div class="srRow"><span>Air</span><b>' + (s.air == null ? "&middot;&middot;" : s.air + "&deg;F") + "</b><i>measured</i></div>" +
+            '<div class="srRow"><span>Ground</span><b>' + (s.ground == null ? "&middot;&middot;" : s.ground + "&deg;F") + "</b><i>modelled</i></div>" +
+            '<div class="srRow"><span>Asphalt</span><b>' + (s.asphalt == null ? "&middot;&middot;" : "~" + s.asphalt + "&deg;F") + "</b><i>derived</i></div>" +
+            '<p class="srNote">' + s.tyre.note + "</p>" +
+            '<p class="srFoot">Asphalt is an estimate from air temperature and how much sun is landing. No public sensor reports the temperature of a given road, so anything that claims to know it is guessing too. It is good enough to tell you your tyres will be cold at eight in the morning.</p>';
+        }).catch(function () {});
+
+        /* Routes are offered, not drawn on load: a line across the map before
+           somebody has said where they are starting is decoration. */
+        ENGINE_ROUTES = function (from) {
+          return DRIVE.routes(from, { lat: PPR.lat, lng: PPR.lng }).then(function (set) {
+            if (ROUTE_LAYER) map.removeLayer(ROUTE_LAYER);
+            ROUTE_LAYER = DRIVE.drawRoutes(L, map, set);
+            map.fitBounds(ROUTE_LAYER.getBounds ? ROUTE_LAYER.getBounds() : map.getBounds(), { padding: [40, 40] });
+            return set;
+          });
+        };
         ENGINE = { kind: "leaflet", map: map, api: L };
         function icon(px, bg, label) {
           return L.divIcon({ className: "", iconSize: [px, px], iconAnchor: [px / 2, px / 2],
@@ -723,6 +791,16 @@
         ENGINE.addMe = function (lat, lng) { return L.marker([lat, lng], { icon: icon(20, "rgba(77,163,216,1)") }).addTo(map); };
         ENGINE.route = null; ENGINE.clearRoute = function () {}; ENGINE.traffic = null; ENGINE.autocomplete = null;
       }
+
+      (function () {
+        var b = document.getElementById("surfaceToggle"), c = document.getElementById("surfaceCard");
+        if (!b || !c) return;
+        b.addEventListener("click", function () {
+          var shut = c.getAttribute("data-shut") === "1";
+          c.setAttribute("data-shut", shut ? "0" : "1");
+          b.setAttribute("aria-expanded", shut ? "true" : "false");
+        });
+      })();
 
       /* ---------- shared telemetry state ---------- */
       var TELEM = { tempF: null, windMph: null, rainPct: null, dayHi: null, dayLo: null, dayRain: null,
