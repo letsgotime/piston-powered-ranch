@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Judging · The Piston Powered Ranch</title>
+    <title>The Awards · The Piston Powered Ranch</title>
     <meta name="description" content="The awards, the panel and the ballots." />
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#070d14" />
@@ -25,12 +25,18 @@
       body { background: var(--bg); color: var(--dim);
         font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
         font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
-      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+      /* the white fence and the drive in evening light. */
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden;
+        background-color: var(--bg); background-image: url("/img/judging-900.webp");
+        background-size: cover; background-position: center; }
+      @media (min-width: 760px) { .ground { background-image: url("/img/judging-1600.webp"); } }
+
       .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
-      .ground i:nth-child(1) { width: 56vw; height: 56vw; left: -15vw; top: -20vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .3; }
-      .ground i:nth-child(2) { width: 62vw; height: 62vw; right: -19vw; top: 22vh; background: radial-gradient(circle, #9b7fe0, transparent 68%); opacity: .2; }
-      .ground i:nth-child(3) { width: 70vw; height: 70vw; left: 6vw; bottom: -33vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .27; }
-      .ground u { position: absolute; inset: 0; display: block; background: linear-gradient(180deg, rgba(7,13,20,.6), rgba(7,13,20,.5) 42%, rgba(7,13,20,.9)); }
+      .ground i:nth-child(1) { width: 56vw; height: 56vw; left: -15vw; top: -20vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .14; }
+      .ground i:nth-child(2) { width: 62vw; height: 62vw; right: -19vw; top: 22vh; background: radial-gradient(circle, #9b7fe0, transparent 68%); opacity: .14; }
+      .ground i:nth-child(3) { width: 70vw; height: 70vw; left: 6vw; bottom: -33vw; background: radial-gradient(circle, #1f6ea8, transparent 70%); opacity: .14; }
+      .ground u { position: absolute; inset: 0; display: block;
+        background: linear-gradient(180deg, rgba(7,13,20,.74), rgba(7,13,20,.56) 34%, rgba(7,13,20,.9)); }
       .rule { position: relative; z-index: 3; height: 4px;
         background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
       .wrap { position: relative; z-index: 2; max-width: 1000px; margin: 0 auto;
@@ -119,12 +125,13 @@
       <div class="glass hero">
         <img src="/brand/pg-mark.png" alt="PaddockGavin" />
         <div class="t">
-          <div class="eyebrow">The Piston Powered Ranch &middot; awards</div>
-          <h1>Seven awards, <span>and a panel</span></h1>
+          <div class="eyebrow">The Piston Powered Ranch &middot; The Awards</div>
+          <h1>The standard, <span>and who holds it</span></h1>
           <p class="stand">
-            Judging opens at eight and closes at one. Awards are read at half one. A panel that can be
-            seen to be fair matters more than a panel that is merely correct, so every ballot here is
-            recorded against the judge who cast it.
+            The panel walks the field from eight. Sheets close at one and the awards are read at half
+            past, in front of the cars. A panel that is seen to be fair carries further than a panel
+            that is merely right, so every ballot on this page is recorded against the judge who
+            cast it, and stays that way.
           </p>
         </div>
         <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
@@ -184,10 +191,7 @@
       /* The field comes from approved vehicle submissions. The details column is
          free form, so this reads what is there and never invents a car. */
       function carName(s) {
-        var d = s.details || {};
-        var bits = [d.year, d.make, d.model].filter(Boolean).join(" ");
-        var num = s.foat_id ? "#" + s.foat_id + " " : "";
-        return num + (bits || d.vehicle || d.car || s.applicant_name || "Entry " + String(s.id).slice(0, 8));
+        return (s.car_number ? "#" + s.car_number + " " : "") + (s.label || "Entry " + s.id);
       }
 
       function myBallot(awardId, rank) {
@@ -319,8 +323,10 @@
         var a = await db.from("awards").select("*").order("sort");
         AWARDS = a.error ? [] : a.data || [];
         if (staff || judge) {
-          var f = await db.from("submissions").select("id,applicant_name,details,foat_id,status,type")
-            .eq("type", "vehicle").eq("status", "approved");
+          /* show_field, not submissions. A judge scores the car, not the
+             owner, and knowing whose car it is invites exactly the bias the
+             panel exists to avoid. */
+          var f = await db.from("show_field").select("*");
           FIELD = f.error ? [] : f.data || [];
           var b = await db.from("ballots").select("*");
           BALLOTS = b.error ? [] : b.data || [];
