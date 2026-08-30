@@ -2324,7 +2324,13 @@
         }
       }
     </style>
-  </head>
+    <link rel="manifest" href="/team.webmanifest" />
+  <meta name="theme-color" content="#0A1523" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ranch Team" />
+  <link rel="apple-touch-icon" href="/brand/rj-icon-192.png" />
+</head>
   <body data-brand="ranch">
     <div class="ground" id="ground"></div>
     <div class="unlock-flash" id="unlockFlash"></div>
@@ -5722,5 +5728,15 @@
       })();
     </script>
       <script type="module" src="/team/rail.js"></script>
+<script>
+  /* Registered at the origin so one install covers the whole Team rail rather
+     than one icon per surface. Failure is silent on purpose: an install is a
+     convenience and must never stop the page working. */
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/team-sw.js", { scope: "/" }).catch(function () {});
+    });
+  }
+</script>
 </body>
 </html>
