@@ -31,6 +31,7 @@ var NAV = [
   ["Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
   ["The Asks", "/asks/", "M9 6h11 M9 12h11 M9 18h11 M4 6h.01 M4 12h.01 M4 18h.01", null],
   ["Crew", "/crew/", "M17 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2 M9.5 6.5a3 3 0 106 0 3 3 0 00-6 0 M22 20v-2a4 4 0 00-3-3.9", "short"],
+  ["Spectators", "/rsvps/", "M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z M12 9a3 3 0 100 6 3 3 0 000-6z", "rsvp"],
   ["The Awards", "/judging/", "M8 4h8v5a4 4 0 01-8 0z M12 13v4 M9 21h6 M5 5h3 M16 5h3", null],
   ["Map", "/map/", "M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z M9 4v14 M15 6v14", null],
   ["Site plan", "/site-plan/", "M4 4h16v16H4z M4 10h16 M10 10v10", null],
@@ -235,6 +236,13 @@ async function load() {
       var hit = {};
       (k.data || []).forEach(function (x) { if (x.category_id != null) hit[x.category_id] = 1; });
       counts.empty = (c.data || []).filter(function (x) { return !hit[x.id]; }).length;
+    }
+  } catch (e) {}
+  try {
+    var sp = await db.from("spectators").select("created_at");
+    if (!sp.error) {
+      var wk = Date.now() - 6048e5;
+      counts.rsvp = (sp.data || []).filter(function (x) { return new Date(x.created_at) > wk; }).length;
     }
   } catch (e) {}
   try {

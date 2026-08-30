@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Spectators · The Piston Powered Ranch</title>
+    <meta name="description" content="Who has said they are coming, and what that means for the food and the restrooms." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#070d14" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/rj-icon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/rj-icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&display=swap" />
+    <style>
+      :root {
+        --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d;
+        --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
+        --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: var(--bg); color: var(--dim);
+        font-family: Archivo, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+        font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; background-color: var(--bg); }
+      .ground .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+      .ground i { position: absolute; display: block; border-radius: 50%; filter: blur(90px); }
+      .ground i:nth-child(2) { width: 58vw; height: 58vw; left: -15vw; top: -21vw; background: radial-gradient(circle, #f8b800, transparent 68%); opacity: .14; }
+      .ground i:nth-child(3) { width: 62vw; height: 62vw; right: -19vw; top: 24vh; background: radial-gradient(circle, #00d2be, transparent 68%); opacity: .14; }
+      .ground u { position: absolute; inset: 0; display: block;
+        background: linear-gradient(180deg, rgba(7,13,20,.74), rgba(7,13,20,.56) 34%, rgba(7,13,20,.9)); }
+      .rule { position: relative; z-index: 3; height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, #005185 50% 75%, var(--faint) 75% 100%); }
+      .wrap { position: relative; z-index: 2; max-width: 1020px; margin: 0 auto;
+        padding: 26px 15px calc(90px + env(safe-area-inset-bottom)); }
+      .glass { background: var(--glass); border: 1px solid var(--gline); border-radius: 18px;
+        box-shadow: 0 10px 34px rgba(0,0,0,.42);
+        -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5); }
+      .hero { padding: 21px 23px; display: flex; gap: 15px; align-items: flex-start; flex-wrap: wrap; }
+      .hero img { height: 38px; }
+      .hero .t { flex: 1; min-width: 240px; }
+      .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+      h1 { margin: 7px 0 0; font-weight: 900; font-size: clamp(26px, 5.2vw, 40px); line-height: 1.02; letter-spacing: -.03em; color: var(--ink); }
+      h1 span { color: var(--amber); }
+      .stand { margin: 9px 0 0; font-size: 15.5px; color: var(--dim); max-width: 60ch; }
+      .who { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px;
+        letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+      .who .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+      .who.on { color: var(--teal); } .who.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
+
+      .bar { margin-top: 13px; padding: 14px 20px; display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+      .n { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+      .n b { display: block; font-size: 25px; font-weight: 900; color: var(--ink);
+        font-variant-numeric: tabular-nums; line-height: 1.12; letter-spacing: -.025em; }
+      .n.t b { color: var(--teal); } .n.a b { color: var(--amber); }
+      .n small { display: block; font-size: 10px; color: var(--faint); text-transform: none; letter-spacing: 0; margin-top: 2px; }
+
+      h2 { margin: 30px 0 0; font-size: 12.5px; letter-spacing: .18em; text-transform: uppercase;
+        font-weight: 900; color: var(--amber); padding-bottom: 8px; border-bottom: 2px solid var(--gline); }
+      h2 em { float: right; font-style: normal; font-size: 12px; letter-spacing: .04em;
+        text-transform: none; color: var(--faint); font-weight: 400; }
+
+      .tools { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 13px; align-items: center; }
+      .tools input { flex: 1; min-width: 190px; font: inherit; font-size: 14.5px; color: var(--ink);
+        background: rgba(0,0,0,.3); border: 1px solid var(--gline); border-radius: 10px; padding: 10px 13px; }
+      .tools input:focus { outline: none; border-color: var(--amber); }
+      .tools button { font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--dim);
+        background: rgba(255,255,255,.06); border: 1px solid var(--gline); border-radius: 999px; padding: 10px 16px; }
+      .tools button:hover { border-color: var(--amber); color: var(--ink); }
+
+      .list { margin-top: 12px; padding: 0; overflow: hidden; }
+      .row { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center;
+        padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,.07); }
+      .row:last-child { border-bottom: 0; }
+      .row b { display: block; font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
+      .row span.e { display: block; font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 2px; }
+      .row .p { font-family: var(--mono); font-size: 13px; color: var(--teal); font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .row .w { font-family: var(--mono); font-size: 10.5px; color: var(--faint); white-space: nowrap; }
+      .empty { padding: 24px 20px; font-size: 15px; color: var(--mute); }
+      .lock { margin-top: 15px; padding: 18px 22px; font-size: 15px; } .lock a { color: var(--amber); }
+      .note { margin-top: 14px; padding: 15px 19px; font-size: 13.5px; color: var(--mute); }
+      .note a { color: var(--amber); }
+      @media (max-width: 620px) {
+        .wrap { padding: 18px 11px 80px; }
+        .row { grid-template-columns: 1fr auto; }
+        .row .w { grid-column: 2; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ground" aria-hidden="true"><img class="shot" alt="" fetchpriority="high" decoding="async" src="/img/targets-1600.webp" srcset="/img/targets-900.webp 900w, /img/targets-1600.webp 1600w" sizes="100vw" /><i></i><i></i><u></u></div>
+    <div class="rule"></div>
+    <div class="wrap">
+      <div class="glass hero">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <div class="t">
+          <div class="eyebrow">The Piston Powered Ranch &middot; spectators</div>
+          <h1>Who said they are <span>coming</span></h1>
+          <p class="stand">
+            Entry is free, so this is a headcount rather than a ticket. It is also the number the
+            caterer, the restroom contract and the parking marshals are all waiting on, which is why
+            it is worth asking for at all.
+          </p>
+        </div>
+        <span class="who" id="who"><span class="d"></span><span id="whoTxt">Checking</span></span>
+      </div>
+
+      <div class="glass bar" id="bar"></div>
+      <div id="stage"></div>
+
+      <div class="glass note">
+        The list is staff only and lives in <code>public.spectators</code>. Nobody outside the five
+        of us can read it, and a stranger who RSVPs cannot read it back.
+        Every twenty fifth RSVP posts to the <a href="/chat/">Spectator RSVPs</a> thread in chat, so
+        the number finds you rather than you having to come looking.
+      </div>
+    </div>
+
+    <script type="module">
+      import { createClient, SupabaseAuthAdapter } from "https://esm.sh/@neondatabase/neon-js@0.7.0-beta";
+
+      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      var db = null, staff = false, ROWS = [], q = "";
+
+      try {
+        db = createClient({
+          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
+                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+          dataApi: { url: DATA_API },
+        });
+      } catch (e) {}
+
+      function esc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+        });
+      }
+      async function rpc(fn) {
+        try {
+          var s = await db.auth.getSession();
+          var tok = s && s.data && s.data.session && s.data.session.access_token;
+          if (!tok) return null;
+          var r = await fetch(DATA_API + "/rpc/" + fn, {
+            method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
+          if (!r.ok) return null;
+          var t = await r.text();
+          try { return JSON.parse(t); } catch (e) { return t.trim(); }
+        } catch (e) { return null; }
+      }
+      function when(iso) {
+        var s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+        if (s < 60) return "just now";
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+
+      function render() {
+        var bar = document.getElementById("bar"), stage = document.getElementById("stage");
+        if (!staff) {
+          bar.style.display = "none";
+          stage.innerHTML = '<div class="glass lock">The spectator list is staff only. Sign in at the ' +
+            '<a href="/console/">console</a> on this device and it unlocks here.</div>';
+          return;
+        }
+        bar.style.display = "";
+        var heads = ROWS.reduce(function (n, r) { return n + (r.party_size || 1); }, 0);
+        var since = ROWS.filter(function (r) { return Date.now() - new Date(r.created_at) < 6048e5; }).length;
+        var src = {};
+        ROWS.forEach(function (r) { src[r.source || "unknown"] = (src[r.source || "unknown"] || 0) + 1; });
+        var top = Object.keys(src).sort(function (a, b) { return src[b] - src[a]; })[0];
+
+        bar.innerHTML =
+          '<span class="n">RSVPs<b>' + ROWS.length + "</b></span>" +
+          '<span class="n t">People expected<b>' + heads + "</b><small>parties counted</small></span>" +
+          '<span class="n a">This week<b>' + since + "</b></span>" +
+          '<span class="n">Average party<b>' + (ROWS.length ? (heads / ROWS.length).toFixed(1) : "0") + "</b></span>" +
+          (top ? '<span class="n">Mostly from<b style="font-size:15px">' + esc(top) + "</b></span>" : "");
+
+        var set = ROWS.filter(function (r) {
+          if (!q) return true;
+          return ((r.name || "") + " " + (r.email || "") + " " + (r.source || "")).toLowerCase().indexOf(q) > -1;
+        });
+
+        stage.innerHTML =
+          "<h2>The list<em>newest first</em></h2>" +
+          '<div class="tools">' +
+          '<input id="find" type="search" placeholder="Search a name, an email or a source" value="' + esc(q) + '" />' +
+          '<button type="button" id="csv">Download CSV</button></div>' +
+          '<div class="glass list">' +
+          (set.length ? set.map(function (r) {
+            return '<div class="row"><span><b>' + esc(r.name || "No name given") + "</b>" +
+              '<span class="e">' + esc(r.email || "") + (r.source ? "  &middot;  " + esc(r.source) : "") + "</span></span>" +
+              '<span class="p">' + (r.party_size || 1) + (r.party_size === 1 ? " guest" : " guests") + "</span>" +
+              '<span class="w">' + esc(when(r.created_at)) + "</span></div>";
+          }).join("")
+            : '<p class="empty">' + (q ? "Nothing matches that." :
+                "Nobody yet. The form is live on the event page, so the first one lands here on its own.") + "</p>") +
+          "</div>";
+      }
+
+      async function load() {
+        if (!db) return;
+        staff = (await rpc("is_staff")) === true;
+        document.getElementById("who").classList.toggle("on", staff);
+        var me = staff ? await rpc("me") : null;
+        document.getElementById("whoTxt").textContent = staff ? String(me || "Staff").split("@")[0] : "Not signed in";
+        if (staff) {
+          var r = await db.from("spectators").select("*").order("created_at", { ascending: false });
+          ROWS = r.error ? [] : r.data || [];
+        }
+        var a = document.activeElement;
+        if (!a || a.id !== "find") render();
+      }
+
+      document.addEventListener("input", function (e) {
+        if (e.target.id !== "find") return;
+        q = e.target.value.toLowerCase().trim();
+        var pos = e.target.selectionStart;
+        render();
+        var again = document.getElementById("find");
+        if (again) { again.focus(); again.setSelectionRange(pos, pos); }
+      });
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest("#csv")) return;
+        /* Quoted properly, because a name with a comma in it is not a reason to
+           hand somebody a broken spreadsheet. */
+        var head = ["name", "email", "party_size", "source", "created_at"];
+        var lines = [head.join(",")].concat(ROWS.map(function (r) {
+          return head.map(function (k) {
+            return '"' + String(r[k] == null ? "" : r[k]).replace(/"/g, '""') + '"';
+          }).join(",");
+        }));
+        var blob = new Blob([lines.join("\n")], { type: "text/csv" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "ppr-spectators.csv";
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      });
+
+      render();
+      load();
+      setInterval(function () { document.hidden || load(); }, 25000);
+    </script>
+    <script type="module" src="/team/rail.js"></script>
+  </body>
+</html>
