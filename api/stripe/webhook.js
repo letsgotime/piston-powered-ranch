@@ -26,7 +26,10 @@ export default async function handler(request, response) {
     response.setHeader("Allow", "POST");
     return response.status(405).json({ error: "Method not allowed" });
   }
-  const whsec = process.env.STRIPE_WEBHOOK_SECRET;
+  // Either name works. Two Vercel projects serve this event and it is easy to
+  // reach for a prefixed name to tell them apart, so both are accepted rather
+  // than failing on a naming choice that is not wrong, just different.
+  const whsec = process.env.STRIPE_WEBHOOK_SECRET || process.env.PPR_STRIPE_WEBHOOK_SECRET;
   const dburl = process.env.DATABASE_URL;
   if (!whsec || !dburl) {
     console.warn("[stripe] webhook not configured");
