@@ -3794,7 +3794,11 @@
                           d.unlockFlash.classList.add("go"),
                           setTimeout(function () {
                             ((c = !0), d.unlockFlash.classList.remove("go"));
-                            var e = y || p() || "submit";
+                            var e = y || p();
+                            // No route asked for means somebody opened the
+                            // console as a place. It is not one. Journeys is
+                            // where you read; this is only where you enter.
+                            if (!e) { location.href = "/journeys/"; return; }
                             ((y = null), f(e));
                           }, 210));
                       } catch (e) {
@@ -5772,7 +5776,7 @@
               await a();
               var e = await n.auth.getSession();
               if (e && e.data && e.data.session && ((c = !0), "enter" === u)) {
-                var t = y || re || "submit";
+                var t = y || re; if (!t) { location.href = "/journeys/"; return; }
                 ((y = null), f(t));
               }
             } catch (e) {}

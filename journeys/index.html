@@ -504,7 +504,7 @@
                  stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true)
                : LIVE.stats ? stat("Cars submitted", LIVE.stats.vehicle_submissions, true) : "") +
             (staff ? "" : lock()) +
-            acts('<a class="primary" href="/console/#submit">Open submit</a>' + (staff ? '<a href="/console/#ops">Review in console</a>' : "") + copyBtn("Copy submit link", ORIGIN + "/#submit")) };
+            acts('<a class="primary" href="/console/#/submit">Open submit</a>' + (staff ? '<a href="/board/">Review on the Board</a>' : "") + copyBtn("Copy submit link", ORIGIN + "/#submit")) };
         },
         status: function () {
           return { e: "Paddock Experience", t: "Private status links", body:
@@ -518,7 +518,7 @@
                  stat("Waitlisted", v.filter(function (x) { return x.status === "waitlisted"; }).length) +
                  stat("Declined", v.filter(function (x) { return x.status === "declined"; }).length) : lock()) +
             "<p style='margin-top:10px'>Approve or decline in the submission sheet; ready-to-send notices are one tap there.</p>" +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open the queue</a>') : "") };
+            (staff ? acts('<a class="primary" href="/board/">Open the Board</a>') : "") };
         },
         clubs: function () {
           var extra = "";
@@ -536,13 +536,13 @@
         clubapprove: function () {
           return { e: "Car clubs", t: "Block approval", body:
             "<p>Approving a block spawns an individual submission per roster car, so every car still carries its own pass and status link. Approval lives in the console pipeline.</p>" +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open pipeline</a>') : lock()) };
+            (staff ? acts('<a class="primary" href="/targets/">Open Targets</a>') : lock()) };
         },
         vendorapply: function () {
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "vendor"; }) : null;
           return { e: "Vendors", t: "Vendor applications", body:
             (v ? stat("Vendor categories", v.length, true) + stat("Applied", v.filter(function (x) { return x.status === "applied"; }).length) + stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) + pipeline(v) : lock()) +
-            acts('<a class="primary" href="/console/#submit">Open submit</a>') };
+            acts('<a class="primary" href="/console/#/submit">Open submit</a>') };
         },
         deposit: function () {
           return { e: "Vendors · money", t: "The $250 deposit", body:
@@ -556,7 +556,7 @@
           return { e: "Vendors · money", t: "Payments ledger", body:
             (paid ? stat("Payments recorded", LIVE.payments.length, true) + stat("Paid", paid.length, true) +
                     stat("Collected", money(paid.reduce(function (a, b) { return a + (b.amount_cents || 0); }, 0)), true) : lock()) +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open ledger</a>') : "") };
+            (staff ? acts('<a class="primary" href="/console/planning/#budget">Open the Budget</a>') : "") };
         },
         sponsorapply: function () {
           /* the working board for the asks lives on its own page now */
@@ -570,7 +570,7 @@
         sponsortrack: function () {
           return { e: "Sponsors", t: "Tracked conversations", body:
             "<p>Every call and email lands on the account timeline in the console pipeline: open the account, type the note, Enter saves it.</p>" +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open pipeline</a>') : lock()) };
+            (staff ? acts('<a class="primary" href="/targets/">Open Targets</a>') : lock()) };
         },
         sponsorclose: function () {
           return { e: "Sponsors", t: "Commit and activate", body:
@@ -659,13 +659,13 @@
           return { e: "Staff", t: "The review queue", body:
             (pend ? stat("Awaiting a decision", pend.length, true) : lock()) +
             "<p style='margin-top:10px'>Each sheet carries approve, decline, the status link, and a ready-to-send notice.</p>" +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open the queue</a>') : "") };
+            (staff ? acts('<a class="primary" href="/board/">Open the Board</a>') : "") };
         },
         pipeline: function () {
           return { e: "Staff", t: "Pipeline and Ledger", body:
             (LIVE.accounts ? stat("Accounts in lanes", LIVE.accounts.length, true) : lock()) +
             (LIVE.payments ? stat("Ledger rows", LIVE.payments.length, true) : "") +
-            (staff ? acts('<a class="primary" href="/console/#ops">Open pipeline</a>') : "") };
+            (staff ? acts('<a class="primary" href="/targets/">Open Targets</a>') : "") };
         },
         timenext: function () {
           var soon = msSoon(7), late = msLate();

@@ -26,7 +26,6 @@ var W = 60, WIDE = 208;
 /* label, href, glyph, and which badge it carries */
 var NAV = [
   ["Journeys", "/journeys/", "M4 5h16M4 12h16M4 19h10", "decisions"],
-  ["Console", "/console/", "M4 6h16v12H4z M8 10h8 M8 14h5", "queue"],
   ["Targets", "/targets/", "M12 3v18 M3 12h18 M12 7a5 5 0 100 10 5 5 0 000-10z", "empty"],
   ["Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
   ["The Asks", "/asks/", "M9 6h11 M9 12h11 M9 18h11 M4 6h.01 M4 12h.01 M4 18h.01", null],
@@ -58,7 +57,7 @@ var FOCUS = {
   /* Oscar owns the ground. The land, who is standing on it, and the plan. */
   "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
   /* Bekah carries the brand and everyone we are talking to. */
-  "Brand Director": ["/console/", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
+  "Brand Director": ["/ledger", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
   /* Arnie and Josh work the chase and the day itself. Journeys sits below
      the divider for them rather than being hidden: they can open it, and the
      money columns are withheld by can_see_money() rather than by this file. */
@@ -264,6 +263,8 @@ async function load() {
     pill.onclick = function () { location.href = "/console/"; };
     rail.innerHTML =
       "<div class='tTop'><img src='/brand/pg-mark.png' alt='' /><span class='tWord'>The Ranch</span></div>" +
+      // /console/ is where the sign in form lives, and the only reason to
+      // send anyone there. Signed in, it hands straight on to Journeys.
       "<nav><a href='/console/' title='Sign in'>" +
       "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' " +
       "stroke-linejoin='round' aria-hidden='true'><path d='M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4 M10 17l5-5-5-5 M15 12H3'/></svg>" +
