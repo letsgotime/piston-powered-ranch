@@ -451,6 +451,24 @@
               } },
             { t: "Every change, logged", d: "Who touched what, and when.", panel: "changes", pill: function () { return LIVE.feed && LIVE.feed.length; } },
           ] },
+        /* The desk. Everything the console holds that exists nowhere else,
+           as a lane rather than as a link, so Journeys is the whole document
+           and not an index that sends you somewhere else to read the rest. */
+        { who: "The desk", badge: ["b-staff", "Where work is entered"], kpi: function () {
+            if (!LIVE.subs) return "";
+            var pend = LIVE.subs.filter(function (x) { return x.status === "pending"; }).length;
+            return "<b>" + LIVE.subs.length + "</b> submitted \u00b7 <b>" + pend + "</b> waiting on a decision";
+          },
+          nodes: [
+            { t: "The entries queue", d: "Every car, vendor and sponsor that came through the form.", panel: "deskQueue",
+              pill: function () { return LIVE.subs ? LIVE.subs.filter(function (x) { return x.status === "pending"; }).length : null; } },
+            { t: "Enter one by hand", d: "For the people who call instead of filling the form.", panel: "deskSubmit" },
+            { t: "The event record", d: "Date, hours, place. Every page reads these.", panel: "deskEvent" },
+            { t: "Budget", d: "What it costs, against what is coming in.", panel: "deskBudget",
+              pill: function () { return LIVE.budget ? LIVE.budget.length : null; } },
+            { t: "Scope of work", d: "What we deliver, and what the ranch provides.", panel: "deskScope" },
+            { t: "Documents and legal", d: "Insurance, permits, terms, the signed versions.", panel: "deskLegal" },
+          ] },
       ];
 
       /* ---------- panels: live stats + actions per node ---------- */
@@ -551,6 +569,53 @@
             "<p style='margin-top:10px'>Send the payment link with an approval; the webhook books it the moment it clears.</p>" +
             acts(copyBtn("Copy TEST deposit link", "https://buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a")) +
             "<p style='margin-top:8px;color:var(--amber);font-size:13px'>This is a sandbox link. Money does not move. Do not send it to a vendor until the live key is in and this line is gone.</p>" };
+        },
+        /* ---------- the desk ---------- */
+        deskQueue: function () {
+          var s = LIVE.subs;
+          var by = function (st) { return s.filter(function (x) { return x.status === st; }).length; };
+          return { e: "The desk", t: "The entries queue", body:
+            (s
+              ? stat("Submitted", s.length, true) + stat("Waiting on a decision", by("pending"), true) +
+                stat("Approved", by("approved"), true) + stat("Waitlisted", by("waitlisted"), true) +
+                stat("Declined", by("declined"), true) +
+                "<p style='margin-top:10px'>Cars, vendors and sponsors arrive here together. Approving a car is what issues its pass.</p>"
+              : lock()) +
+            (staff ? acts('<a class="primary" href="/console/#/ops">Open the queue</a>') : "") };
+        },
+        deskSubmit: function () {
+          return { e: "The desk", t: "Enter one by hand", body:
+            "<p>The public form is the front door, and some people will phone instead. This puts the same row in the same table, so nothing arrives by a route the queue cannot see.</p>" +
+            "<p style='margin-top:10px'>Vehicle, vendor and sponsor all start here. The form changes shape to match.</p>" +
+            (staff ? acts('<a class="primary" href="/console/#/submit">Open the form</a>') : lock()) };
+        },
+        deskEvent: function () {
+          return { e: "The desk", t: "The event record", body:
+            stat("When", "Saturday 10 October 2026") + stat("Hours", "9am to 3pm") +
+            stat("Where", "Rancho Jaramillo, Unionville") + stat("Entry", "Free to show and to watch") +
+            "<p style='margin-top:10px'>These are the facts every page and every email reads. Change them here and they change everywhere at once.</p>" +
+            (staff ? acts('<a class="primary" href="/console/#/event">Open the record</a>') : "") };
+        },
+        deskBudget: function () {
+          var paid = LIVE.payments ? LIVE.payments.filter(function (x) { return x.status === "paid"; }) : null;
+          return { e: "The desk \u00b7 money", t: "Budget", body:
+            (LIVE.budget ? stat("Lines", LIVE.budget.length, true) : "") +
+            (paid ? stat("Collected", money(paid.reduce(function (a, b) { return a + (b.amount_cents || 0); }, 0)), true) : "") +
+            (!LIVE.budget && !paid ? lock() : "") +
+            "<p style='margin-top:10px'>Quotes replace estimates as they land. The money columns are held to Oscar, Gavin and Bekah.</p>" +
+            (staff ? acts('<a class="primary" href="/console/planning/#budget">Open the budget</a>') : "") };
+        },
+        deskScope: function () {
+          return { e: "The desk", t: "Scope of work", body:
+            "<p>What PaddockGavin delivers to Rancho Jaramillo, and what the ranch provides. As agreed, in writing.</p>" +
+            "<p style='margin-top:10px'>Check here before promising anything to anybody. Changes are proposed in chat, then written here.</p>" +
+            (staff ? acts('<a class="primary" href="/console/planning/#scope">Open the scope</a>') : lock()) };
+        },
+        deskLegal: function () {
+          return { e: "The desk", t: "Documents and legal", body:
+            "<p>Insurance, permits, vendor terms, sponsor agreements, and the DD Form 2535 if the helicopter lands.</p>" +
+            "<p style='margin-top:10px'>Upload the signed version and retire the draft. One folder per category, current on top.</p>" +
+            (staff ? acts('<a class="primary" href="/console/#/legal">Open documents</a>') : lock()) };
         },
         ledger: function () {
           var paid = LIVE.payments ? LIVE.payments.filter(function (x) { return x.status === "paid"; }) : null;
