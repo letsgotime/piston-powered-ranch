@@ -252,9 +252,23 @@ async function load() {
   if (!db) return;
   var tok = await token();
   if (!tok || (await rpc("is_staff", tok)) !== true) {
-    rail.classList.remove("on"); pill.style.display = ""; pill.classList.remove("on");
-    document.body.style.paddingLeft = "";
-    rail.style.display = "none"; pill.style.display = "none";
+    /* Signed out, the rail used to disappear entirely, which left every staff
+       tool looking like an island with no way back to Journeys, the console or
+       anywhere else. Navigation should not vanish because auth has not
+       resolved. Show a way in instead. */
+    rail.classList.add("on");
+    rail.style.display = "";
+    pill.style.display = "";
+    pill.innerHTML = "<span>Sign in</span>";
+    pill.onclick = function () { location.href = "/console/"; };
+    rail.innerHTML =
+      "<div class='tTop'><img src='/brand/pg-mark.png' alt='' /><span class='tWord'>The Ranch</span></div>" +
+      "<nav><a href='/console/' title='Sign in'>" +
+      "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' " +
+      "stroke-linejoin='round' aria-hidden='true'><path d='M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4 M10 17l5-5-5-5 M15 12H3'/></svg>" +
+      "<span>Sign in</span></a></nav>" +
+      "<div class='tMe'><span>Not signed in</span></div>";
+    if (window.innerWidth > 900) document.body.style.paddingLeft = W + "px";
     return;
   }
   rail.style.display = ""; pill.style.display = "";

@@ -2449,10 +2449,16 @@
       }
 
       (async function () {
-        if (!db) return;
+        if (!db) return deny("Could not reach the sign-in service.");
+        // Every await here could hang rather than fail. getSession resolving
+        // never left the page on "Checking your session" indefinitely, which
+        // reads as broken and gives nobody a way forward. Race it.
+        var withTimeout = function (p, ms) {
+          return Promise.race([p, new Promise(function (r) { setTimeout(function () { r(null); }, ms); })]);
+        };
         var email = null;
         try {
-          var s = await db.auth.getSession();
+          var s = await withTimeout(db.auth.getSession(), 8000);
           email = s && s.data && s.data.session && s.data.session.user && s.data.session.user.email;
         } catch (e) {}
         if (!email) return deny("You are not signed in.");
@@ -2485,5 +2491,6 @@
         budgetRows();
       })();
     </script>
-  </body>
+    <script type="module" src="/team/rail.js"></script>
+</body>
 </html>
