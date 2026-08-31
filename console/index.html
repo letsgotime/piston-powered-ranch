@@ -360,6 +360,13 @@
       .subnav::-webkit-scrollbar {
         display: none;
       }
+      .subnav-out {
+        display: inline-flex; align-items: center; white-space: nowrap;
+        font: 600 12.5px/1 var(--font-sans, Archivo, system-ui, sans-serif);
+        letter-spacing: .02em; color: var(--muted, #8b95a3); text-decoration: none;
+        padding: 9px 14px; border-radius: 999px; border: 1px dashed rgba(255,255,255,.16);
+      }
+      .subnav-out:hover { color: var(--paper, #EDF1F6); border-color: rgba(255,255,255,.32); }
       .subnav button {
         flex-shrink: 0;
         border: 1px solid var(--line);
@@ -2389,9 +2396,10 @@
           </div>
         </div>
         <nav class="subnav" id="subnav">
-          <button data-route="dashboard">Telemetry</button>
           <button data-route="submit">Submit</button> <button data-route="event">Event Info</button>
-          <button data-route="ops">Ops</button> <button data-route="legal">Documents</button>
+          <button data-route="legal">Documents</button>
+          <a class="subnav-out" href="/journeys/">Journeys &rsaquo;</a>
+          <a class="subnav-out" href="/board/">The Board &rsaquo;</a>
         </nav>
       </header>
       <div class="scrim" id="scrim"></div>
@@ -2409,15 +2417,13 @@
           Built on PaddockEvents
         </div>
         <nav>
-          <button class="drawer-link" data-route="dashboard">
+          <a class="drawer-link" href="/journeys/">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <rect x="3" y="3" width="7" height="9" rx="1.5" />
               <rect x="14" y="3" width="7" height="5" rx="1.5" />
               <rect x="14" y="12" width="7" height="9" rx="1.5" />
               <rect x="3" y="16" width="7" height="5" rx="1.5" />
-            </svg>
-            Telemetry
-          </button>
+            </svg>Journeys</a>
           <button class="drawer-link" data-route="submit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M12 5v14M5 12h14" />
@@ -2431,13 +2437,11 @@
             </svg>
             Event Info
           </button>
-          <button class="drawer-link" data-route="ops">
+          <a class="drawer-link" href="/board/">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3.5 2" />
-            </svg>
-            Ops &amp; Staff
-          </button>
+            </svg>The Board</a>
           <button class="drawer-link" data-route="legal">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
@@ -3520,7 +3524,12 @@
           },
           c = !1,
           u = "enter",
-          v = ["dashboard", "submit", "event", "ops", "budget", "scope", "legal"];
+          v = ["dashboard", "submit", "event", "ops", "budget", "scope", "legal"],
+          /* Telemetry duplicated Journeys and Ops duplicated the Board, both
+             less well. The routes stay valid so an old bookmark still lands
+             somewhere, but they hand off rather than render a second, worse
+             copy of a page that already exists. */
+          OUT = { dashboard: "/journeys/", ops: "/board/" };
         function m(e) {
           var t = String(e || "")
             .replace(/^#\/?/, "")
@@ -3537,6 +3546,8 @@
         function f(e, t) {
           var n = m(e);
           if (n.route) {
+            // A retired route leaves rather than rendering a second, worse copy.
+            if (OUT[n.route]) { location.href = OUT[n.route]; return; }
             if (!c && "enter" !== n.route && -1 === o.indexOf(n.route))
               return ((y = "string" == typeof e ? e : n.route), void g("enter"));
             (!1 !== t && (location.hash = "/" + n.route + (n.detail ? "/" + n.detail : "")),
@@ -3699,7 +3710,7 @@
           e.route && (c || -1 !== o.indexOf(e.route))
             ? (g(e.route), e.detail ? I(e.detail) : T())
             : !e.route && c
-              ? (g("dashboard"), T())
+              ? (g("submit"), T())
               : e.route && !c && ((y = p()), g("enter"));
         }),
           d.menuBtn.addEventListener("click", function () {
@@ -3783,7 +3794,7 @@
                           d.unlockFlash.classList.add("go"),
                           setTimeout(function () {
                             ((c = !0), d.unlockFlash.classList.remove("go"));
-                            var e = y || p() || "dashboard";
+                            var e = y || p() || "submit";
                             ((y = null), f(e));
                           }, 210));
                       } catch (e) {
@@ -5761,7 +5772,7 @@
               await a();
               var e = await n.auth.getSession();
               if (e && e.data && e.data.session && ((c = !0), "enter" === u)) {
-                var t = y || re || "dashboard";
+                var t = y || re || "submit";
                 ((y = null), f(t));
               }
             } catch (e) {}
