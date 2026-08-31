@@ -310,7 +310,8 @@
         </section>
         <nav class="jDocs" aria-label="Working surfaces">
           <span class="jDocsLabel">Where the work is entered</span>
-          <a href="/console/#/ops">Entries queue</a>
+          <a href="#" data-panel="deskQueue">Entries queue</a>
+          <a href="#" data-panel="deskRsvps">RSVP list</a>
           <a href="/console/#/submit">Submit an entry</a>
           <a href="/console/#/event">Event info</a>
           <a href="/console/planning/#budget">Budget</a>
@@ -622,6 +623,25 @@
                   : '<p style="margin-top:12px;color:#8b95a3">Nothing has come in yet. The forms are live and the field is empty, which is what it should look like before the announcement.</p>')
               : lock()) +
             (staff ? acts('<a class="primary" href="/console/#/ops">Open the queue</a>') : "") };
+        },
+        deskRsvps: function () {
+          var s = LIVE.spectators;
+          var heads = s ? s.reduce(function (a, r) { return a + (r.party_size || 1); }, 0) : 0;
+          return { e: "The desk", t: "RSVP list", body:
+            (s
+              ? stat("RSVPs", s.length, true) + stat("People expected", heads, true) +
+                (s.length
+                  ? '<div style="margin-top:12px">' +
+                    s.map(function (r) {
+                      return '<div class="qRow"><span class="n">' + esc(r.name || "Someone") +
+                        "<small>" + esc(r.email || "no address") +
+                        (r.source ? " \u00b7 " + esc(String(r.source).slice(0, 40)) : "") +
+                        "</small></span><span class=\"s s-approved\">" +
+                        (r.party_size || 1) + (r.party_size === 1 ? " seat" : " seats") + "</span></div>";
+                    }).join("") + "</div>"
+                  : '<p style="margin-top:12px;color:#8b95a3">Nobody yet. The form is live and the list is empty, which is what it should look like before the announcement.</p>')
+              : lock()) +
+            (staff ? acts('<a class="primary" href="/rsvps/">Open the full list</a>') : "") };
         },
         deskSubmit: function () {
           return { e: "The desk", t: "Enter one by hand", body:
@@ -1480,8 +1500,11 @@
           return removeIds((LIVE.wb || []).filter(function (x) { return x.option_group === g; }).map(function (x) { return x.id; }));
         }
 
-        var n = e.target.closest(".node");
-        if (n) return openPanel(n.getAttribute("data-panel"), n);
+        var n = e.target.closest(".node, [data-panel]:not([data-add]):not([data-remove])");
+        if (n) {
+          if (n.tagName === "A") e.preventDefault();
+          return openPanel(n.getAttribute("data-panel"), n);
+        }
         if (e.target.closest("#close") || e.target === scrim) return closePanel();
         var c = e.target.closest("[data-copy]");
         if (c && navigator.clipboard) {
@@ -1562,7 +1585,7 @@
            table that fails takes only itself down. */
         var Q = [
           ["names", loadNames()],
-          ["subs", db.from("submissions").select("type,status")],
+          ["subs", db.from("submissions").select("applicant_name,type,status,email,phone,details,created_at").order("created_at", { ascending: false })],
           ["accounts", db.from("accounts").select("type,status,company,category,pipeline_stage,note").order("sort")],
           ["payments", db.from("payments").select("status,amount_cents")],
           /* id and notes as well, so a decision can name the milestone it holds up */
@@ -1577,7 +1600,7 @@
           ["volunteers", db.from("volunteers").select("id,name,status")],
           ["categories", db.from("categories").select("id,name,domain,sort").order("sort")],
           ["candidates", db.from("account_candidates").select("id,category_id,status")],
-          ["spectators", db.from("spectators").select("name,party_size,source").order("created_at", { ascending: false }).limit(25)],
+          ["spectators", db.from("spectators").select("name,email,party_size,source,created_at").order("created_at", { ascending: false }).limit(25)],
           ["clubSubs", db.from("club_submissions").select("status,vehicle_count,club_id")],
           ["clubNames", db.from("clubs").select("id,club_name")],
         ];
