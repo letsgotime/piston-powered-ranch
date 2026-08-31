@@ -3724,11 +3724,24 @@
                         var i = await n.auth.signInWithPassword({ email: e, password: t });
                         if (i.error) {
                           var s = await n.auth.signUp({ email: e, password: t });
-                          if (s.error)
+                          if (s.error) {
+                            /* If sign up says the account exists, then the sign
+                               in that just failed is the real story and it was
+                               almost certainly the password. Showing the sign up
+                               error here told people their email was wrong when
+                               their email was fine. */
+                            var exists = /already exists|already registered|USER_ALREADY/i.test(
+                              s.error.message || ""
+                            );
                             return (
                               E(!1),
-                              void w(s.error.message || i.error.message || "Could not sign in.")
+                              void w(
+                                exists
+                                  ? "That password does not match this account. Check it, or ask Gavin to reset it."
+                                  : s.error.message || i.error.message || "Could not sign in."
+                              )
                             );
+                          }
                           if (
                             (!s.data || !s.data.session) &&
                             (i = await n.auth.signInWithPassword({ email: e, password: t })).error
