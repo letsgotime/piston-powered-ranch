@@ -422,6 +422,30 @@
       };
       var ORIGIN = location.origin;
       var staff = false;
+      var gateSettled = false;
+      function liftGate(ok) {
+        if (gateSettled) return;
+        gateSettled = true;
+        var g = document.getElementById("jGate");
+        if (!g) return;
+        if (ok) {
+          g.remove();
+          document.body.classList.remove("jLocked");
+          return;
+        }
+        document.getElementById("jGateH").textContent = "Staff only";
+        document.getElementById("jGateP").textContent =
+          "Sign in on this device, then come back. Journeys carries names, addresses and money, so it is not public.";
+        var b = document.getElementById("jGateBtn");
+        b.hidden = false;
+        b.focus();
+      }
+      /* If the session check never returns, the page must still say something.
+         A spinner that spins forever is worse than a locked door. */
+      setTimeout(function () { liftGate(false); }, 9000);
+      document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("jLocked");
+      });
       var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
       var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null,
                    spectators: null, clubs: null, features: null, wb: null, feed: null,
@@ -1593,6 +1617,11 @@
            the next tick rather than on a reload. */
         if (!staff) {
           try { staff = await isStaff(db); } catch (e) { staff = false; }
+          /* Lift or lock. This page carries names, addresses and money, so it
+             is staff only. The gate never hangs: it resolves to one of two
+             states here, and a watchdog below resolves it even if this line is
+             never reached. */
+          liftGate(staff);
         }
         if (!staff) return;
         /* Seventeen queries used to run one after another inside a single try.
