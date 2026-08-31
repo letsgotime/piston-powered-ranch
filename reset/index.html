@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Set a new password &middot; The Piston Powered Ranch</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" href="/brand/favicon-32.png" />
+<style>
+  :root{
+    --ink:#0A1523; --paper:#EDF1F6; --mute:#8b95a3; --line:rgba(255,255,255,.14);
+    --amber:#F2C94C; --bad:#ef6d70; --good:#00D2BE;
+    --sans:Archivo,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100dvh;background:var(--ink);color:var(--paper);
+    font-family:var(--sans);display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:min(440px,100%)}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--good);margin:0 0 12px;font-weight:600}
+  h1{font-size:clamp(30px,7vw,42px);font-weight:900;letter-spacing:-.035em;line-height:1.02;margin:0}
+  p.lede{margin:14px 0 0;font-size:16.5px;line-height:1.6;color:#a9b4c2}
+  label{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--mute);font-weight:600;margin:22px 0 6px}
+  input{width:100%;font:400 16px/1.4 var(--sans);color:var(--paper);background:rgba(0,0,0,.32);
+    border:1px solid var(--line);border-radius:11px;padding:14px 15px;outline:none}
+  input:focus{border-color:var(--amber)}
+  button{width:100%;margin-top:20px;font:900 15.5px/1 var(--sans);color:#151000;background:var(--amber);
+    border:0;border-radius:12px;padding:16px;cursor:pointer}
+  button:disabled{opacity:.6;cursor:default}
+  .said{margin-top:14px;font-size:14.5px;line-height:1.55;min-height:1.2em}
+  .said.bad{color:var(--bad)} .said.ok{color:var(--good)}
+  .fine{margin-top:22px;font-size:13.5px;line-height:1.6;color:var(--mute)}
+  a{color:var(--amber)}
+</style>
+</head>
+<body>
+<main class="card">
+  <p class="eyebrow" id="eyebrow">Account access</p>
+  <h1 id="head">Set a new password</h1>
+  <p class="lede" id="lede">Choose something you will remember. It signs you into every ranch tool.</p>
+
+  <div id="formWrap">
+    <label for="pw" id="lbl">New password</label>
+    <input id="pw" type="password" autocomplete="new-password" />
+    <button id="go" type="button">Set it</button>
+  </div>
+
+  <p class="said" id="said"></p>
+  <p class="fine">
+    Trouble? Write to <a href="mailto:gavin@paddockgavin.com">gavin@paddockgavin.com</a>.
+  </p>
+</main>
+
+<script type="module">
+/* Two jobs in one page, chosen by whether the URL carries a token.
+ *
+ *   No token: ask for the address and request a reset link.
+ *   Token:    take a new password and set it.
+ *
+ * Both talk to the auth service directly. There is no session yet, which is
+ * the whole point, so nothing here needs the database client. */
+
+const AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
+const q = new URLSearchParams(location.search);
+const token = q.get("token") || q.get("t") || "";
+
+const pw = document.getElementById("pw");
+const go = document.getElementById("go");
+const said = document.getElementById("said");
+const lbl = document.getElementById("lbl");
+const head = document.getElementById("head");
+const lede = document.getElementById("lede");
+
+function say(msg, kind) { said.textContent = msg; said.className = "said" + (kind ? " " + kind : ""); }
+
+if (!token) {
+  head.textContent = "Reset your password";
+  lede.textContent = "Tell us your address and we will send a link that lets you set a new one.";
+  lbl.textContent = "Your email";
+  pw.type = "email";
+  pw.autocomplete = "email";
+  go.textContent = "Send the link";
+}
+
+go.addEventListener("click", async () => {
+  const val = pw.value.trim();
+  if (!val) { say("Fill the field first.", "bad"); return; }
+  go.disabled = true;
+
+  try {
+    if (!token) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+        say("That is not an address.", "bad"); go.disabled = false; return;
+      }
+      const r = await fetch(AUTH + "/request-password-reset", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: val, redirectTo: location.origin + "/reset/" }),
+      });
+      /* The service answers the same way whether or not the address exists, so
+         nobody can use this to find out who has an account. Say the same. */
+      if (r.ok) {
+        say("If that address has an account, a link is on its way. Check the inbox, and the spam folder.", "ok");
+        go.textContent = "Sent";
+      } else {
+        say("That did not send. Try again in a moment.", "bad");
+        go.disabled = false;
+      }
+      return;
+    }
+
+    if (val.length < 8) { say("Eight characters or more, please.", "bad"); go.disabled = false; return; }
+    const r = await fetch(AUTH + "/reset-password", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newPassword: val, token }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok) {
+      say("Done. Sending you to the console.", "ok");
+      setTimeout(() => { location.href = "/console/"; }, 1200);
+    } else {
+      say(j.message || "That link may have expired. Request a new one.", "bad");
+      go.disabled = false;
+    }
+  } catch {
+    say("Could not reach the sign in service.", "bad");
+    go.disabled = false;
+  }
+});
+
+pw.addEventListener("keydown", (e) => { if (e.key === "Enter") go.click(); });
+pw.focus();
+</script>
+</body>
+</html>

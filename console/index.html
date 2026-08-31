@@ -551,11 +551,25 @@
           transition: opacity 0.2s linear;
           transform: none !important;
         }
+        /* The reveal is opacity 0 until a transition brings it in. With motion
+           reduced there may be no transition to run, which leaves the whole
+           form invisible while still holding its height: a page of empty boxes
+           and gaps. Anyone who has reduce motion on, which is common on a
+           phone, saw the console like that. Force the end state instead. */
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+          transition: none !important;
+        }
+        /* This read animation-duration: NaNs, which is not a value, so the
+           declaration was dropped and animations ran at full length for the
+           people who had asked for less motion. */
         *,
         .drawer,
         .ground,
         .scrim {
-          animation-duration: NaNs !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
         }
       }
       .reveal {
@@ -2494,6 +2508,7 @@
               </button>
               <p class="field-error" id="enterError"></p>
               <p class="enter-note">
+                <p style="margin:10px 0 0"><a href="/reset/" style="font-family:var(--mono,monospace);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,#F2C94C);text-decoration:none">Forgot your password</a></p>
                 Real sign-in. First time signing in with an approved email creates your account;
                 after that, the same email and password sign you back in. Only
                 approved addresses can reach internal data. Anyone else can sign in but
