@@ -533,6 +533,19 @@
         opacity: 0;
         transform: translateY(-14px) scale(0.99);
       }
+      /* Measured, not theorised: an active view was computing to opacity 0 with
+         reduce-motion off, taking every field on the Submit and Event Info tabs
+         with it. The content was present at full height and invisible, which is
+         the page of empty boxes and gaps. Whatever stops the transition landing,
+         the end state is not negotiable, so it is asserted. The transition still
+         runs into it when it works. */
+      .view.active:not(.leaving),
+      .view.active:not(.leaving) .reveal {
+        opacity: 1 !important;
+      }
+      .view.active:not(.leaving) .reveal {
+        transform: none !important;
+      }
       .val-pulse {
         animation: valpulse 700ms var(--ease-cine);
       }

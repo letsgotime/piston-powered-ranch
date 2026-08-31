@@ -257,6 +257,7 @@ async function load() {
        anywhere else. Navigation should not vanish because auth has not
        resolved. Show a way in instead. */
     rail.classList.add("on");
+    pill.classList.add("on");
     rail.style.display = "";
     pill.style.display = "";
     pill.innerHTML = "<span>Sign in</span>";
