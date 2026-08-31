@@ -48,13 +48,25 @@ export default async function handler(request, response) {
       const s = event.data.object;
       const md = s.metadata || {};
       const sql = neon(dburl);
-      await sql`
+      // The slug in public.events is "pistonpoweredranch", no hyphens. This
+      // used to default to the hyphenated spelling, which matches no row, and
+      // an INSERT ... SELECT with no matching row inserts nothing and reports
+      // success. Every payment would have looked booked and been absent.
+      const slug = md.event_slug || "pistonpoweredranch";
+      const wrote = await sql`
         insert into payments (event_id, kind, stripe_object, amount_cents, currency, status, payer_email, livemode)
         select e.id, ${md.kind || "other"}, ${s.id}, ${s.amount_total}, ${s.currency || "usd"},
                ${s.payment_status || "paid"}, ${(s.customer_details && s.customer_details.email) || null},
                ${Boolean(event.livemode)}
-        from events e where e.slug = ${md.event_slug || "piston-powered-ranch"}
-        on conflict (stripe_object) do update set status = excluded.status`;
+        from events e where e.slug = ${slug}
+        on conflict (stripe_object) do update set status = excluded.status
+        returning id`;
+      // Fail loudly. Stripe retries a 500, so a payment that did not book stays
+      // visible as a failing delivery instead of disappearing quietly.
+      if (!wrote || wrote.length === 0) {
+        console.error("[stripe] no events row for slug:", slug, "payment not booked:", s.id);
+        return response.status(500).json({ error: "No matching event", slug });
+      }
     }
     return response.status(200).json({ received: true });
   } catch (err) {
