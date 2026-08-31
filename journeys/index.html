@@ -305,6 +305,9 @@
           here. Under them sit the dated plan, the money, the decisions nobody has made yet, and
           the name against each.
         </p>
+        <section class="jNow" id="jNow" aria-label="Live now">
+          <div class="jNowGrid" id="jNowGrid"><span class="jNowWait">Reading the live numbers</span></div>
+        </section>
         <nav class="jDocs" aria-label="Working surfaces">
           <span class="jDocsLabel">Where the work is entered</span>
           <a href="/console/#/ops">Entries queue</a>
@@ -315,6 +318,28 @@
           <a href="/console/#/legal">Documents and legal</a>
         </nav>
         <style>
+          .jNow{margin:22px 0 0}
+          .jNowGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+            background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.10);border-radius:13px;overflow:hidden}
+          .jNowGrid > div{background:#0d1620;padding:14px 15px}
+          .jNowGrid b{display:block;font:900 25px/1.05 Archivo,system-ui,sans-serif;letter-spacing:-.03em;
+            color:#fff;font-variant-numeric:tabular-nums}
+          .jNowGrid span{display:block;margin-top:3px;font:600 9.5px/1 ui-monospace,Menlo,monospace;
+            letter-spacing:.13em;text-transform:uppercase;color:#7f8a99}
+          .jNowGrid .warn b{color:var(--amber,#F2C94C)}
+          .jNowWait{padding:14px 15px;font:600 11px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;
+            text-transform:uppercase;color:#6d7a87}
+          .qRow{display:grid;grid-template-columns:1fr auto;gap:10px;padding:9px 0;
+            border-bottom:1px solid rgba(255,255,255,.09)}
+          .qRow:last-child{border-bottom:0}
+          .qRow .n{font:600 14px/1.3 Archivo,system-ui,sans-serif;color:#EDF1F6}
+          .qRow .n small{display:block;font:400 12px/1.4 Archivo,system-ui,sans-serif;color:#8b95a3;margin-top:2px}
+          .qRow .s{font:700 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;
+            align-self:center;padding:4px 8px;border-radius:5px;white-space:nowrap}
+          .s-pending{background:rgba(242,201,76,.16);color:#F2C94C}
+          .s-approved{background:rgba(0,210,190,.16);color:#00D2BE}
+          .s-waitlisted{background:rgba(255,255,255,.10);color:#a9b4c2}
+          .s-declined{background:rgba(239,109,112,.14);color:#ef6d70}
           .jDocs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 0}
           .jDocsLabel{font:600 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
             text-transform:uppercase;color:#6d7a87;width:100%;margin-bottom:2px}
@@ -579,7 +604,22 @@
               ? stat("Submitted", s.length, true) + stat("Waiting on a decision", by("pending"), true) +
                 stat("Approved", by("approved"), true) + stat("Waitlisted", by("waitlisted"), true) +
                 stat("Declined", by("declined"), true) +
-                "<p style='margin-top:10px'>Cars, vendors and sponsors arrive here together. Approving a car is what issues its pass.</p>"
+                "<p style='margin-top:10px'>Cars, vendors and sponsors arrive here together. Approving a car is what issues its pass.</p>" +
+                (s.length
+                  ? '<div style="margin-top:12px">' +
+                    s.slice()
+                      .sort(function (a, b) { return String(b.created_at || "").localeCompare(String(a.created_at || "")); })
+                      .slice(0, 12)
+                      .map(function (r) {
+                        var st = r.status || "pending";
+                        return '<div class="qRow"><span class="n">' + esc(r.applicant_name || "Someone") +
+                          "<small>" + esc(r.type || "") +
+                          (r.details && r.details.org ? " \u00b7 " + esc(String(r.details.org).slice(0, 46)) : "") +
+                          "</small></span><span class=\"s s-" + esc(st) + '">' + esc(st) + "</span></div>";
+                      }).join("") +
+                    (s.length > 12 ? '<p style="margin-top:10px;color:#8b95a3">Showing the 12 most recent of ' + s.length + ".</p>" : "") +
+                    "</div>"
+                  : '<p style="margin-top:12px;color:#8b95a3">Nothing has come in yet. The forms are live and the field is empty, which is what it should look like before the announcement.</p>')
               : lock()) +
             (staff ? acts('<a class="primary" href="/console/#/ops">Open the queue</a>') : "") };
         },
@@ -1280,6 +1320,42 @@
       /* ---------- modal ---------- */
       var sheet = document.getElementById("sheet"), scrim = document.getElementById("scrim");
       var lastFocus = null, openKey = null;
+      /* The live home. Everything the console's Telemetry showed, on the page
+         people actually open, reading the same LIVE object the lanes read so it
+         can never disagree with the row beneath it. */
+      function paintNow() {
+        var el = document.getElementById("jNowGrid");
+        if (!el) return;
+        var cells = [];
+        var days = (function () {
+          var t0 = ranchToday(), g = new Date("2026-10-10T00:00:00-05:00");
+          return Math.max(0, Math.ceil((g - new Date(t0 + "T00:00:00-05:00")) / 86400000));
+        })();
+        cells.push(["warn", days, "Days to gates"]);
+
+        if (LIVE.subs) {
+          var pend = LIVE.subs.filter(function (x) { return x.status === "pending"; }).length;
+          cells.push(["", LIVE.subs.length, "Submitted"]);
+          cells.push([pend ? "warn" : "", pend, "Waiting on you"]);
+          cells.push(["", LIVE.subs.filter(function (x) { return x.type === "vehicle" && x.status === "approved"; }).length, "Cars approved"]);
+        }
+        if (LIVE.stats) {
+          cells.push(["", LIVE.stats.spectator_rsvps || 0, "RSVPs"]);
+          cells.push(["", LIVE.stats.party_headcount || 0, "People expected"]);
+        }
+        if (LIVE.decisions) {
+          var open = LIVE.decisions.filter(function (d) { return d.status !== "decided"; }).length;
+          cells.push([open ? "warn" : "", open, "Open decisions"]);
+        }
+        if (LIVE.payments) {
+          var paid = LIVE.payments.filter(function (x) { return x.status === "paid"; });
+          cells.push(["", money(paid.reduce(function (a, b) { return a + (b.amount_cents || 0); }, 0)), "Collected"]);
+        }
+        el.innerHTML = cells.map(function (c) {
+          return '<div class="' + c[0] + '"><b>' + c[1] + "</b><span>" + c[2] + "</span></div>";
+        }).join("");
+      }
+
       function paintPanel(key) {
         var p = PANELS[key] && PANELS[key]();
         if (!p) return null;
@@ -1437,6 +1513,7 @@
           var r = pr[0].value;
           var row = r && r.data && (Array.isArray(r.data) ? r.data[0] : r.data);
           if (row) LIVE.stats = row;
+          paintNow();
         }
         if (pr[1].status === "fulfilled") {
           var mf = pr[1].value;
@@ -1528,6 +1605,7 @@
         got.shifts && (LIVE.shifts = got.shifts);
         got.assigns && (LIVE.assigns = got.assigns);
         got.volunteers && (LIVE.volunteers = got.volunteers);
+        paintNow();
         got.categories && (LIVE.categories = got.categories);
         got.candidates && (LIVE.candidates = got.candidates.filter(function (x) { return x.category_id != null; }));
         got.spectators && (LIVE.spectators = got.spectators);
