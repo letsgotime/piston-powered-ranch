@@ -2396,6 +2396,7 @@
           </div>
         </div>
         <nav class="subnav" id="subnav">
+          <button data-route="ops">Entries</button>
           <button data-route="submit">Submit</button> <button data-route="event">Event Info</button>
           <button data-route="legal">Documents</button>
           <a class="subnav-out" href="/journeys/">Journeys &rsaquo;</a>
@@ -3528,8 +3529,12 @@
           /* Telemetry duplicated Journeys and Ops duplicated the Board, both
              less well. The routes stay valid so an old bookmark still lands
              somewhere, but they hand off rather than render a second, worse
-             copy of a page that already exists. */
-          OUT = { dashboard: "/journeys/", ops: "/board/" };
+             copy of a page that already exists.
+
+             ops is NOT in here. It looked like the Board and is not: the Board
+             holds decisions, ops holds submissions, and it is the only surface
+             in the estate where a car entry can be read or worked. */
+          OUT = { dashboard: "/journeys/" };
         function m(e) {
           var t = String(e || "")
             .replace(/^#\/?/, "")

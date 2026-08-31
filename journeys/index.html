@@ -307,6 +307,7 @@
         </p>
         <nav class="jDocs" aria-label="Working surfaces">
           <span class="jDocsLabel">Where the work is entered</span>
+          <a href="/console/#/ops">Entries queue</a>
           <a href="/console/#/submit">Submit an entry</a>
           <a href="/console/#/event">Event info</a>
           <a href="/console/planning/#budget">Budget</a>
@@ -504,7 +505,7 @@
                  stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true)
                : LIVE.stats ? stat("Cars submitted", LIVE.stats.vehicle_submissions, true) : "") +
             (staff ? "" : lock()) +
-            acts('<a class="primary" href="/console/#/submit">Open submit</a>' + (staff ? '<a href="/board/">Review on the Board</a>' : "") + copyBtn("Copy submit link", ORIGIN + "/#submit")) };
+            acts('<a class="primary" href="/console/#/submit">Open submit</a>' + (staff ? '<a href="/console/#/ops">Review the queue</a>' : "") + copyBtn("Copy submit link", ORIGIN + "/#submit")) };
         },
         status: function () {
           return { e: "Paddock Experience", t: "Private status links", body:
@@ -518,7 +519,7 @@
                  stat("Waitlisted", v.filter(function (x) { return x.status === "waitlisted"; }).length) +
                  stat("Declined", v.filter(function (x) { return x.status === "declined"; }).length) : lock()) +
             "<p style='margin-top:10px'>Approve or decline in the submission sheet; ready-to-send notices are one tap there.</p>" +
-            (staff ? acts('<a class="primary" href="/board/">Open the Board</a>') : "") };
+            (staff ? acts('<a class="primary" href="/console/#/ops">Open the entries queue</a>') : "") };
         },
         clubs: function () {
           var extra = "";
@@ -659,7 +660,7 @@
           return { e: "Staff", t: "The review queue", body:
             (pend ? stat("Awaiting a decision", pend.length, true) : lock()) +
             "<p style='margin-top:10px'>Each sheet carries approve, decline, the status link, and a ready-to-send notice.</p>" +
-            (staff ? acts('<a class="primary" href="/board/">Open the Board</a>') : "") };
+            (staff ? acts('<a class="primary" href="/console/#/ops">Open the entries queue</a>') : "") };
         },
         pipeline: function () {
           return { e: "Staff", t: "Pipeline and Ledger", body:
