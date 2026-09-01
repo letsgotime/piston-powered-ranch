@@ -498,7 +498,12 @@
           // a session, which used to end in an error beside a working account.
           var r1 = await db.auth.signInWithPassword({ email: em, password: pw });
           if (r1.error) {
-            var r2 = await db.auth.signUp({ email: em, password: pw });
+            var r2 = await db.auth.signUp({
+              email: em,
+              password: pw,
+              // Required by the auth service. Its absence is why sign up failed.
+              name: (em.split("@")[0] || "Crew").replace(/[._-]+/g, " ").trim(),
+            });
             if (r2.error && /already exists|already registered|USER_ALREADY/i.test(r2.error.message || "")) {
               sb.disabled = false; sb.textContent = "Sign in";
               sd.className = "said bad";

@@ -3780,7 +3780,15 @@
                            beside a working account. Now both end signed in. */
                         var i = await n.auth.signInWithPassword({ email: e, password: t });
                         if (i.error) {
-                          var s = await n.auth.signUp({ email: e, password: t });
+                          var s = await n.auth.signUp({
+                            email: e,
+                            password: t,
+                            /* Required. Without it the service answers
+                               [body.name] Invalid input and no account is made,
+                               which is why sign up has never worked. Derived
+                               from the address so nobody has to type it. */
+                            name: (e.split("@")[0] || "Staff").replace(/[._-]+/g, " ").trim(),
+                          });
                           var known = s.error &&
                             /already exists|already registered|USER_ALREADY/i.test(s.error.message || "");
                           if (known) {
