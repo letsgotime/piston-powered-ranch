@@ -1948,6 +1948,13 @@
         opacity: 1;
         transform: translateY(0);
       }
+      /* An empty container is worse than no container. The hero only gets a
+         photo when the brand is the ranch and a hero image is configured; every
+         other time it rendered a 260px box with nothing in it, which is most of
+         what "nothing works" looks like on this page. Collapse it instead. */
+      .hero-media:not(.has-photo) {
+        display: none !important;
+      }
       .hero-media {
         position: relative;
         height: 260px;
