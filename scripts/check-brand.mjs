@@ -50,6 +50,17 @@ const SKIP_DIRS = new Set(["node_modules", ".git", ".vercel", ".next", "dist", "
 const SKIP_FILES = new Set(["scripts/check-brand.mjs"])
 const EXT = /\.(html|css|js|mjs|svg)$/
 
+/**
+ * Third party marks are not ours to recolour.
+ *
+ * Google's G is #4285F4, #34A853, #FBBC05 and #EA4335, and that last one is a
+ * red carrying 21% white, so this check would otherwise call it pink. Their
+ * brand guidelines require those exact values. Exempt only where all four
+ * appear together, which is a whole G and not one pink smuggled through.
+ */
+const GOOGLE_MARK = ["#4285F4", "#34A853", "#FBBC05", "#EA4335"]
+const isGoogleMark = (src) => GOOGLE_MARK.every((c) => src.toUpperCase().includes(c))
+
 const HEX = /#([0-9a-f]{3}|[0-9a-f]{6})\b/gi
 const RGB = /rgba?\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})/gi
 const NAMED =
@@ -101,7 +112,9 @@ for (const file of walk(process.cwd())) {
   const rel = relative(process.cwd(), file).split(sep).join("/")
   if (SKIP_FILES.has(rel)) continue
 
-  readFileSync(file, "utf8").split("\n").forEach((raw, i) => {
+  const source = readFileSync(file, "utf8")
+  const exemptMark = isGoogleMark(source)
+  source.split("\n").forEach((raw, i) => {
     const line = raw.replace(/\/\*.*?\*\//g, "").replace(/(^|\s)\/\/.*$/, "")
     const seen = []
     for (const m of line.matchAll(HEX)) seen.push({ raw: m[0], rgb: toRgb(m[0]) })
@@ -110,6 +123,7 @@ for (const file of walk(process.cwd())) {
     for (const c of seen) {
       const d = describe(c.rgb)
       if (!isRed(d)) continue
+      if (exemptMark && GOOGLE_MARK.includes(canon(c.rgb))) continue
       if (isPink(d)) {
         problems.push({
           rel, n: i + 1, line: line.trim().slice(0, 110),
