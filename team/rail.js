@@ -24,8 +24,8 @@ var W = 60, WIDE = 208;
 /* label, href, glyph, and which badge it carries */
 var NAV = [
   ["Journeys", "/journeys/", "M4 5h16M4 12h16M4 19h10", "decisions"],
-  ["Targets", "/targets/", "M12 3v18 M3 12h18 M12 7a5 5 0 100 10 5 5 0 000-10z", "empty"],
-  ["Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
+  ["Targets", "https://pistonpoweredranch.com/targets", "M12 3v18 M3 12h18 M12 7a5 5 0 100 10 5 5 0 000-10z", "empty"],
+  ["The Board", "/board/", "M4 4h6v7H4z M14 4h6v11h-6z M4 15h6v5H4z M14 19h6", null],
   ["The Asks", "/asks/", "M9 6h11 M9 12h11 M9 18h11 M4 6h.01 M4 12h.01 M4 18h.01", null],
   ["Crew", "/crew/", "M17 20v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2 M9.5 6.5a3 3 0 106 0 3 3 0 00-6 0 M22 20v-2a4 4 0 00-3-3.9", "short"],
   ["Spectators", "/rsvps/", "M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z M12 9a3 3 0 100 6 3 3 0 000-6z", "rsvp"],
@@ -50,16 +50,24 @@ var NAV = [
  * Roles come from public.staff_allowlist, the same table is_staff() reads, so
  * the menu and the row level policies can never disagree about who someone is.
  */
+/* This list has a twin: lib/tools.ts in the paddockgavin repo, which the CRM
+   rail and the roles sheet both read. The two repos cannot import from each
+   other, so this is the one copy that has to be kept in step by hand. Labels,
+   paths and the FOCUS ordering below must match it. If you change one, change
+   the other in the same sitting. */
 var FOCUS = {
+  /* Deliberately unranked, and the one place this list differs from its twin:
+     the roles sheet shows Gavin a "leads with" six, because a card needs a
+     short list, while the rail itself ranks nothing for him. */
   Owner: null,
   /* Oscar owns the ground. The land, who is standing on it, and the plan. */
   "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
   /* Bekah carries the brand and everyone we are talking to. */
-  "Brand Director": ["/journeys/#ledger", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
+  "Brand Director": ["https://pistonpoweredranch.com/targets", "/console/#/ops", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
   /* Arnie and Josh work the chase and the day itself. Journeys sits below
      the divider for them rather than being hidden: they can open it, and the
      money columns are withheld by can_see_money() rather than by this file. */
-  Member: ["/targets/", "/crew/", "/board/", "/asks/", "/chat/"],
+  Member: ["https://pistonpoweredranch.com/targets", "/crew/", "/board/", "/asks/", "/chat/"],
 };
 
 /* The chat runs inside the floating dock's iframe. A rail in there would be a
