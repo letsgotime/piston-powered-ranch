@@ -13,7 +13,8 @@
         --bg: #0a111a; --glass: rgba(16, 26, 38, 0.62); --sheetbg: rgba(15, 24, 35, 0.97);
         --gline: rgba(255, 255, 255, 0.12); --gline2: rgba(255, 255, 255, 0.2);
         --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
-        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d;
+        --amber: #f8b800; --teal: #00d2be; --crit: #FF1A21;
+        --crit-fill: #E5141A;
         --e0: 0 2px 12px rgba(0, 0, 0, 0.25); --e1: 0 10px 34px rgba(0, 0, 0, 0.38);
         --e2: 0 24px 70px rgba(0, 0, 0, 0.62); --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
         --pad: 16px;
@@ -184,7 +185,7 @@
       .wb .sv.dirty .dot { background: var(--amber); }
       .wb .sv.saving .dot { background: var(--amber); animation: pulse 1s infinite; }
       .wb .sv.saved .dot { background: var(--teal); }
-      .wb .sv.error { color: var(--crit); } .wb .sv.error .dot { background: var(--crit); }
+      .wb .sv.error { color: var(--crit); } .wb .sv.error .dot { background: var(--crit-fill); }
       @keyframes pulse { 50% { opacity: 0.3; } }
       .wbadd { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
       .wbadd button { font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; color: var(--dim);
@@ -360,7 +361,7 @@
           .s-pending{background:rgba(242,201,76,.16);color:#F2C94C}
           .s-approved{background:rgba(0,210,190,.16);color:#00D2BE}
           .s-waitlisted{background:rgba(255,255,255,.10);color:#a9b4c2}
-          .s-declined{background:rgba(239,109,112,.14);color:#ef6d70}
+          .s-declined{background:rgba(229, 20, 26,.14);color:#FF1A21}
           .jDocs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0 0}
           .jDocsLabel{font:600 9.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.18em;
             text-transform:uppercase;color:#6d7a87;width:100%;margin-bottom:2px}

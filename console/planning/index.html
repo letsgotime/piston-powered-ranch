@@ -112,7 +112,8 @@
         --ink-mute: #8b95a3;
         --good: #00d2be;
         --warn: #f8b800;
-        --crit: #ff6b5e;
+        --crit: #FF1A21;
+        --crit-fill: #E5141A;
         --font-display: "Archivo", Helvetica, Arial, sans-serif;
         --font-body: "Archivo", Helvetica, Arial, sans-serif;
         --tracking-display: -0.01em;
@@ -134,7 +135,7 @@
         --panel-solid: #1a2417;
         --line: #2c3a28;
         --line-soft: #202b1d;
-        --accent: #d94f3d;
+        --accent: #FF1A21;
         --accent-ink: #1a0b08;
         --accent-2: #9fc379;
         --accent-2-ink: #14200c;
@@ -146,7 +147,8 @@
         --ink-mute: #8a997e;
         --good: #9fc379;
         --warn: #c9a15a;
-        --crit: #d94f3d;
+        --crit: #FF1A21;
+        --crit-fill: #E5141A;
         --font-display: Georgia, "Times New Roman", serif;
         --font-body: Arial, Helvetica, sans-serif;
         --tracking-display: 0em;
@@ -1778,7 +1780,7 @@
         height: 52px;
         border-radius: 50%;
         border: none;
-        background: var(--crit);
+        background: var(--crit-fill);
         color: #fff;
         flex-shrink: 0;
         display: flex;
@@ -1788,7 +1790,7 @@
         transition:
           transform 160ms var(--ease-cine),
           border-radius 220ms;
-        box-shadow: 0 8px 22px -8px rgba(255, 107, 94, 0.6);
+        box-shadow: 0 8px 22px -8px rgba(229, 20, 26, 0.6);
       }
       .rec-btn.recording {
         border-radius: 16px;
@@ -2089,8 +2091,8 @@
         gap: 11px;
         padding: 13px 14px;
         border-radius: var(--radius-s);
-        background: color-mix(in srgb, var(--crit) 14%, transparent);
-        border: 1px solid color-mix(in srgb, var(--crit) 40%, transparent);
+        background: color-mix(in srgb, var(--crit-fill) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--crit-fill) 40%, transparent);
         margin-bottom: var(--gap-4);
       }
       .draft-banner svg {

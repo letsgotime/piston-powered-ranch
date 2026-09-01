@@ -15,7 +15,8 @@
     <style>
       :root {
         --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
-        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #FF1A21; --violet: #9b7fe0;
+        --crit-fill: #E5141A;
         --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
         --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
         color-scheme: dark;
@@ -71,7 +72,7 @@
         text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
       .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
       .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
-      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit-fill); }
 
       .aw { display: grid; gap: 9px; margin-top: 13px; }
       .a { padding: 15px 18px; position: relative; overflow: hidden; }

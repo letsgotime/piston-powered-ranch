@@ -15,7 +15,8 @@
     <style>
       :root {
         --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
-        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #FF1A21; --violet: #9b7fe0;
+        --crit-fill: #E5141A;
         --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
         --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
@@ -92,7 +93,7 @@
         text-transform: uppercase; border-radius: 999px; padding: 3px 9px; font-weight: 600; }
       .pill.assigned { background: rgba(248,184,0,.16); color: var(--amber); }
       .pill.confirmed { background: rgba(0,210,190,.16); color: var(--teal); }
-      .pill.declined { background: rgba(229,72,77,.16); color: var(--crit); }
+      .pill.declined { background: rgba(229, 20, 26,.16); color: var(--crit); }
 
       /* staff coverage board */
       .shifts { display: grid; gap: 9px; margin-top: 13px; }
@@ -121,7 +122,7 @@
         text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
       .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
       .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
-      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit-fill); }
 
       /* sign up */
       .signup { margin-top: 13px; padding: 20px 22px; }

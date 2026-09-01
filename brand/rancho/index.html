@@ -21,7 +21,7 @@
         --rj-blue: #1424a1;
 
         --red-900: #9a0d11; --red-700: #bf1116; --red-500: #e5141a;
-        --red-300: #ea4c51; --red-200: #ef7a7d; --red-100: #f5a8aa;
+        --red-text: #ff1a21; --red-ink: #b3121a;
         --blue-900: #0b1458; --blue-700: #0f1c7d; --blue-500: #1424a1;
         --blue-300: #2035d2; --blue-200: #4355e2; --blue-100: #6f7de9;
 
@@ -56,6 +56,7 @@
       /* Six swatches across a phone is 65px each, and every one of them holds
          a seven character hex code. Three across gives it room. */
       @media (max-width: 560px) { .ramp { grid-template-columns: repeat(3, 1fr); } }
+      .ramp.reds { grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); }
       .ramp div { padding: 18px 8px 14px; text-align: center; }
       .ramp b { display: block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; }
       .ramp span { display: block; font-family: var(--mono); font-size: 9.5px; opacity: .78; margin-top: 3px; }
@@ -64,7 +65,7 @@
         color: var(--faint); font-weight: 600; padding: 0 10px 8px 0; border-bottom: 1px solid var(--gline); }
       td { padding: 9px 10px 9px 0; border-bottom: 1px solid var(--gline); vertical-align: top; }
       td.h { font-family: var(--mono); font-size: 12.5px; color: #fff; white-space: nowrap; }
-      .ok { color: #34d399; } .warn { color: #fbbf24; } .no { color: #f87171; }
+      .ok { color: #34d399; } .warn { color: #fbbf24; } .no { color: #FF1A21; }
       .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
       .f { border: 1px solid var(--gline); border-radius: 10px; padding: 12px 14px; }
       .f b { display: block; font-family: var(--mono); font-size: 12.5px; color: #fff; }
@@ -72,7 +73,7 @@
       .don { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
       .don > div { border-radius: 12px; padding: 15px 17px; font-size: 14px; }
       .do { background: rgba(52,211,153,.09); border: 1px solid rgba(52,211,153,.32); }
-      .dont { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.3); }
+      .dont { background: rgba(229, 20, 26,.08); border: 1px solid rgba(229, 20, 26,.3); }
       .don b { display: block; margin-bottom: 6px; color: #fff; }
       .spec { font-family: var(--serif); font-size: clamp(26px, 5vw, 46px); letter-spacing: .06em; color: #fff; margin: 6px 0 0; }
       .specnote { font-size: 13.5px; color: var(--mute); margin: 8px 0 0; }
@@ -116,15 +117,20 @@
       <p style="font-size: 15px; color: var(--dim); margin: 4px 0 0; max-width: 66ch">
         The two brand colours cannot carry text on the dark ground. Red manages
         <b>3.89:1</b>, which is large text only. Blue manages <b>1.57:1</b>, which is unreadable.
-        These ramps exist so the brand can be used in interfaces without failing anybody.
+        These steps exist so the brand can be used in interfaces without failing anybody.
       </p>
-      <div class="ramp" style="margin-top: 14px">
+      <p style="font-size: 15px; color: var(--dim); margin: 10px 0 0; max-width: 66ch">
+        There is no pale end to the red. Adding white to Jaramillo Red gives pink, salmon or coral,
+        and none of those is a brand colour, however subtle the step looks on its own. When red needs
+        to be readable it gets darker or it gets a different ground, never lighter. The build refuses
+        to ship any red carrying more than a fifth white, which is the only reason this rule holds.
+      </p>
+      <div class="ramp reds" style="margin-top: 14px">
         <div style="background:#9a0d11;color:#fff"><b>900</b><span>#9A0D11</span></div>
         <div style="background:#bf1116;color:#fff"><b>700</b><span>#BF1116</span></div>
-        <div style="background:#e5141a;color:#fff"><b>500</b><span>#E5141A</span></div>
-        <div style="background:#ea4c51;color:#180406"><b>300</b><span>#EA4C51</span></div>
-        <div style="background:#ef7a7d;color:#180406"><b>200</b><span>#EF7A7D</span></div>
-        <div style="background:#f5a8aa;color:#180406"><b>100</b><span>#F5A8AA</span></div>
+        <div style="background:#e5141a;color:#fff"><b>500 &middot; the mark</b><span>#E5141A</span></div>
+        <div style="background:#0a1523;color:#ff1a21"><b>text on ink</b><span>#FF1A21</span></div>
+        <div style="background:#faf8f4;color:#b3121a"><b>text on paper</b><span>#B3121A</span></div>
       </div>
       <div class="ramp" style="margin-top: 8px">
         <div style="background:#0b1458;color:#fff"><b>900</b><span>#0B1458</span></div>
@@ -140,8 +146,9 @@
         <thead><tr><th>Colour</th><th>On ranch ink</th><th>On ranch paper</th><th>Use it for</th></tr></thead>
         <tbody>
           <tr><td class="h">Red 500</td><td class="warn">3.89:1</td><td class="warn">4.45:1</td><td>The mark. Large display type. Rules and fills.</td></tr>
-          <tr><td class="h">Red 300</td><td class="ok">4.94:1</td><td class="no">3.50:1</td><td>Body text and links on the dark ground.</td></tr>
-          <tr><td class="h">Red 700</td><td class="no">2.89:1</td><td class="ok">5.99:1</td><td>Body text on paper, and on print.</td></tr>
+          <tr><td class="h">Red on ink</td><td class="ok">4.74:1</td><td class="no">3.65:1</td><td>Small text, labels and links on the dark ground. Never a fill.</td></tr>
+          <tr><td class="h">Red on paper</td><td class="no">2.64:1</td><td class="ok">6.56:1</td><td>Text on paper, in print and in email. Never a fill.</td></tr>
+          <tr><td class="h">Red 700</td><td class="no">2.89:1</td><td class="ok">5.99:1</td><td>A deeper red for large type on paper.</td></tr>
           <tr><td class="h">Blue 500</td><td class="no">1.57:1</td><td class="ok">11.02:1</td><td>The mark. Text on paper only. Never text on dark.</td></tr>
           <tr><td class="h">Blue 100</td><td class="ok">5.06:1</td><td class="no">3.42:1</td><td>The only blue that carries text on the dark ground.</td></tr>
         </tbody>

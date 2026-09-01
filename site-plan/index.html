@@ -109,7 +109,7 @@
       var LETTERS = "abcdefgh";
       var CAT = {
         show: "#d99400", vendor: "#00776e", vip: "#2d6f9e", parking: "#5b6672",
-        ops: "#b23a3e", entry: "#a8801a", charity: "#8a6a00", food: "#00776e", facility: "#5b6672",
+        ops: "#FF1A21", entry: "#a8801a", charity: "#8a6a00", food: "#00776e", facility: "#5b6672",
       };
       /* Same fallback the map carries, so the sheet prints even if the API is slow. */
       var FALLBACK = [
@@ -230,9 +230,9 @@
         if (lz) {
           var lc = ctr(lz);
           g += '<circle cx="' + p.x(lc[1]).toFixed(1) + '" cy="' + p.y(lc[0]).toFixed(1) + '" r="' + (45.72 / p.mpu).toFixed(1) +
-            '" fill="none" stroke="#b23a3e" stroke-width="1.6" stroke-dasharray="6 6" opacity="0.75"/>';
+            '" fill="none" stroke="#FF1A21" stroke-width="1.6" stroke-dasharray="6 6" opacity="0.75"/>';
           g += '<text x="' + p.x(lc[1]).toFixed(1) + '" y="' + (p.y(lc[0]) - 45.72 / p.mpu - 8).toFixed(1) +
-            '" font-family="Arial" font-size="13" font-weight="bold" fill="#b23a3e" text-anchor="middle">150 FT CROWD LINE</text>';
+            '" font-family="Arial" font-size="13" font-weight="bold" fill="#FF1A21" text-anchor="middle">150 FT CROWD LINE</text>';
         }
         g += '<text font-family="Arial" font-size="15" font-weight="bold" letter-spacing="3" fill="#7a6a3a" transform="translate(' +
           (p.x(-86.5822) - 6).toFixed(1) + "," + p.y(35.647).toFixed(1) + ') rotate(-90)">RANCH ROAD</text>';

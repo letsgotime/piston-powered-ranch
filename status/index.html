@@ -12,7 +12,8 @@
       :root {
         --bg: #0d1620; --glass: rgba(16, 26, 38, 0.6); --gline: rgba(255, 255, 255, 0.1);
         --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3; --amber: #f8b800; --teal: #00d2be;
-        --crit: #e5484d; --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --crit: #FF1A21; --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --crit-fill: #E5141A;
       }
       * { box-sizing: border-box; }
       body {
@@ -44,11 +45,11 @@
       .st.done::before { background: var(--teal); border-color: var(--teal); }
       .st.now { color: var(--ink); font-weight: 650; }
       .st.now::before { border-color: var(--amber); background: var(--bg); box-shadow: 0 0 0 4px rgba(248, 184, 0, 0.18); }
-      .st.bad::before { border-color: var(--crit); background: var(--crit); }
+      .st.bad::before { border-color: var(--crit-fill); background: var(--crit-fill); }
       .verdict { margin: 20px 0 0; padding: 14px 18px; border-radius: 12px; font-size: 14.5px; color: var(--dim);
         background: rgba(255, 255, 255, 0.05); border: 1px solid var(--gline); }
       .verdict.approved { border-color: rgba(0, 210, 190, 0.4); }
-      .verdict.declined { border-color: rgba(229, 72, 77, 0.4); }
+      .verdict.declined { border-color: rgba(229, 20, 26, 0.4); }
       .fine { margin: 16px 0 0; font-size: 12.5px; color: var(--mute); }
       .fine a { color: var(--dim); }
       #ask { display: none; }

@@ -15,7 +15,8 @@
     <style>
       :root {
         --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
-        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d; --violet: #9b7fe0;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #FF1A21; --violet: #9b7fe0;
+        --crit-fill: #E5141A;
         --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
         --e1: 0 10px 34px rgba(0, 0, 0, 0.42);
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
@@ -69,7 +70,7 @@
         color: var(--faint); display: flex; align-items: center; gap: 7px; }
       .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
       .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
-      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit-fill); }
       .lock { margin-top: 15px; padding: 18px 22px; font-size: 15px; }
       .lock a { color: var(--amber); }
       .dom { margin-top: 26px; }

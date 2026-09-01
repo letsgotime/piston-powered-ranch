@@ -29,7 +29,8 @@
     <style>
       :root {
         --bg: #070d14; --ink: #fff; --dim: #dbe2ea; --mute: #a9b4c2; --faint: #7f8a99;
-        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #e5484d;
+        --amber: #f8b800; --teal: #00d2be; --blue: #3d8fd6; --crit: #FF1A21;
+        --crit-fill: #E5141A;
         --glass: rgba(17, 27, 40, 0.58); --gline: rgba(255, 255, 255, 0.11);
         --e1: 0 10px 34px rgba(0, 0, 0, 0.42); --e2: 0 26px 74px rgba(0, 0, 0, 0.56);
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
@@ -76,14 +77,14 @@
         text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 7px; }
       .sv .d { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
       .sv.on { color: var(--teal); } .sv.on .d { background: var(--teal); box-shadow: 0 0 9px var(--teal); }
-      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit); }
+      .sv.err { color: var(--crit); } .sv.err .d { background: var(--crit-fill); }
       .lock { margin-top: 16px; padding: 18px 22px; font-size: 15px; }
       .lock a { color: var(--amber); }
       .card { margin-top: 15px; padding: 20px 22px; position: relative; overflow: hidden;
         transition: border-color .3s var(--ease); }
       .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tone, var(--amber)); opacity: .85; }
       .card[data-d="send"] { border-color: rgba(0,210,190,.5); }
-      .card[data-d="hold"] { border-color: rgba(229,72,77,.45); }
+      .card[data-d="hold"] { border-color: rgba(229, 20, 26,.45); }
       .card[data-d="edit"] { border-color: rgba(61,143,214,.45); }
       .ch { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
       .ch h2 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -.02em; color: var(--ink); }
@@ -109,7 +110,7 @@
       .acts button:disabled { opacity: .45; cursor: default; }
       .acts button[data-v="send"][aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #04211d; }
       .acts button[data-v="edit"][aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #04141f; }
-      .acts button[data-v="hold"][aria-pressed="true"] { background: var(--crit); border-color: var(--crit); color: #fff; }
+      .acts button[data-v="hold"][aria-pressed="true"] { background: var(--crit-fill); border-color: var(--crit-fill); color: #fff; }
       .note { width: 100%; margin-top: 11px; padding: 11px 13px; font: inherit; font-size: 14.5px; color: var(--ink);
         resize: vertical; min-height: 46px; background: rgba(0,0,0,.26); border: 1px solid var(--gline); border-radius: 11px; }
       .note:focus { outline: none; border-color: var(--amber); }

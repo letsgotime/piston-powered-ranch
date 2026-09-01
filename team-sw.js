@@ -116,7 +116,7 @@ self.addEventListener("fetch", function (e) {
                   "<title>Offline</title>" +
                   "<body style=\"margin:0;background:#0A1523;color:#DDE3EB;font:16px/1.6 Georgia,serif;display:flex;align-items:center;justify-content:center;height:100vh\">" +
                   "<div style='text-align:center;padding:24px;max-width:34ch'>" +
-                  "<div style=\"font:600 11px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#EF7A7D\">Ranch Team</div>" +
+                  "<div style=\"font:600 11px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#FF1A21\">Ranch Team</div>" +
                   "<p style='margin:14px 0 0'>No signal here. This page needs live data, so it is not going to pretend.</p>" +
                   "<p style='margin:12px 0 0;color:#8B93A7;font-size:14px'>It will load the moment you have a bar.</p>" +
                   "</div></body>",

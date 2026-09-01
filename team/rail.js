@@ -110,7 +110,7 @@ css.textContent = [
   "border-radius:999px;background:#00d2be;color:#04211d;font:900 10px/16px Archivo,system-ui,sans-serif;",
   "text-align:center;transition:all .16s}",
   ".tRail a b.at{background:#f8b800;color:#2a1e00}",
-  ".tRail a b.warn{background:#e5484d;color:#fff}",
+  ".tRail a b.warn{background:#E5141A;color:#fff}",
   ".tRail:hover a b,.tRail:focus-within a b{left:auto;right:14px;top:13px}",
   /* Group headings. Collapsed to a hairline when the rail is narrow, so the
      icons stay evenly spaced and the words appear with everything else. */

@@ -19,7 +19,8 @@
       :root {
         --bg: #0a111a; --glass: rgba(14, 23, 34, 0.66); --glass2: rgba(20, 31, 45, 0.78);
         --gline: rgba(255, 255, 255, 0.11); --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
-        --amber: #f8b800; --teal: #00d2be; --crit: #e5484d; --blue: #4da3d8;
+        --amber: #f8b800; --teal: #00d2be; --crit: #FF1A21; --blue: #4da3d8;
+        --crit-fill: #E5141A;
         --e1: 0 10px 34px rgba(0, 0, 0, 0.4); --e2: 0 24px 70px rgba(0, 0, 0, 0.55);
         --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
       }
@@ -750,7 +751,7 @@
         DRIVE.surfaceRead(PPR.lat, PPR.lng).then(function (s) {
           var el = document.getElementById("surfaceRead");
           if (!el) return;
-          var tone = s.tyre.level === "stop" ? "#EF6D70" : s.tyre.level === "caution" ? "#F8B800" : "#00D2BE";
+          var tone = s.tyre.level === "stop" ? "#FF1A21" : s.tyre.level === "caution" ? "#F8B800" : "#00D2BE";
           el.innerHTML =
             '<div class="srHead" style="color:' + tone + '">' + s.tyre.head + "</div>" +
             '<div class="srRow"><span>Air</span><b>' + (s.air == null ? "&middot;&middot;" : s.air + "&deg;F") + "</b><i>measured</i></div>" +
@@ -1097,7 +1098,7 @@
         confirmed: { dot: "#ffffff", word: "Confirmed" },
         open: { dot: "#00d2be", word: "Open" },
         full: { dot: "#f8b800", word: "Full" },
-        closed: { dot: "#e5484d", word: "Closed" },
+        closed: { dot: "#FF1A21", word: "Closed" },
       };
       var CAT = {
         show: { color: "#f8b800", word: "Show" },
@@ -1378,7 +1379,7 @@
           var mPerUnit = ((GEO.E - GEO.W) * 111320 * Math.cos((GEO.N * Math.PI) / 180)) / VW;
           var rr = (45.72 / mPerUnit).toFixed(1);
           html += '<circle cx="' + gx(lc[1]).toFixed(1) + '" cy="' + gy(lc[0]).toFixed(1) + '" r="' + rr +
-            '" fill="none" stroke="rgba(229,72,77,0.5)" stroke-width="1.6" stroke-dasharray="6 6" vector-effect="non-scaling-stroke"/>';
+            '" fill="none" stroke="rgba(229, 20, 26,0.5)" stroke-width="1.6" stroke-dasharray="6 6" vector-effect="non-scaling-stroke"/>';
         }
         /* golden light azimuth ray across the show field */
         var sf = FIELD.features.find(function (f) { return f.slug === "show-field"; });
@@ -1547,7 +1548,7 @@
           '<span class="li"><span class="sw" style="border-color:#fff;background:rgba(255,255,255,0.1)"></span>Confirmed</span>' +
           '<span class="li"><span class="sw" style="border-color:#00d2be;background:rgba(0,210,190,0.15)"></span>Open now</span>' +
           '<span class="li"><span class="sw" style="border-color:#f8b800;background:repeating-linear-gradient(45deg,rgba(248,184,0,0.35) 0 3px,rgba(248,184,0,0.1) 3px 7px)"></span>Full</span>' +
-          '<span class="li"><span class="sw" style="border-color:#e5484d;background:rgba(229,72,77,0.08)"></span>Closed</span>' +
+          '<span class="li"><span class="sw" style="border-color:#E5141A;background:rgba(229, 20, 26,0.08)"></span>Closed</span>' +
           '<span class="li"><span class="sw" style="border-color:#f8b800;border-style:solid;background:none"></span>Property line</span>' +
           "</div>" +
           '<div class="scalerow"><span class="rulebar"></span><span>90 m · about 18 car lengths</span><span style="margin-left:auto">N ↑</span></div>' +
