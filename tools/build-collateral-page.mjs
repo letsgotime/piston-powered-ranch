@@ -27,6 +27,26 @@ const CATALOG = [
     shape: "sq",
   },
   {
+    base: "PPR_QR_PistonPoweredRanch",
+    title: "Event QR",
+    aud: "community",
+    group: "Brand",
+    blurb:
+      "Goes to pistonpoweredranch.com. Error correction H, so it still reads off a printed sheet, in the sun, at an angle. Take the SVG to print.",
+    imageOnly: true,
+    shape: "sq",
+  },
+  {
+    base: "PPR_QR_PistonPoweredRanch_OnInk",
+    title: "Event QR, for dark stock",
+    aud: "community",
+    group: "Brand",
+    blurb:
+      "The same code on a white tile, for placing on Ranch Ink. Not a white QR: inverted codes fail on plenty of scanners, and this one would not decode at all.",
+    imageOnly: true,
+    shape: "sq",
+  },
+  {
     base: "PPR_Proposal_RanchoJaramillo",
     title: "Venue Proposal",
     aud: "ranch",
@@ -178,6 +198,9 @@ function assetsFor(it) {
   }
   if (present.has(`${it.base}.png`))
     push(`${it.base}.png`, "image", "PNG", "Image, drops into any chat");
+    /* Vector, for anything printed bigger than a page. A QR blown up from a
+       bitmap loses its edges and stops scanning. */
+    push(`${it.base}.svg`, "print", "SVG", "Vector, scales to a banner");
   for (const p of ["p1", "p2"])
     push(
       `${it.base}_${p}.png`,
