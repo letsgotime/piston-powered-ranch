@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Diagnostics · The Piston Powered Ranch</title>
+<meta name="robots" content="noindex,nofollow" />
+<style>
+  :root{--ink:#0A1523;--paper:#EDF1F6;--mute:#8b95a3;--ok:#00D2BE;--bad:#ef6d70;--warn:#F2C94C;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--mono);
+    font-size:13px;line-height:1.6;padding:20px}
+  h1{font:900 22px/1.2 Archivo,system-ui,sans-serif;margin:0 0 4px;letter-spacing:-.02em}
+  p.sub{margin:0 0 18px;color:var(--mute);font-family:Archivo,system-ui,sans-serif;font-size:14px}
+  pre{background:#060c14;border:1px solid #22303f;border-radius:10px;padding:14px;
+    white-space:pre-wrap;word-break:break-word;margin:0;max-width:900px}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  button{margin:14px 0 0;font:800 14px/1 Archivo,system-ui,sans-serif;color:#151000;
+    background:var(--warn);border:0;border-radius:10px;padding:13px 22px;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Diagnostics</h1>
+<p class="sub">Everything Claude needs in one place. Press copy, paste it into the chat.</p>
+<pre id="out">Running…</pre>
+<button id="copy" type="button">Copy all of it</button>
+
+<script type="module">
+import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+
+const AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
+const DATA = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+const out = document.getElementById("out");
+const lines = [];
+const say = (s) => { lines.push(s); out.textContent = lines.join("\n"); };
+
+/* Anything can throw or hang. Every step is raced against a timeout so the
+   report always finishes, because a diagnostic that hangs is the same problem
+   it is meant to diagnose. */
+const T = (p, ms = 8000) =>
+  Promise.race([p, new Promise((r) => setTimeout(() => r({ __timeout: true }), ms))]);
+
+say("PISTON POWERED RANCH · DIAGNOSTIC");
+say("when      " + new Date().toISOString());
+say("where     " + location.href);
+say("browser   " + navigator.userAgent.slice(0, 90));
+say("reduced motion " + matchMedia("(prefers-reduced-motion: reduce)").matches);
+say("");
+
+const errs = [];
+window.addEventListener("error", (e) => errs.push("JS: " + e.message));
+window.addEventListener("unhandledrejection", (e) => errs.push("PROMISE: " + (e.reason && e.reason.message)));
+
+let db = null;
+try {
+  db = createClient({
+    auth: { url: AUTH, allowAnonymous: true, adapter: SupabaseAuthAdapter() },
+    dataApi: { url: DATA },
+  });
+  say("client    built OK");
+} catch (e) {
+  say("client    FAILED " + e.message);
+}
+
+let token = null, email = null;
+if (db) {
+  const s = await T(db.auth.getSession().catch((e) => ({ __err: e.message })));
+  if (s && s.__timeout) say("session   TIMED OUT after 8s");
+  else if (s && s.__err) say("session   ERROR " + s.__err);
+  else {
+    token = s?.data?.session?.access_token || null;
+    email = s?.data?.session?.user?.email || null;
+    say("session   " + (token ? "present" : "NONE"));
+    say("signed in as " + (email || "nobody"));
+  }
+}
+
+if (token) {
+  const r = await T(
+    fetch(DATA + "/rpc/is_staff", {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+      body: "{}",
+    }).then((x) => x.text()).catch((e) => "ERR " + e.message)
+  );
+  say("is_staff  " + (r && r.__timeout ? "TIMED OUT" : String(r).trim()));
+}
+
+say("");
+say("TABLES (rows the signed in session can actually read)");
+const tables = ["submissions", "spectators", "payments", "accounts", "milestones",
+                "open_decisions", "budget_items", "staff_roster", "volunteers",
+                "awards", "categories", "account_candidates", "threads", "messages"];
+for (const t of tables) {
+  if (!db) break;
+  const r = await T(db.from(t).select("*").limit(200));
+  if (r && r.__timeout) { say(`  ${t.padEnd(20)} TIMED OUT`); continue; }
+  if (r?.error) { say(`  ${t.padEnd(20)} ERROR ${r.error.message.slice(0, 70)}`); continue; }
+  say(`  ${t.padEnd(20)} ${(r?.data || []).length}`);
+}
+
+say("");
+say("ERRORS SEEN ON THIS PAGE");
+say(errs.length ? errs.map((e) => "  " + e).join("\n") : "  none");
+
+say("");
+say("END");
+
+document.getElementById("copy").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(out.textContent);
+    document.getElementById("copy").textContent = "Copied. Paste it to Claude.";
+  } catch {
+    const r = document.createRange();
+    r.selectNode(out);
+    getSelection().removeAllRanges();
+    getSelection().addRange(r);
+    document.getElementById("copy").textContent = "Selected. Press Command C.";
+  }
+});
+</script>
+</body>
+</html>
