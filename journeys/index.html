@@ -1445,11 +1445,40 @@
         sheet.removeAttribute("inert");
         document.body.classList.add("locked");
         (sheet.querySelector(".acts a, .acts button") || sheet).focus();
+        syncHash(key);
       }
+      /**
+       * A panel you can send somebody.
+       *
+       * Panels only ever opened by clicking a node, so there was no way to
+       * link to one: "open Journeys, then find the ledger tile" is not a URL.
+       * The key now rides in the hash, which makes every panel its own address
+       * without the page needing a router.
+       */
+      function syncHash(key) {
+        var want = key ? "#" + key : "";
+        if (location.hash === want) return;
+        try {
+          history.replaceState(null, "", location.pathname + location.search + want);
+        } catch (e) {
+          /* file:// and other odd origins refuse replaceState. Not worth failing over. */
+        }
+      }
+      function panelFromHash() {
+        return (location.hash || "").replace(/^#\/?/, "") || null;
+      }
+      function openFromHash() {
+        var k = panelFromHash();
+        if (k && k !== openKey) openPanel(k);
+        else if (!k && openKey) closePanel();
+      }
+      window.addEventListener("hashchange", openFromHash);
+
       function closePanel() {
         if (!sheet.classList.contains("on")) return;
         Saver.flushAll().then(function () { loadWorkbench(); }); // (a) flush on close
         openKey = null;
+        syncHash(null);
         sheet.classList.remove("on"); scrim.classList.remove("on");
         sheet.setAttribute("aria-hidden", "true");
         sheet.setAttribute("inert", "");
@@ -1748,7 +1777,9 @@
         if (document.hidden) Saver.flushAll();
       });
       render();
-      tick();
+      /* Panels paint from loaded data, so a link is honoured after the first
+         tick rather than on DOMContentLoaded, when there is nothing to show. */
+      tick().then(openFromHash, openFromHash);
       // The workbench is shared, so it polls faster than the headline numbers:
       // this is near-live, not true realtime. The data API has no push channel.
       setInterval(function () { document.hidden || loadWorkbench(); }, 8e3);
