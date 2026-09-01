@@ -4,22 +4,6 @@
     {
       "source": "/rancho",
       "destination": "/collateral/index.html"
-    },
-    {
-      "source": "/hq",
-      "destination": "/journeys/index.html"
-    },
-    {
-      "source": "/hq/",
-      "destination": "/journeys/index.html"
-    },
-    {
-      "source": "/ledger",
-      "destination": "/journeys/index.html"
-    },
-    {
-      "source": "/ledger/",
-      "destination": "/journeys/index.html"
     }
   ],
   "headers": [

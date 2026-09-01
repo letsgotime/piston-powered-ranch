@@ -57,7 +57,7 @@ var FOCUS = {
   /* Oscar owns the ground. The land, who is standing on it, and the plan. */
   "Property Owner": ["/journeys/", "/map/", "/site-plan/", "/crew/", "/rsvps/", "/chat/"],
   /* Bekah carries the brand and everyone we are talking to. */
-  "Brand Director": ["/ledger", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
+  "Brand Director": ["/journeys/#ledger", "/targets/", "/collateral/", "/brand/rancho/", "/asks/", "/chat/"],
   /* Arnie and Josh work the chase and the day itself. Journeys sits below
      the divider for them rather than being hidden: they can open it, and the
      money columns are withheld by can_see_money() rather than by this file. */
@@ -168,9 +168,8 @@ scrim.className = "tScrim";
 
 function here(href) {
   var p = location.pathname;
-  /* Journeys answers on both paths: /journeys/, which is the name, and /ledger,
-     which was briefly the label. Both highlight, so an old link is not punished. */
-  if (href === "/journeys/") return p.indexOf("/journeys") === 0 || p.indexOf("/ledger") === 0;
+  /* One file, one address. A panel hash still counts as being on Journeys. */
+  if (href.indexOf("/journeys/") === 0) return p.indexOf("/journeys") === 0;
   return p.indexOf(href) === 0;
 }
 
