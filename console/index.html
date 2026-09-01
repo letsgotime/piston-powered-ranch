@@ -2526,6 +2526,11 @@
               </button>
               <p class="field-error" id="enterError"></p>
               <p class="enter-note">
+                <div id="magicWrap" style="margin:18px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)">
+                  <p style="margin:0 0 10px;font-family:var(--font-mono,ui-monospace,Menlo,monospace);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted,#8b95a3)">Or skip the password</p>
+                  <button type="button" id="magicBtn" style="width:100%;font:800 15px/1 var(--font-sans,Archivo,system-ui,sans-serif);color:#EDF1F6;background:transparent;border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:15px;cursor:pointer">Email me a sign in link</button>
+                  <p id="magicSaid" style="margin:10px 0 0;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-size:14px;line-height:1.5;color:var(--muted,#8b95a3)"></p>
+                </div>
                 <p style="margin:10px 0 0"><a href="/reset/" style="font-family:var(--mono,monospace);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,#F2C94C);text-decoration:none">Forgot your password</a></p>
                 Real sign-in. First time signing in with an approved email creates your account;
                 after that, the same email and password sign you back in. Only
@@ -3755,6 +3760,38 @@
               this.setAttribute("aria-pressed", show ? "true" : "false"),
               f.focus());
           }),
+          document.getElementById("magicBtn").addEventListener("click", async function () {
+            var em = (document.getElementById("fEmail").value || "").trim();
+            var said = document.getElementById("magicSaid");
+            var btn = this;
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+              said.style.color = "#ef6d70";
+              said.textContent = "Put your email in the box above first.";
+              return;
+            }
+            btn.disabled = true; btn.textContent = "Sending";
+            try {
+              var r = await fetch("https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/sign-in/magic-link", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: em, callbackURL: location.origin + "/journeys/" }),
+              });
+              if (r.status === 404) {
+                said.style.color = "#F2C94C";
+                said.textContent = "Magic links are not switched on for this project yet.";
+                btn.disabled = false; btn.textContent = "Email me a sign in link";
+                return;
+              }
+              if (!r.ok) throw new Error(String(r.status));
+              said.style.color = "#00D2BE";
+              said.textContent = "Check your email. The link signs you straight in and lands you on Journeys.";
+              btn.textContent = "Sent";
+            } catch (err) {
+              said.style.color = "#ef6d70";
+              said.textContent = "Could not send it. Try the password above, or the reset link.";
+              btn.disabled = false; btn.textContent = "Email me a sign in link";
+            }
+          });
           document.getElementById("enterBtn").addEventListener("click", function () {
             var e = (document.getElementById("fEmail").value || "").trim(),
               t = document.getElementById("fCode").value || "";
