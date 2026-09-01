@@ -27,10 +27,8 @@
 <button id="copy" type="button">Copy all of it</button>
 
 <script type="module">
-import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+import { db as makeDb, DATA_API as DATA, AUTH_URL as AUTH } from "/vendor/ranch-db.js";
 
-const AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
-const DATA = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 const out = document.getElementById("out");
 const lines = [];
 const say = (s) => { lines.push(s); out.textContent = lines.join("\n"); };
@@ -54,10 +52,7 @@ window.addEventListener("unhandledrejection", (e) => errs.push("PROMISE: " + (e.
 
 let db = null;
 try {
-  db = createClient({
-    auth: { url: AUTH, allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-    dataApi: { url: DATA },
-  });
+  db = makeDb();
   say("client    built OK");
 } catch (e) {
   say("client    FAILED " + e.message);

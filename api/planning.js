@@ -1,4 +1,5 @@
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { DATA_API, JWKS_URL } from "./_neon.js";
 
 /**
  * Serves the internal planning documents to verified staff only.
@@ -10,8 +11,6 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
  * prose here withholds it from unauthenticated callers for real.
  * */
 
-const DATA_API =
-  "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 
 /**
  * Authorisation comes from public.staff_allowlist, never from a list in code.
@@ -41,7 +40,7 @@ async function canSeeMoney(bearer) {
 
 const JWKS = createRemoteJWKSet(
   new URL(
-    "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json",
+    JWKS_URL,
   ),
 );
 

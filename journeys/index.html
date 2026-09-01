@@ -398,23 +398,11 @@
       <div class="body" id="shBody"></div>
     </div>
     <script type="module">
-      import {
-        createClient,
-        SupabaseAuthAdapter,
-      } from "/vendor/neon-js.js";
+      import { db as makeDb, DATA_API, EVENT_ID } from "/vendor/ranch-db.js";
       import { upload as blobUpload } from "/vendor/vercel-blob-client.js";
       var db = null;
       try {
-        db = createClient({
-          auth: {
-            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-            allowAnonymous: true,
-            adapter: SupabaseAuthAdapter(),
-          },
-          dataApi: {
-            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
-          },
-        });
+        db = makeDb();
       } catch (e) {}
       var esc = function (s) {
         return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
@@ -447,7 +435,7 @@
       document.addEventListener("DOMContentLoaded", function () {
         document.body.classList.add("jLocked");
       });
-      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      
       var LIVE = { stats: null, subs: null, accounts: null, payments: null, decisions: null,
                    spectators: null, clubs: null, features: null, wb: null, feed: null,
                    milestones: null, budget: null, roster: null };
@@ -1617,7 +1605,7 @@
           mf.error || (LIVE.features = mf.data);
         }
       }
-      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      
       /* Staff is decided by public.staff_allowlist, never by a list in this
          file. Replaying the session token against is_staff() means the display
          gate and the row-level policy read the same table. Note the raw fetch:

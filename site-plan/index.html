@@ -99,13 +99,9 @@
     <span class="live" id="live">Reading the layout…</span>
 
     <script type="module">
-      import {
-        createClient,
-        SupabaseAuthAdapter,
-      } from "/vendor/neon-js.js";
+      import { db as makeDb, EVENT_ID } from "/vendor/ranch-db.js";
       import { PARCEL, ROADS, CREEKS } from "/map/geo.js";
 
-      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
       var LETTERS = "abcdefgh";
       var CAT = {
         show: "#d99400", vendor: "#00776e", vip: "#2d6f9e", parking: "#5b6672",
@@ -305,14 +301,7 @@
       document.getElementById("live").textContent = "Built-in layout";
 
       try {
-        var db = createClient({
-          auth: {
-            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-            allowAnonymous: true,
-            adapter: SupabaseAuthAdapter(),
-          },
-          dataApi: { url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1" },
-        });
+        var db = makeDb();
         var r = await db.from("map_features").select("*").eq("event_id", EVENT_ID).order("sort");
         if (r && r.data && r.data.length) {
           render(r.data);

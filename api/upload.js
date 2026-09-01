@@ -1,6 +1,7 @@
 import { handleUpload } from "@vercel/blob/client";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { verifySession, sessionSecret } from "./upload-session.js";
+import { DATA_API, JWKS_URL } from "./_neon.js";
 
 /**
  * Mints short-lived, scoped upload tokens for the public Submit form.
@@ -75,8 +76,6 @@ const SUBMISSION_TYPES = new Set(["vehicle", "vendor", "sponsor"]);
  * demands a verified Neon Auth token on a staff address before it will mint a
  * token, and confines that token to one workbench item's folder.
  */
-const DATA_API =
-  "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 
 /**
  * Authorisation comes from public.staff_allowlist, never from a list in code.
@@ -100,7 +99,7 @@ async function isStaff(bearer) {
 
 const JWKS = createRemoteJWKSet(
   new URL(
-    "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json",
+    JWKS_URL,
   ),
 );
 

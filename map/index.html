@@ -523,15 +523,12 @@
     </div>
 
     <script type="module">
-      import {
-        createClient,
-        SupabaseAuthAdapter,
-      } from "/vendor/neon-js.js";
+      import { db as makeDb, EVENT_ID } from "/vendor/ranch-db.js";
       import { PARCEL, ROADS } from "./geo.js";
 
       /* Side gate fix pending from Gavin: swap this one constant when it lands. */
       var PPR = { lat: 35.6309932, lng: -86.5868705 };
-      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
+      
       var SHOW_DAY = "2026-10-10";
       var reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
       var reduce = reduceMq.matches;
@@ -542,16 +539,7 @@
       };
       var db = null;
       try {
-        db = createClient({
-          auth: {
-            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-            allowAnonymous: true,
-            adapter: SupabaseAuthAdapter(),
-          },
-          dataApi: {
-            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
-          },
-        });
+        db = makeDb();
       } catch (e) {}
       var esc = function (s) {
         return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {

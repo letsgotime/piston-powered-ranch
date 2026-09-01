@@ -170,10 +170,9 @@
     </div>
 
     <script type="module">
-      import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+      import { db as makeDb, DATA_API, EVENT_ID } from "/vendor/ranch-db.js";
 
-      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
-      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      
       var DOMAINS = [
         ["sponsor", "Sponsors", "var(--amber)", "Brands buying a position on the day"],
         ["vendor", "Vendors", "var(--teal)", "Sellers on the field"],
@@ -191,11 +190,7 @@
       var timer = {}, chain = {}, pending = {};
 
       try {
-        db = createClient({
-          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-          dataApi: { url: DATA_API },
-        });
+        db = makeDb();
       } catch (e) {}
 
       function esc(s) {

@@ -99,18 +99,12 @@
     </div>
 
     <script type="module">
-      import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
-
-      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      import { db as makeDb, DATA_API } from "/vendor/ranch-db.js";
 
       var db = null, award = null, FIELD = [], voted = null, key = null;
 
       try {
-        db = createClient({
-          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-          dataApi: { url: DATA_API },
-        });
+        db = makeDb();
       } catch (e) {}
 
       function esc(s) {

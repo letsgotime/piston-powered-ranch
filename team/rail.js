@@ -17,10 +17,8 @@
  * renders nothing at all, which is why it is safe on pages that also have a
  * public face.
  */
-import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js";
 
-var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
-var AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
 var W = 60, WIDE = 208;
 
 /* label, href, glyph, and which badge it carries */
@@ -73,10 +71,7 @@ if (window.self !== window.top || location.search.indexOf("embed=1") > -1) {
 var db = null, counts = {}, me = "", role = "", people = {};
 
 try {
-  db = createClient({
-    auth: { url: AUTH, allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-    dataApi: { url: DATA_API },
-  });
+  db = makeDb();
 } catch (e) {}
 
 var css = document.createElement("style");

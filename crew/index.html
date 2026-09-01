@@ -209,21 +209,16 @@
     </div>
 
     <script type="module">
-      import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+      import { db as makeDb, DATA_API, EVENT_ID } from "/vendor/ranch-db.js";
 
-      var EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
-      var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
+      
       var TZ = "America/Chicago";
 
       var db = null, staff = false, ME = "", MINE = null;
       var SHIFTS = [], ASSIGN = [], VOLS = [], openShift = null;
 
       try {
-        db = createClient({
-          auth: { url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-                  allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-          dataApi: { url: DATA_API },
-        });
+        db = makeDb();
       } catch (e) {}
 
       function esc(s) {
@@ -373,8 +368,8 @@
           "<div><label for='sMail'>Email</label><input id='sMail' type='email' autocomplete='email' /></div>" +
           "<div><label for='sPass'>Password</label><input id='sPass' type='password' autocomplete='current-password' /></div>" +
           "</div>" +
-          '<button class="go" type="button" id="sGo">Sign in</button>
-          <p style="margin:12px 0 0;text-align:center"><a href="/reset/" style="font:600 11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:#F2C94C;text-decoration:none">Forgot your password</a></p>' +
+          '<button class="go" type="button" id="sGo">Sign in</button>' +
+          '<p style="margin:12px 0 0;text-align:center"><a href="/reset/" style="font:600 11.5px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:#F2C94C;text-decoration:none">Forgot your password</a></p>' +
           '<div class="said" id="sSaid"></div></div>';
       }
 

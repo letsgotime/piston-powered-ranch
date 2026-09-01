@@ -19,18 +19,12 @@
  * session and there is exactly one chat implementation rather than a copy of
  * it embedded in every page.
  */
-import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
-
-var DATA_API = "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
-var AUTH = "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
+import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js";
 
 var db = null, unread = 0, mentioned = false, subject = null, open = false, staff = false;
 
 try {
-  db = createClient({
-    auth: { url: AUTH, allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-    dataApi: { url: DATA_API },
-  });
+  db = makeDb();
 } catch (e) {}
 
 var css = document.createElement("style");

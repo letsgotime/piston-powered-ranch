@@ -3406,23 +3406,11 @@
       <span class="lbl" id="authOffBadge" style="display: none; color: #f8b800">Auth off</span>
     </div>
     <script type="module">
-      import {
-        createClient,
-        SupabaseAuthAdapter,
-      } from "/vendor/neon-js.js";
+      import { db as makeDb, AUTH_URL } from "/vendor/ranch-db.js";
       import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
       try {
-        ((window.__pgdb = createClient({
-          auth: {
-            url: "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth",
-            allowAnonymous: !0,
-            adapter: SupabaseAuthAdapter(),
-          },
-          dataApi: {
-            url: "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1",
-          },
-        })),
+        ((window.__pgdb = makeDb()),
           window.dispatchEvent(new Event("pgdb-ready")));
       } catch (t) {
         console.error("Neon client construction failed:", t);
@@ -3783,7 +3771,7 @@
             said.style.color = "#9AA6B2";
             said.textContent = "Taking you to Google";
             try {
-              var r = await fetch("https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/sign-in/social", {
+              var r = await fetch(AUTH_URL + "/sign-in/social", {
                 method: "POST",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -3799,7 +3787,7 @@
               said.style.color = "#FF1A21";
               said.textContent = err.message + " Use the email link instead.";
             }
-          });
+          }),
           document.getElementById("magicBtn").addEventListener("click", async function () {
             var em = (document.getElementById("fEmail").value || "").trim();
             var said = document.getElementById("magicSaid");
@@ -3811,7 +3799,7 @@
             }
             btn.disabled = true; btn.textContent = "Sending";
             try {
-              var r = await fetch("https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/sign-in/magic-link", {
+              var r = await fetch(AUTH_URL + "/sign-in/magic-link", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: em, callbackURL: location.origin + "/journeys/" }),
@@ -3831,7 +3819,7 @@
               said.textContent = "Could not send it. Try the password above, or the reset link.";
               btn.disabled = false; btn.textContent = "Email me a sign in link";
             }
-          });
+          }),
           document.getElementById("enterBtn").addEventListener("click", function () {
             var e = (document.getElementById("fEmail").value || "").trim(),
               t = document.getElementById("fCode").value || "";

@@ -1,5 +1,6 @@
 import { issueSignedToken, presignUrl } from "@vercel/blob";
 import { createRemoteJWKSet, jwtVerify } from "jose";
+import { DATA_API, JWKS_URL } from "./_neon.js";
 
 /**
  * Returns short-lived signed URLs for submitted media.
@@ -11,8 +12,6 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
  * check: RLS protects the rows, this protects the pixels.
  * */
 
-const DATA_API =
-  "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 
 /**
  * Authorisation comes from public.staff_allowlist, never from a list in code.
@@ -42,7 +41,7 @@ async function isStaff(bearer) {
 
 const JWKS = createRemoteJWKSet(
   new URL(
-    "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth/.well-known/jwks.json",
+    JWKS_URL,
   ),
 );
 
