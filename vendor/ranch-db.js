@@ -97,6 +97,117 @@ export async function me() {
   return (await rpc("me")) || "";
 }
 
+/* ---------------------------------------------------------------------------
+ * Signing in.
+ *
+ * This algorithm was written three times, in the console, in crew, and again
+ * in the Next app, and the three had already drifted: two waited before the
+ * second attempt and one did not. Every message below is the wording the team
+ * has already seen, so nothing reads differently depending on which door was
+ * used. Each returns null when it worked, or something to show the person.
+ * ------------------------------------------------------------------------- */
+
+/** gavin@paddockgavin.com becomes Gavin. Enough to satisfy the field. */
+function nameFromEmail(email) {
+  const local = (email.split("@")[0] || "Staff").replace(/[._-]+/g, " ").trim();
+  return local ? local.charAt(0).toUpperCase() + local.slice(1) : "Staff";
+}
+
+/**
+ * Sign in, sign up, then sign in once more whatever sign up said.
+ *
+ * Sign up can create the account and still fail to hand back a session, which
+ * used to end in an error message beside a working account. The auth service
+ * also requires a name and answers [body.name] Invalid input without one,
+ * which reads as a wrong password, so the name is derived from the address.
+ */
+export async function signIn(email, password) {
+  const c = db();
+  if (!c) return "No connection to the database.";
+
+  const first = await c.auth.signInWithPassword({ email, password });
+  if (!first.error) return null;
+
+  const made = await c.auth.signUp({ email, password, name: nameFromEmail(email) });
+  if (made.error && /already exists|already registered|USER_ALREADY/i.test(made.error.message || "")) {
+    /* The address is the one right thing about this attempt. Saying "use
+       another email", which is what the service returns, is the opposite of
+       what they should do. */
+    return "That password does not match this account. Use the sign in link, or reset it below.";
+  }
+
+  await new Promise((r) => setTimeout(r, 600));
+  const again = await c.auth.signInWithPassword({ email, password });
+  if (again.error) {
+    return (made.error && made.error.message) ||
+      "Could not sign in. Try once more, and if it repeats use the reset link.";
+  }
+  return null;
+}
+
+/** The way the onboarding email tells people to get in. */
+export async function magicLink(email, callbackURL) {
+  try {
+    const r = await fetch(AUTH_URL + "/sign-in/magic-link", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, callbackURL }),
+    });
+    if (r.status === 404) return "Sign in links are not switched on yet. Use a password for now.";
+    if (!r.ok) return "Could not send the link (" + r.status + "). Try the password instead.";
+    return null;
+  } catch (e) {
+    return "Could not reach the sign in service. Check your connection.";
+  }
+}
+
+/**
+ * Google. Answers with a one time token URL that redirects to the consent
+ * screen. Credentialed because the endpoint sets state on the auth origin,
+ * which its CORS headers allow from all four of our domains.
+ *
+ * This puts nobody on the staff list. is_staff() still decides what anybody
+ * sees, so an address that is not on the list signs in and finds nothing.
+ */
+export async function signInWithGoogle(callbackURL) {
+  try {
+    const r = await fetch(AUTH_URL + "/sign-in/social", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ provider: "google", callbackURL }),
+    });
+    if (r.status === 400) return "Google sign in is not switched on for this project.";
+    if (!r.ok) return "Could not start Google sign in (" + r.status + "). Use the email link instead.";
+    const data = await r.json();
+    if (!data || !data.url) return "Google did not give us anywhere to send you. Use the email link instead.";
+    window.location.href = data.url;
+    return null;
+  } catch (e) {
+    return "Could not reach the sign in service. Check your connection.";
+  }
+}
+
+/**
+ * A reset, for somebody who set a password and cannot remember it. The success
+ * line is deliberately vague about whether the address exists, so this cannot
+ * be used to find out who is on the staff list.
+ */
+export async function requestReset(email, redirectTo) {
+  try {
+    const r = await fetch(AUTH_URL + "/request-password-reset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, redirectTo }),
+    });
+    if (r.status === 404) return "Password resets are not switched on. Use the sign in link instead.";
+    if (!r.ok) return "Could not send the reset (" + r.status + "). Use the sign in link instead.";
+    return null;
+  } catch (e) {
+    return "Could not reach the sign in service. Check your connection.";
+  }
+}
+
 export async function signOut() {
   try {
     const c = db();

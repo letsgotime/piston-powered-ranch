@@ -3406,7 +3406,7 @@
       <span class="lbl" id="authOffBadge" style="display: none; color: #f8b800">Auth off</span>
     </div>
     <script type="module">
-      import { db as makeDb, AUTH_URL } from "/vendor/ranch-db.js";
+      import { db as makeDb, signIn, magicLink, signInWithGoogle } from "/vendor/ranch-db.js";
       import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
       try {
@@ -3770,22 +3770,11 @@
             btn.disabled = true;
             said.style.color = "#9AA6B2";
             said.textContent = "Taking you to Google";
-            try {
-              var r = await fetch(AUTH_URL + "/sign-in/social", {
-                method: "POST",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ provider: "google", callbackURL: location.origin + "/journeys/" }),
-              });
-              if (r.status === 400) throw new Error("Google sign in is not switched on for this project.");
-              if (!r.ok) throw new Error("Could not start Google sign in (" + r.status + ").");
-              var data = await r.json();
-              if (!data || !data.url) throw new Error("Google did not give us anywhere to send you.");
-              location.href = data.url;
-            } catch (err) {
+            var problem = await signInWithGoogle(location.origin + "/journeys/");
+            if (problem) {
               btn.disabled = false;
               said.style.color = "#FF1A21";
-              said.textContent = err.message + " Use the email link instead.";
+              said.textContent = problem;
             }
           }),
           document.getElementById("magicBtn").addEventListener("click", async function () {
@@ -3798,27 +3787,16 @@
               return;
             }
             btn.disabled = true; btn.textContent = "Sending";
-            try {
-              var r = await fetch(AUTH_URL + "/sign-in/magic-link", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: em, callbackURL: location.origin + "/journeys/" }),
-              });
-              if (r.status === 404) {
-                said.style.color = "#F2C94C";
-                said.textContent = "Magic links are not switched on for this project yet.";
-                btn.disabled = false; btn.textContent = "Email me a sign in link";
-                return;
-              }
-              if (!r.ok) throw new Error(String(r.status));
-              said.style.color = "#00D2BE";
-              said.textContent = "Check your email. The link signs you straight in and lands you on Journeys.";
-              btn.textContent = "Sent";
-            } catch (err) {
+            var problem = await magicLink(em, location.origin + "/journeys/");
+            if (problem) {
               said.style.color = "#FF1A21";
-              said.textContent = "Could not send it. Try the password above, or the reset link.";
+              said.textContent = problem;
               btn.disabled = false; btn.textContent = "Email me a sign in link";
+              return;
             }
+            said.style.color = "#00D2BE";
+            said.textContent = "Check your email. The link signs you straight in and lands you on Journeys.";
+            btn.textContent = "Sent";
           }),
           document.getElementById("enterBtn").addEventListener("click", function () {
             var e = (document.getElementById("fEmail").value || "").trim(),
@@ -3830,46 +3808,14 @@
                     (async function () {
                       try {
                         await a();
-                        /* Three attempts, in the only order that cannot strand
-                           somebody half created.
-
-                           Sign in first, because most people already have an
-                           account. If that fails, sign up, because a first time
-                           approved address should just work. Then sign in ONCE
-                           MORE regardless of what sign up said.
-
-                           That last retry is the fix. Sign up can succeed
-                           without handing back a session, and it can fail with
-                           "Failed to retrieve user session" having already
-                           created the row. Both used to end in an error message
-                           beside a working account. Now both end signed in. */
-                        var i = await n.auth.signInWithPassword({ email: e, password: t });
-                        if (i.error) {
-                          var s = await n.auth.signUp({
-                            email: e,
-                            password: t,
-                            /* Required. Without it the service answers
-                               [body.name] Invalid input and no account is made,
-                               which is why sign up has never worked. Derived
-                               from the address so nobody has to type it. */
-                            name: (e.split("@")[0] || "Staff").replace(/[._-]+/g, " ").trim(),
-                          });
-                          var known = s.error &&
-                            /already exists|already registered|USER_ALREADY/i.test(s.error.message || "");
-                          if (known) {
-                            // The account is real and the password is not.
-                            return (E(!1), void w("That password does not match this account. Use Forgot your password below."));
-                          }
-                          // Whatever sign up returned, try once more: it may
-                          // have made the account without giving us a session.
-                          await new Promise(function (r) { setTimeout(r, 600); });
-                          i = await n.auth.signInWithPassword({ email: e, password: t });
-                          if (i.error) {
-                            return (E(!1), void w(
-                              (s.error && s.error.message) ||
-                              "Could not sign in. Try once more, and if it repeats use Forgot your password."
-                            ));
-                          }
+                        /* One implementation, in /vendor/ranch-db.js. It signs
+                           in, signs up if that fails, then signs in once more
+                           whatever sign up said, because sign up can create the
+                           account without handing back a session. This door and
+                           crew now answer the same failure with the same words. */
+                        var problem = await signIn(e, t);
+                        if (problem) {
+                          return (E(!1), void w(problem));
                         }
                         (E(!1),
                           d.unlockFlash.classList.add("go"),
