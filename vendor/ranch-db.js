@@ -125,11 +125,29 @@ export async function signIn(email, password) {
   const c = db();
   if (!c) return "No connection to the database.";
 
-  const first = await c.auth.signInWithPassword({ email, password });
-  if (!first.error) return null;
+  /* Each of these can reject instead of answering, and a rejection used to
+     travel all the way up to the caller's catch. The console's catch says
+     "Could not reach the console database", so a mistyped password was being
+     reported as the database being down, which sends somebody to check their
+     wifi over a typo. Every call is caught here and turned into something
+     true, and this function no longer throws. */
+  const attempt = async (fn) => {
+    try {
+      return { value: await fn() };
+    } catch (e) {
+      return { thrown: e };
+    }
+  };
 
-  const made = await c.auth.signUp({ email, password, name: nameFromEmail(email) });
-  if (made.error && /already exists|already registered|USER_ALREADY/i.test(made.error.message || "")) {
+  const first = await attempt(() => c.auth.signInWithPassword({ email, password }));
+  if (first.value && !first.value.error) return null;
+
+  const made = await attempt(() => c.auth.signUp({ email, password, name: nameFromEmail(email) }));
+  const madeSaid = made.thrown
+    ? String((made.thrown && made.thrown.message) || made.thrown)
+    : (made.value && made.value.error && made.value.error.message) || "";
+
+  if (/already exists|already registered|USER_ALREADY/i.test(madeSaid)) {
     /* The address is the one right thing about this attempt. Saying "use
        another email", which is what the service returns, is the opposite of
        what they should do. */
@@ -137,12 +155,13 @@ export async function signIn(email, password) {
   }
 
   await new Promise((r) => setTimeout(r, 600));
-  const again = await c.auth.signInWithPassword({ email, password });
-  if (again.error) {
-    return (made.error && made.error.message) ||
-      "Could not sign in. Try once more, and if it repeats use the reset link.";
+  const again = await attempt(() => c.auth.signInWithPassword({ email, password }));
+  if (again.value && !again.value.error) return null;
+
+  if (first.thrown || made.thrown || again.thrown) {
+    return "Could not reach the sign in service. Check your connection and try again.";
   }
-  return null;
+  return madeSaid || "Could not sign in. Try once more, and if it repeats use the reset link.";
 }
 
 /** The way the onboarding email tells people to get in. */
