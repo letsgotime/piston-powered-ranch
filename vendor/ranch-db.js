@@ -200,8 +200,30 @@ export async function signInWithGoogle(callbackURL) {
     if (!r.ok) return "Could not start Google sign in (" + r.status + "). Use the email link instead.";
     const data = await r.json();
     if (!data || !data.url) return "Google did not give us anywhere to send you. Use the email link instead.";
-    window.location.href = data.url;
-    return null;
+    /* Leaving for another origin, two ways, because one of them has been
+       silently doing nothing: the button set location.href, said "Taking you
+       to Google" and stayed put, while the very same call made by hand
+       reached the account chooser every time. An anchor click is the route
+       browsers guard least, so it goes first, with the assignment behind it.
+
+       If we are somehow still here a moment later, say so. A dead button
+       under a hopeful message is worse than an error, because the person
+       just keeps pressing it. */
+    try {
+      const a = document.createElement("a");
+      a.href = data.url;
+      a.rel = "noopener";
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (e) {
+      /* fall through to the assignment below */
+    }
+    window.location.assign(data.url);
+
+    await new Promise((again) => setTimeout(again, 1500));
+    return "Google did not open. Use the email link below instead.";
   } catch (e) {
     return "Could not reach the sign in service. Check your connection.";
   }
