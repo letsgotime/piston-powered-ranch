@@ -12,7 +12,7 @@
  * so the two halves of the estate describe the database the same way while
  * they are still two halves.
  *
- *     import { db, EVENT_ID } from "/vendor/ranch-db.js";
+ *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02a";
  *     const rows = await db().from("submissions").select("*");
  *
  * Nothing here decides what anybody may read. Row level security does that,
