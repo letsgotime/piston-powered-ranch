@@ -1284,14 +1284,19 @@
       }
       .ops-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        /* Auto fill rather than a locked pair. Two fixed columns made every
+           card half the screen whatever the screen was, so Staff & Traffic
+           Control and Vendor & Booth Program wrapped into their own status
+           lines on a phone while a wide screen sat half empty. One column
+           when narrow, as many as fit when not. */
+        grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
         gap: var(--gap-2);
       }
       .ops-card {
         display: flex;
         flex-direction: column;
         gap: 7px;
-        min-height: 118px;
+        min-height: 128px;
       }
       .ops-card .oc-ic {
         width: 30px;
@@ -1309,16 +1314,19 @@
         height: 15px;
       }
       .ops-card .oc-t {
-        font-size: 13.5px;
-        font-weight: 800;
+        font-size: 15.5px;
+        font-weight: 900;
         color: var(--ink);
-        line-height: 1.25;
+        line-height: 1.2;
+        letter-spacing: -0.012em;
         margin-top: 2px;
       }
       .ops-card .oc-s {
-        font-size: 11px;
+        /* Was 11px: the smallest type on the busiest page, and it carried the
+           count that tells somebody whether they need to act. */
+        font-size: 13px;
         color: var(--ink-mute);
-        line-height: 1.35;
+        line-height: 1.45;
         flex: 1;
       }
       .ops-nav-list {
