@@ -74,13 +74,42 @@ function authClient() {
  * PostgREST call attaches as its bearer token, whether that call goes
  * through db().from() below or through rpc().
  */
+/**
+ * Why this stopped returning null in silence.
+ *
+ * Every PostgREST call attaches whatever this returns. When it returned null
+ * the request went out with no Authorization header, PostgREST answered
+ * "missing authentication credentials", and the console rendered that as a
+ * card that says Loading forever. A signed out session, an expired token and
+ * a network failure were all indistinguishable from a slow connection, and
+ * finding out which took a screenshot and an afternoon.
+ *
+ * It still returns null, because callers rely on that. But it records why on
+ * lastTokenError, and db() below turns that into a message a person can act
+ * on instead of a spinner that never stops.
+ */
+export let lastTokenError = null;
+
 export async function accessToken() {
   const c = authClient();
-  if (!c) return null;
+  if (!c) {
+    lastTokenError = "The sign in client did not load. Reload the page.";
+    return null;
+  }
   try {
-    const { data } = await c.token();
-    return (data && data.token) || null;
+    const { data, error } = await c.token();
+    if (error) {
+      lastTokenError =
+        error.status === 401 || /unauthor/i.test(error.code || error.message || "")
+          ? "Your session has expired. Sign in again."
+          : "Could not get a session token: " + (error.message || error.code || "unknown");
+      return null;
+    }
+    const token = (data && data.token) || null;
+    lastTokenError = token ? null : "The sign in service returned no token. Sign in again.";
+    return token;
   } catch (e) {
+    lastTokenError = "Could not reach the sign in service. Check your connection.";
     return null;
   }
 }

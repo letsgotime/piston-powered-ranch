@@ -64,7 +64,7 @@
  * no session yet, which is the whole point, but the client itself needs none
  * — these two calls are unauthenticated by design. */
 
-import { requestReset, completeReset } from "/vendor/ranch-db.js?v=2026-09-02d";
+import { requestReset, completeReset } from "/vendor/ranch-db.js?v=2026-09-02f";
 const q = new URLSearchParams(location.search);
 const token = q.get("token") || q.get("t") || "";
 
