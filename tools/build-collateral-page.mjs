@@ -11,6 +11,19 @@ import { readdirSync, statSync, readFileSync, writeFileSync, existsSync } from "
 import { join } from "node:path";
 
 const DIR = "collateral";
+/**
+ * Absolute, because relative paths here resolve against the wrong directory.
+ *
+ * The page is proxied onto the event domain at /collateral, and a request for
+ * /collateral/ is redirected back to it with the slash stripped. So a browser
+ * resolving "files/x.png" against /collateral looks for /files/x.png at the
+ * site root, which does not exist: every picture and every download link on
+ * this page was a 404 for anybody who opened it, while fetching the same file
+ * by its full path worked perfectly and hid the fault.
+ *
+ * An absolute path is right at both addresses, with the slash and without.
+ */
+const BASE = "/collateral/";
 const FILES = join(DIR, "files");
 const THUMBS = join(DIR, "thumbs");
 
@@ -173,14 +186,14 @@ const present = new Set(readdirSync(FILES));
 const size = (n) => (present.has(n) ? statSync(join(FILES, n)).size : 0);
 const thumbFor = (base) => {
   for (const c of [`${base}.jpg`, `${base}_p1.jpg`])
-    if (existsSync(join(THUMBS, c))) return `thumbs/${c}`;
-  return present.has(`${base}.png`) ? `files/${base}.png` : null;
+    if (existsSync(join(THUMBS, c))) return `${BASE}thumbs/${c}`;
+  return present.has(`${base}.png`) ? `${BASE}files/${base}.png` : null;
 };
 /** Preview target. Thumbnails are only 320px wide, so a lightbox built on them
  *  renders small and soft. The full PNG render is sharp at any size and is only
  *  fetched when someone deliberately taps preview. */
 const previewFor = (base, thumb) => {
-  for (const c of [`${base}.png`, `${base}_p1.png`]) if (present.has(c)) return `files/${c}`;
+  for (const c of [`${base}.png`, `${base}_p1.png`]) if (present.has(c)) return `${BASE}files/${c}`;
   return thumb;
 };
 
@@ -233,7 +246,7 @@ function renderCards(catalog) {
       const btns = it.assets
         .map(
           (a) =>
-            `<a class="dl ${a.kind}" href="files/${encodeURIComponent(a.name)}" download title="${esc(a.hint)}">` +
+            `<a class="dl ${a.kind}" href="${BASE}files/${encodeURIComponent(a.name)}" download title="${esc(a.hint)}">` +
             `<span class="k">${esc(a.label)}</span><span class="s">${esc(a.sizeLabel)}</span></a>`,
         )
         .join("");
@@ -247,7 +260,7 @@ function renderCards(catalog) {
           ? `<a class="dl page" href="${esc(it.pageHref)}"><span class="k">${esc(it.pageLabel)}</span><span class="s">Copy per platform</span></a>`
           : "") +
         `${btns}</div>` +
-        `<button class="copy" data-file="files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
+        `<button class="copy" data-file="${BASE}files/${encodeURIComponent(it.assets[0].name)}">Copy link</button>` +
         `</div></article>`;
     }
     cards += `\n          </div>\n        </section>`;
