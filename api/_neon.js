@@ -25,14 +25,34 @@ export const AUTH_PATH = "/api/auth";
 export const JWKS_PATH = AUTH_PATH + "/jwks";
 
 /**
- * Builds an absolute JWKS URL from the incoming request's own host, since
- * createRemoteJWKSet needs a full URL and this file has no request object
- * of its own.
+ * The one canonical origin the Better Auth server issues tokens from, mirrored
+ * exactly from lib/auth.js resolveBaseURL(): BETTER_AUTH_URL if set, otherwise
+ * the custom domain. The token issuer AND its verifying keys both live here.
+ *
+ * SECURITY: this MUST NOT be derived from the incoming request. An endpoint
+ * that fetches its JWKS from a request-controlled host (x-forwarded-host /
+ * host) can be handed a spoofed host pointing at an attacker's own key set;
+ * the attacker then signs a token with any `email` they like and it verifies.
+ * For endpoints that read data over the privileged, RLS-bypassing connection
+ * (api/account.js), that is a full read-any-attendee bypass. Pinning the host
+ * means only tokens genuinely signed by our server's private key verify, and
+ * the `email` claim is one our server set from the authenticated user.
  */
-export function jwksUrlFromRequest(request) {
-  const proto = request.headers["x-forwarded-proto"] || "https";
-  const host = request.headers["x-forwarded-host"] || request.headers.host;
-  return `${proto}://${host}${JWKS_PATH}`;
+export const AUTH_ORIGIN = process.env.BETTER_AUTH_URL || "https://pistonpoweredranch.com";
+
+/** Issuer origin for jose's optional issuer check; same value as AUTH_ORIGIN. */
+export const AUTH_ISSUER = AUTH_ORIGIN;
+
+/** The fixed JWKS URL. Never request-derived — see AUTH_ORIGIN. */
+export const JWKS_URL = `${AUTH_ORIGIN}${JWKS_PATH}`;
+
+/**
+ * Kept under its original name so existing callers need no edit, but the
+ * request argument is now deliberately ignored: the JWKS host is pinned to
+ * AUTH_ORIGIN so no caller can point verification at a key set it controls.
+ */
+export function jwksUrlFromRequest(_request) {
+  return JWKS_URL;
 }
 
 /** The Piston Powered Ranch, Saturday 10 October 2026. */
