@@ -19,7 +19,7 @@
  * session and there is exactly one chat implementation rather than a copy of
  * it embedded in every page.
  */
-import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js?v=2026-09-02b";
+import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js?v=2026-09-02c";
 
 var db = null, unread = 0, mentioned = false, subject = null, open = false, staff = false;
 

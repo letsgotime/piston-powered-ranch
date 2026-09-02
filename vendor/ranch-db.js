@@ -12,7 +12,7 @@
  * so the two halves of the estate describe the database the same way while
  * they are still two halves.
  *
- *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02b";
+ *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02c";
  *     const rows = await db().from("submissions").select("*");
  *
  * Nothing here decides what anybody may read. Row level security does that,
@@ -125,7 +125,14 @@ function nameFromEmail(email) {
 export const NEEDS_VERIFICATION = "needs-verification"
 
 function looksUnverified(said) {
-  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED/i.test(String(said || ""))
+  /* Two spellings, because two layers name the same thing differently. The
+     endpoint answers EMAIL_NOT_VERIFIED; Neon's client maps it into the
+     Supabase compatible email_not_confirmed, and that mapped value is the only
+     one signInWithPassword hands to this module. Catching both means the
+     common case needs no second request. Credit to PR #1 for the mapping. */
+  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED|email_not_confirmed/i.test(
+    String(said || ""),
+  )
 }
 
 /**
@@ -183,6 +190,14 @@ export async function signIn(email, password) {
      through to sign up here is what produced "that password does not match
      this account" for people whose password matched perfectly, and sent them
      to reset a password that was never wrong. */
+  const firstSaid =
+    first.value && first.value.error
+      ? first.value.error.code || first.value.error.message || ""
+      : "";
+  /* Read what we were handed first. Only ask the service directly when that is
+     inconclusive, so an ordinary wrong password costs one request rather than
+     two. */
+  if (firstSaid && looksUnverified(firstSaid)) return NEEDS_VERIFICATION;
   if (first.value && first.value.error && (await reallyUnverified(email, password))) {
     return NEEDS_VERIFICATION;
   }
