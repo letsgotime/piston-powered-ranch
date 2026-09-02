@@ -3459,6 +3459,19 @@
       import { db as makeDb, signIn, signInWithGoogle, magicLink, sendEmailCode, verifyEmailCode, NEEDS_VERIFICATION } from "/vendor/ranch-db.js?v=2026-09-02d";
       import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
+      /* This module's bindings are invisible to the plain <script> just below
+         it — a module and a classic script never share scope, even back to
+         back in the same document. signIn, signInWithGoogle, magicLink,
+         sendEmailCode, verifyEmailCode and NEEDS_VERIFICATION are all called
+         from that plain script, so each has to cross onto window explicitly
+         or every one of those calls throws ReferenceError and lands in that
+         script's own catch as a fake "could not reach the database" error. */
+      window.signIn = signIn;
+      window.signInWithGoogle = signInWithGoogle;
+      window.magicLink = magicLink;
+      window.sendEmailCode = sendEmailCode;
+      window.verifyEmailCode = verifyEmailCode;
+      window.NEEDS_VERIFICATION = NEEDS_VERIFICATION;
       try {
         ((window.__pgdb = makeDb()),
           window.dispatchEvent(new Event("pgdb-ready")));
@@ -3467,6 +3480,16 @@
       }
     </script>
     <script>
+      /* Local names for the functions bridged onto window just above, so every
+         existing bare call below (signIn(...), magicLink(...), etc.) keeps
+         working unchanged rather than needing every call site rewritten to
+         window.signIn(...). */
+      var signIn = window.signIn,
+        signInWithGoogle = window.signInWithGoogle,
+        magicLink = window.magicLink,
+        sendEmailCode = window.sendEmailCode,
+        verifyEmailCode = window.verifyEmailCode,
+        NEEDS_VERIFICATION = window.NEEDS_VERIFICATION;
       !(function () {
         "use strict";
         var e = { logoMono: "" },
