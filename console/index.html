@@ -2578,16 +2578,18 @@
                    text at the end, stranded a closing tag, and is why the
                    bottom of this screen fell apart. -->
               <div class="enter-note">
-                <!-- Continue with Google is out for now. The button reached the
-                     auth service and got a valid redirect back every time, and
-                     then did not go anywhere: it sat on "Taking you to Google"
-                     while the page stayed put. A door that looks open and is not
-                     is worse than one that is plainly shut, and there are two
-                     working ways in below it.
-
-                     signInWithGoogle stays in vendor/ranch-db.js, unused, and the
-                     provider stays enabled in Neon Auth, so putting this back is
-                     this block and its click handler and nothing else. -->
+                <!-- Continue with Google is back. The old failure was the
+                     bundled GoTrue-shaped client's redirect step doing
+                     nothing after a valid response came back, leaving the
+                     button parked on "Taking you to Google" forever. Talking
+                     to our own Better Auth server's own client, signIn.social
+                     navigates the browser itself the moment the server
+                     answers, synchronously inside this click. -->
+                <button type="button" id="googleBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font:800 15px/1 var(--font-sans,Archivo,system-ui,sans-serif);color:#0A1523;background:#EDF1F6;border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:15px;cursor:pointer">
+                  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.85 2.09-1.81 2.73v2.27h2.92c1.7-1.57 2.69-3.88 2.69-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.27c-.81.54-1.85.86-3.04.86-2.34 0-4.32-1.58-5.03-3.71H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.29-1.71V4.96H.96A8.96 8.96 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+                  Continue with Google
+                </button>
+                <p id="googleSaid" style="margin:10px 0 0;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-size:14px;line-height:1.5;color:var(--muted,#8b95a3)"></p>
                 <div id="magicWrap" style="margin:18px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)">
                   <p style="margin:0 0 10px;font-family:var(--font-mono,ui-monospace,Menlo,monospace);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted,#8b95a3)">Or skip the password</p>
                   <button type="button" id="magicBtn" style="width:100%;font:800 15px/1 var(--font-sans,Archivo,system-ui,sans-serif);color:#EDF1F6;background:transparent;border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:15px;cursor:pointer">Email me a sign in link</button>
@@ -3454,7 +3456,7 @@
       <span class="lbl" id="authOffBadge" style="display: none; color: #f8b800">Auth off</span>
     </div>
     <script type="module">
-      import { db as makeDb, signIn, magicLink, sendEmailCode, verifyEmailCode, NEEDS_VERIFICATION } from "/vendor/ranch-db.js?v=2026-09-02c";
+      import { db as makeDb, signIn, signInWithGoogle, magicLink, sendEmailCode, verifyEmailCode, NEEDS_VERIFICATION } from "/vendor/ranch-db.js?v=2026-09-02d";
       import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
       try {
@@ -3861,6 +3863,20 @@
             var problem = await sendEmailCode(em);
             this.disabled = false;
             said.textContent = problem || "New code sent. It is good for fifteen minutes.";
+          }),
+          document.getElementById("googleBtn").addEventListener("click", async function () {
+            var said = document.getElementById("googleSaid");
+            var btn = this;
+            btn.disabled = true;
+            var problem = await signInWithGoogle(location.origin + "/journeys/");
+            /* On success the client has already navigated the browser away
+               inside the call above; this line only runs at all when Google
+               sign in itself failed to start. */
+            btn.disabled = false;
+            if (problem) {
+              said.style.color = "#FF1A21";
+              said.textContent = problem;
+            }
           }),
           document.getElementById("magicBtn").addEventListener("click", async function () {
             var em = (document.getElementById("fEmail").value || "").trim();
