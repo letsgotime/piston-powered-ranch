@@ -27,36 +27,55 @@
  */
 
 import { createAuthClient, magicLinkClient, emailOTPClient, jwtClient } from "/vendor/better-auth-client.js?v=2026-09-02d";
+import { PostgrestClient } from "/vendor/postgrest-client.js?v=2026-09-02d";
 
 export const DATA_API =
   "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
 
+/**
+ * chat/dock.js, team/rail.js and diag/index.html still import this under
+ * their older cache-bust query string and never read it once imported, but
+ * an ES module that names an export which does not exist fails to link at
+ * all, so it has to keep existing even though nothing calls it. Same-origin
+ * now, matching basePath in lib/auth.js — there is no separate host to send
+ * this to anymore.
+ */
+export const AUTH_URL = "/api/auth";
+
 /** The Piston Powered Ranch, Saturday 10 October 2026. */
 export const EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
 
-let cached = null;
+let cachedAuth = null;
 
-/** One client per tab. The auth client talks to same-origin /api/auth. */
-export function db() {
-  if (cached) return cached;
+/**
+ * Better Auth's own client — signIn.email, signUp.email, getSession, token,
+ * signOut, and the plugin methods below. Every function in this file that
+ * talks to /api/auth calls this directly. The twenty pages that render the
+ * site never see this shape: what they import as `db` is the composite
+ * object further down, which wraps this client in the .auth/.from() shape
+ * they were already written against.
+ */
+function authClient() {
+  if (cachedAuth) return cachedAuth;
   try {
-    cached = createAuthClient({
+    cachedAuth = createAuthClient({
       plugins: [magicLinkClient(), emailOTPClient(), jwtClient()],
     });
   } catch (e) {
-    cached = null;
+    cachedAuth = null;
   }
-  return cached;
+  return cachedAuth;
 }
 
 /**
  * A short-lived JWT, signed by our own server and verifiable against the
  * public key it publishes at /api/auth/jwks — the same key
  * pg_session_jwt / auth.uid() read out of neon_auth.jwks. This is what every
- * PostgREST call below attaches as its bearer token.
+ * PostgREST call attaches as its bearer token, whether that call goes
+ * through db().from() below or through rpc().
  */
 export async function accessToken() {
-  const c = db();
+  const c = authClient();
   if (!c) return null;
   try {
     const { data } = await c.token();
@@ -64,6 +83,90 @@ export async function accessToken() {
   } catch (e) {
     return null;
   }
+}
+
+/**
+ * One PostgREST client, reused across every db().from() call. Its fetch is
+ * wrapped so every request carries whatever token accessToken() returns at
+ * the moment it fires rather than one captured when the client was built —
+ * the same "read the token fresh, per request" behavior the old Supabase-
+ * shaped bundle had, just without the thousands of unrelated lines that came
+ * with it.
+ */
+let cachedRest = null;
+async function withAuth(input, init) {
+  const token = await accessToken();
+  const headers = new Headers(init && init.headers);
+  if (token) headers.set("Authorization", "Bearer " + token);
+  return fetch(input, Object.assign({}, init, { headers }));
+}
+function rest() {
+  if (!cachedRest) cachedRest = new PostgrestClient(DATA_API, { fetch: withAuth });
+  return cachedRest;
+}
+
+/**
+ * The shape every page already calls: db.auth.getSession() returning
+ * { data: { session: { access_token, user: { email, ... } } } }, matching
+ * what the old Supabase-shaped client returned. Better Auth's own
+ * getSession() puts session and user as siblings and has no access_token
+ * field at all (that's the separate JWT plugin token above) — this merges
+ * the two into the one shape twenty pages already read from.
+ */
+async function shimGetSession() {
+  const c = authClient();
+  if (!c) return { data: null, error: null };
+  try {
+    const [sessionRes, token] = await Promise.all([c.getSession(), accessToken()]);
+    const { data, error } = sessionRes || {};
+    if (error || !data || !data.session) return { data: null, error: error || null };
+    return {
+      data: {
+        session: Object.assign({}, data.session, {
+          access_token: token,
+          accessToken: token,
+          user: data.user,
+        }),
+      },
+      error: null,
+    };
+  } catch (e) {
+    return { data: null, error: e };
+  }
+}
+
+let cachedDb = null;
+
+/**
+ * One client per tab, in the shape the twenty existing pages were written
+ * against: db.auth.getSession(), db.auth.signOut(), db.from(table). Every
+ * sign-in/sign-up/magic-link/reset function below is a separate export that
+ * talks to authClient() directly instead — this composite exists only for
+ * the pages that read and write rows and check who is signed in.
+ */
+export function db() {
+  if (cachedDb) return cachedDb;
+  cachedDb = {
+    auth: {
+      getSession: shimGetSession,
+      signOut: async () => {
+        const c = authClient();
+        if (c) await c.signOut();
+      },
+    },
+    from: (table) => rest().from(table),
+    /*
+     * clubs, map, show, journeys and status all call db.rpc(fn, args) and
+     * read the result as { data, error } — the shape PostgREST's own
+     * client already returns from .rpc(), so this needs no shim of its
+     * own. This is deliberately separate from the rpc() export above: that
+     * one is this file's own internal helper for is_staff()/can_see_money()/
+     * me(), used before a page has any reason to hold a db() at all, and it
+     * returns a bare value or null rather than { data, error }.
+     */
+    rpc: (fn, args) => rest().rpc(fn, args || {}),
+  };
+  return cachedDb;
 }
 
 /**
@@ -139,7 +242,7 @@ function looksUnverified(said) {
 }
 
 export async function signIn(email, password) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
 
   /* Each of these can reject instead of answering, and a rejection used to
@@ -207,7 +310,7 @@ export async function signIn(email, password) {
  * there was no way through that from any of our own pages.
  */
 export async function sendEmailCode(email) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { error } = await c.emailOtp.sendVerificationOtp({ email, type: "email-verification" });
@@ -220,7 +323,7 @@ export async function sendEmailCode(email) {
 
 /** Confirm the address with the code. Returns null when it worked. */
 export async function verifyEmailCode(email, otp) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { error } = await c.emailOtp.verifyEmail({ email, otp: String(otp).trim() });
@@ -238,7 +341,7 @@ export async function verifyEmailCode(email, otp) {
 
 /** The way the onboarding email tells people to get in. */
 export async function magicLink(email, callbackURL) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { error } = await c.signIn.magicLink({ email, callbackURL });
@@ -261,7 +364,7 @@ export async function magicLink(email, callbackURL) {
  * sees, so an address that is not on the list signs in and finds nothing.
  */
 export async function signInWithGoogle(callbackURL) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { data, error } = await c.signIn.social({ provider: "google", callbackURL });
@@ -287,7 +390,7 @@ export async function signInWithGoogle(callbackURL) {
  * be used to find out who is on the staff list.
  */
 export async function requestReset(email, redirectTo) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { error } = await c.requestPasswordReset({ email, redirectTo });
@@ -304,7 +407,7 @@ export async function requestReset(email, redirectTo) {
  * or checks it.
  */
 export async function completeReset(newPassword, token) {
-  const c = db();
+  const c = authClient();
   if (!c) return "No connection to the database.";
   try {
     const { error } = await c.resetPassword({ newPassword, token });
@@ -321,7 +424,7 @@ export async function completeReset(newPassword, token) {
 
 export async function signOut() {
   try {
-    const c = db();
+    const c = authClient();
     if (c) await c.signOut();
   } catch (e) {
     /* already gone */

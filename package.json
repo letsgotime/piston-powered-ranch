@@ -5,6 +5,7 @@
   "dependencies": {
     "@neondatabase/neon-js": "^0.7.0-beta",
     "@neondatabase/serverless": "^1.1.0",
+    "@supabase/postgrest-js": "^2.114.0",
     "@vercel/blob": "^2.0.0",
     "better-auth": "^1.7.2",
     "jose": "^6.2.10",
