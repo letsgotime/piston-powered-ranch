@@ -1395,6 +1395,34 @@
             var(--void)
           );
       }
+      /* Short viewports, which is most phones held upright.
+         The door was laid out at a comfortable desktop size and then checked
+         on a phone, which is the wrong order and showed: the badge alone took
+         a quarter of a 568 tall screen and pushed Enter console to the very
+         bottom edge. What a sign in screen owes a phone is the field and the
+         button without scrolling. The mark shrinks, the display type steps
+         down, and the gaps tighten until they do. */
+      @media (max-height: 700px), (max-width: 380px) {
+        .enter-badge {
+          width: 104px;
+        }
+        .enter-wrap {
+          justify-content: flex-start;
+          padding-top: max(12px, var(--safe-t));
+        }
+        .enter-glass {
+          padding: 20px 18px 24px;
+          border-radius: 18px;
+        }
+        .view[data-view="enter"] .h-display {
+          font-size: clamp(30px, 9vw, 40px);
+        }
+        .view[data-view="enter"] .lede {
+          font-size: 15px;
+        }
+      }
+
+
       @keyframes gateDrift {
         from {
           transform: scale(1.06) translate3d(-1.1%, 0.6%, 0);
