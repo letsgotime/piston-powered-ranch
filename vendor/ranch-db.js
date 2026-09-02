@@ -12,7 +12,7 @@
  * so the two halves of the estate describe the database the same way while
  * they are still two halves.
  *
- *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02a";
+ *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02b";
  *     const rows = await db().from("submissions").select("*");
  *
  * Nothing here decides what anybody may read. Row level security does that,
@@ -128,6 +128,36 @@ function looksUnverified(said) {
   return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED/i.test(String(said || ""))
 }
 
+/**
+ * Ask the service directly whether this is an unconfirmed address.
+ *
+ * The bundled client does not pass the real error through. Sign in with an
+ * unconfirmed address answers 403 EMAIL_NOT_VERIFIED at the endpoint, and the
+ * client reports it as invalid_credentials, so every check for "not verified"
+ * looked at the wrong word and fell through to sign up. That is what produced
+ * a wrong password message, and then the database one, for somebody whose
+ * password was right and whose address had simply never been confirmed.
+ *
+ * One extra request, only on the failure path, and only to read the code the
+ * service actually returned. Sign in itself still goes through the client so
+ * the session is stored the way every other call expects.
+ */
+async function reallyUnverified(email, password) {
+  try {
+    const r = await fetch(AUTH_URL + "/sign-in/email", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    if (r.status !== 403) return false;
+    const said = await r.text();
+    return looksUnverified(said);
+  } catch (e) {
+    return false;
+  }
+}
+
 export async function signIn(email, password) {
   const c = db();
   if (!c) return "No connection to the database.";
@@ -153,7 +183,7 @@ export async function signIn(email, password) {
      through to sign up here is what produced "that password does not match
      this account" for people whose password matched perfectly, and sent them
      to reset a password that was never wrong. */
-  if (first.value && looksUnverified(first.value.error && (first.value.error.code || first.value.error.message))) {
+  if (first.value && first.value.error && (await reallyUnverified(email, password))) {
     return NEEDS_VERIFICATION;
   }
 
@@ -175,7 +205,7 @@ export async function signIn(email, password) {
   const again = await attempt(() => c.auth.signInWithPassword({ email, password }));
   if (again.value && !again.value.error) return null;
 
-  if (again.value && looksUnverified(again.value.error && (again.value.error.code || again.value.error.message))) {
+  if (again.value && again.value.error && (await reallyUnverified(email, password))) {
     return NEEDS_VERIFICATION;
   }
 

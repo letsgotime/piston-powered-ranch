@@ -209,7 +209,7 @@
     </div>
 
     <script type="module">
-      import { db as makeDb, signIn, DATA_API, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02a";
+      import { db as makeDb, signIn, DATA_API, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02b";
 
       
       var TZ = "America/Chicago";
@@ -489,7 +489,7 @@
           if (!em || !pw) { sd.className = "said bad"; sd.textContent = "Both fields, please."; return; }
           var sb = document.getElementById("sGo");
           sb.disabled = true; sb.textContent = "Signing in";
-          // One implementation, in /vendor/ranch-db.js?v=2026-09-02a, so this door and the
+          // One implementation, in /vendor/ranch-db.js?v=2026-09-02b, so this door and the
           // console cannot answer the same failure with different words.
           var problem = await signIn(em, pw);
           if (problem) {

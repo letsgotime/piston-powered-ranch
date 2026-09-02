@@ -1,7 +1,7 @@
 /**
  * The Neon endpoints, for the serverless side.
  *
- * The browser gets these from /vendor/ranch-db.js?v=2026-09-02a, which it cannot share with
+ * The browser gets these from /vendor/ranch-db.js?v=2026-09-02b, which it cannot share with
  * this side: that module is served over HTTP and imports the vendored client,
  * neither of which a function can do. So the endpoints live in two files
  * rather than twenty four, and this is the second one.

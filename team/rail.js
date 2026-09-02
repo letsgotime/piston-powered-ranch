@@ -17,7 +17,7 @@
  * renders nothing at all, which is why it is safe on pages that also have a
  * public face.
  */
-import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js?v=2026-09-02a";
+import { db as makeDb, DATA_API, AUTH_URL as AUTH } from "/vendor/ranch-db.js?v=2026-09-02b";
 
 var W = 60, WIDE = 208;
 
