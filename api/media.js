@@ -1,6 +1,6 @@
 import { issueSignedToken, presignUrl } from "@vercel/blob";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { DATA_API, JWKS_URL } from "./_neon.js";
+import { DATA_API, jwksUrlFromRequest } from "./_neon.js";
 
 /**
  * Returns short-lived signed URLs for submitted media.
@@ -39,11 +39,22 @@ async function isStaff(bearer) {
   return (await res.text()).trim() === "true";
 }
 
-const JWKS = createRemoteJWKSet(
-  new URL(
-    JWKS_URL,
-  ),
-);
+/**
+ * createRemoteJWKSet caches its own fetched keys internally, but it needs a
+ * fixed URL up front — and this function's own host isn't known until a
+ * request arrives (see jwksUrlFromRequest in _neon.js). In practice every
+ * request hits the same deployment host, so caching one JWKS instance per
+ * host still gets the same steady-state behavior as a single module-level
+ * constant, just without hardcoding a second hostname here.
+ */
+const jwksByHost = new Map();
+function getJwks(request) {
+  const url = jwksUrlFromRequest(request);
+  if (!jwksByHost.has(url)) {
+    jwksByHost.set(url, createRemoteJWKSet(new URL(url)));
+  }
+  return jwksByHost.get(url);
+}
 
 const URL_TTL_MS = 10 * 60 * 1000;
 const MAX_PER_REQUEST = 120;
@@ -60,7 +71,7 @@ export default async function handler(request, response) {
 
   let email = "";
   try {
-    const { payload } = await jwtVerify(bearer, JWKS);
+    const { payload } = await jwtVerify(bearer, getJwks(request));
     email = String(payload.email || payload.sub_email || "").toLowerCase();
   } catch {
     return response.status(401).json({ error: "Invalid or expired session" });

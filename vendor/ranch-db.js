@@ -298,6 +298,27 @@ export async function requestReset(email, redirectTo) {
   }
 }
 
+/**
+ * The second half of a reset: taking the token from the emailed link and a
+ * new password. Better Auth verifies the token itself; this file never sees
+ * or checks it.
+ */
+export async function completeReset(newPassword, token) {
+  const c = db();
+  if (!c) return "No connection to the database.";
+  try {
+    const { error } = await c.resetPassword({ newPassword, token });
+    if (error) {
+      const said = error.code || error.message || "";
+      if (/INVALID_TOKEN|expired/i.test(said)) return "That link may have expired. Request a new one.";
+      return "That did not work. Try again in a moment.";
+    }
+    return null;
+  } catch (e) {
+    return "Could not reach the sign in service. Check your connection.";
+  }
+}
+
 export async function signOut() {
   try {
     const c = db();

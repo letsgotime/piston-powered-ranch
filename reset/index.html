@@ -59,11 +59,12 @@
  *   No token: ask for the address and request a reset link.
  *   Token:    take a new password and set it.
  *
- * Both talk to the auth service directly. There is no session yet, which is
- * the whole point, so this needs the address of the auth service but not the
- * database client behind it. */
+ * Both go through Better Auth's own client (requestReset / completeReset in
+ * ranch-db.js) rather than a raw fetch against a hardcoded auth URL. There is
+ * no session yet, which is the whole point, but the client itself needs none
+ * — these two calls are unauthenticated by design. */
 
-import { AUTH_URL as AUTH } from "/vendor/ranch-db.js?v=2026-09-02c";
+import { requestReset, completeReset } from "/vendor/ranch-db.js?v=2026-09-02d";
 const q = new URLSearchParams(location.search);
 const token = q.get("token") || q.get("t") || "";
 
@@ -95,13 +96,10 @@ go.addEventListener("click", async () => {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
         say("That is not an address.", "bad"); go.disabled = false; return;
       }
-      const r = await fetch(AUTH + "/request-password-reset", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: val, redirectTo: location.origin + "/reset/" }),
-      });
+      const problem = await requestReset(val, location.origin + "/reset/");
       /* The service answers the same way whether or not the address exists, so
          nobody can use this to find out who has an account. Say the same. */
-      if (r.ok) {
+      if (!problem) {
         say("If that address has an account, a link is on its way. Check the inbox, and the spam folder.", "ok");
         go.textContent = "Sent";
       } else {
@@ -112,16 +110,12 @@ go.addEventListener("click", async () => {
     }
 
     if (val.length < 8) { say("Eight characters or more, please.", "bad"); go.disabled = false; return; }
-    const r = await fetch(AUTH + "/reset-password", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newPassword: val, token }),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (r.ok) {
+    const problem = await completeReset(val, token);
+    if (!problem) {
       say("Done. Sending you to the console.", "ok");
       setTimeout(() => { location.href = "/console/"; }, 1200);
     } else {
-      say(j.message || "That link may have expired. Request a new one.", "bad");
+      say(problem, "bad");
       go.disabled = false;
     }
   } catch {
