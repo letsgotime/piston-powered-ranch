@@ -1,7 +1,7 @@
 import { handleUpload } from "@vercel/blob/client";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { verifySession, sessionSecret } from "./upload-session.js";
-import { DATA_API, JWKS_URL } from "./_neon.js";
+import { DATA_API, jwksUrlFromRequest } from "./_neon.js";
 
 /**
  * Mints short-lived, scoped upload tokens for the public Submit form.
@@ -97,16 +97,22 @@ async function isStaff(bearer) {
   return (await res.text()).trim() === "true";
 }
 
-const JWKS = createRemoteJWKSet(
-  new URL(
-    JWKS_URL,
-  ),
-);
+// See api/media.js for why this is cached per-host rather than a single
+// module-level constant: the JWKS now lives on this same deployment, whose
+// host isn't known until a request arrives.
+const jwksByHost = new Map();
+function getJwks(request) {
+  const url = jwksUrlFromRequest(request);
+  if (!jwksByHost.has(url)) {
+    jwksByHost.set(url, createRemoteJWKSet(new URL(url)));
+  }
+  return jwksByHost.get(url);
+}
 
-async function staffEmail(token) {
+async function staffEmail(token, request) {
   if (!token) return "";
   try {
-    const { payload } = await jwtVerify(String(token), JWKS);
+    const { payload } = await jwtVerify(String(token), getJwks(request));
     const email = String(payload.email || payload.sub_email || "").toLowerCase();
     return (await isStaff(String(token))) ? email : "";
   } catch {
@@ -138,7 +144,7 @@ export default async function handler(request, response) {
 
         // Workbench scope: staff only, and pinned to one item's folder.
         if (payload.scope === "workbench") {
-          const email = await staffEmail(payload.token);
+          const email = await staffEmail(payload.token, request);
           if (!email) throw new Error("Sign in as staff to attach files to the workbench");
           const item = String(payload.itemId || "").replace(/[^a-zA-Z0-9-]/g, "");
           if (item.length < 8 || item.length > 64) throw new Error("Invalid workbench item");
@@ -157,7 +163,7 @@ export default async function handler(request, response) {
         // Chat scope: staff only, pinned to the sender's own folder, so a
         // leaked token can write into nobody else's history.
         if (payload.scope === "chat") {
-          const email = await staffEmail(payload.token);
+          const email = await staffEmail(payload.token, request);
           if (!email) throw new Error("Sign in as staff to attach files to chat");
           const chatKind = CHAT_KINDS[payload.kind];
           if (!chatKind) throw new Error("Unknown upload kind");
@@ -178,7 +184,7 @@ export default async function handler(request, response) {
 
         // Avatar scope: staff only, one folder per person, photos only.
         if (payload.scope === "avatar") {
-          const email = await staffEmail(payload.token);
+          const email = await staffEmail(payload.token, request);
           if (!email) throw new Error("Sign in as staff to set a picture");
           const who = email.replace(/[^a-z0-9]+/g, "-");
           const wanted = `avatars/${who}/`;
