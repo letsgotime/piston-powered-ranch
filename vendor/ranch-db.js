@@ -8,36 +8,40 @@
  * then hunted through every file that had a copy, with no compiler to say
  * which one had been missed.
  *
- * This is the same shape as lib/crm/client.ts in the Next app, deliberately,
- * so the two halves of the estate describe the database the same way while
- * they are still two halves.
+ * September 2026: this used to speak Neon's hosted auth endpoint through a
+ * Supabase-GoTrue-shaped compatibility adapter (SupabaseAuthAdapter), which
+ * itself talked to a Better Auth server Neon ran on our behalf, using a
+ * Google OAuth app Neon owned rather than one of ours. That extra layer is
+ * also what turned "email not verified" into "invalid_credentials" (see the
+ * retired reallyUnverified() workaround in git history) and quietly ate the
+ * Google redirect. This file now talks to our own self-hosted Better Auth
+ * server (see lib/auth.js, mounted at /api/auth) with Better Auth's real
+ * client library, which is what the adapter was standing in for all along.
+ * Nothing about is_staff(), can_see_money(), or any other RLS policy
+ * changed: they still verify a session by checking a signature against a
+ * public key in neon_auth.jwks, and that never depended on whose server
+ * issued the token.
  *
- *     import { db, EVENT_ID } from "/vendor/ranch-db.js?v=2026-09-02c";
- *     const rows = await db().from("submissions").select("*");
- *
- * Nothing here decides what anybody may read. Row level security does that,
- * keyed on the caller's token, so knowing these URLs buys nothing.
+ * Row level security decides what anybody may read, keyed on the caller's
+ * token. This module only gets someone signed in.
  */
 
-import { createClient, SupabaseAuthAdapter } from "/vendor/neon-js.js";
+import { createAuthClient, magicLinkClient, emailOTPClient, jwtClient } from "/vendor/better-auth-client.js?v=2026-09-02d";
 
 export const DATA_API =
   "https://ep-broad-truth-auz9r4ir.apirest.c-10.us-east-1.aws.neon.tech/neondb/rest/v1";
-export const AUTH_URL =
-  "https://ep-broad-truth-auz9r4ir.neonauth.c-10.us-east-1.aws.neon.tech/neondb/auth";
 
 /** The Piston Powered Ranch, Saturday 10 October 2026. */
 export const EVENT_ID = "6ad3f289-8103-4c69-b10e-923790fb8a88";
 
 let cached = null;
 
-/** One client per tab. Null only if the module failed to construct. */
+/** One client per tab. The auth client talks to same-origin /api/auth. */
 export function db() {
   if (cached) return cached;
   try {
-    cached = createClient({
-      auth: { url: AUTH_URL, allowAnonymous: true, adapter: SupabaseAuthAdapter() },
-      dataApi: { url: DATA_API },
+    cached = createAuthClient({
+      plugins: [magicLinkClient(), emailOTPClient(), jwtClient()],
     });
   } catch (e) {
     cached = null;
@@ -45,12 +49,18 @@ export function db() {
   return cached;
 }
 
+/**
+ * A short-lived JWT, signed by our own server and verifiable against the
+ * public key it publishes at /api/auth/jwks — the same key
+ * pg_session_jwt / auth.uid() read out of neon_auth.jwks. This is what every
+ * PostgREST call below attaches as its bearer token.
+ */
 export async function accessToken() {
   const c = db();
   if (!c) return null;
   try {
-    const s = await c.auth.getSession();
-    return (s && s.data && s.data.session && s.data.session.access_token) || null;
+    const { data } = await c.token();
+    return (data && data.token) || null;
   } catch (e) {
     return null;
   }
@@ -113,56 +123,19 @@ function nameFromEmail(email) {
   return local ? local.charAt(0).toUpperCase() + local.slice(1) : "Staff";
 }
 
-/**
- * Sign in, sign up, then sign in once more whatever sign up said.
- *
- * Sign up can create the account and still fail to hand back a session, which
- * used to end in an error message beside a working account. The auth service
- * also requires a name and answers [body.name] Invalid input without one,
- * which reads as a wrong password, so the name is derived from the address.
- */
 /** Better Auth says this when the address has never been confirmed. */
-export const NEEDS_VERIFICATION = "needs-verification"
-
-function looksUnverified(said) {
-  /* Two spellings, because two layers name the same thing differently. The
-     endpoint answers EMAIL_NOT_VERIFIED; Neon's client maps it into the
-     Supabase compatible email_not_confirmed, and that mapped value is the only
-     one signInWithPassword hands to this module. Catching both means the
-     common case needs no second request. Credit to PR #1 for the mapping. */
-  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED|email_not_confirmed/i.test(
-    String(said || ""),
-  )
-}
+export const NEEDS_VERIFICATION = "needs-verification";
 
 /**
- * Ask the service directly whether this is an unconfirmed address.
+ * True if the code or message we were handed means "not verified".
  *
- * The bundled client does not pass the real error through. Sign in with an
- * unconfirmed address answers 403 EMAIL_NOT_VERIFIED at the endpoint, and the
- * client reports it as invalid_credentials, so every check for "not verified"
- * looked at the wrong word and fell through to sign up. That is what produced
- * a wrong password message, and then the database one, for somebody whose
- * password was right and whose address had simply never been confirmed.
- *
- * One extra request, only on the failure path, and only to read the code the
- * service actually returned. Sign in itself still goes through the client so
- * the session is stored the way every other call expects.
+ * Talking to our own server directly, error.code is now the real
+ * EMAIL_NOT_VERIFIED Better Auth returns rather than a value translated
+ * through a Supabase-shaped compatibility layer, so this no longer needs a
+ * second request to double check what the service actually meant.
  */
-async function reallyUnverified(email, password) {
-  try {
-    const r = await fetch(AUTH_URL + "/sign-in/email", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (r.status !== 403) return false;
-    const said = await r.text();
-    return looksUnverified(said);
-  } catch (e) {
-    return false;
-  }
+function looksUnverified(said) {
+  return /EMAIL_NOT_VERIFIED|not verified|unverified|verify your email/i.test(String(said || ""));
 }
 
 export async function signIn(email, password) {
@@ -182,34 +155,28 @@ export async function signIn(email, password) {
     }
   };
 
-  const first = await attempt(() => c.auth.signInWithPassword({ email, password }));
+  const first = await attempt(() => c.signIn.email({ email, password }));
   if (first.value && !first.value.error) return null;
 
   /* Checked before anything else, because the account exists and the password
      may well be right: the address simply has never been confirmed. Falling
-     through to sign up here is what produced "that password does not match
-     this account" for people whose password matched perfectly, and sent them
-     to reset a password that was never wrong. */
+     through to sign up here is what used to produce "that password does not
+     match this account" for people whose password matched perfectly, and sent
+     them to reset a password that was never wrong. */
   const firstSaid =
     first.value && first.value.error
       ? first.value.error.code || first.value.error.message || ""
       : "";
-  /* Read what we were handed first. Only ask the service directly when that is
-     inconclusive, so an ordinary wrong password costs one request rather than
-     two. */
   if (firstSaid && looksUnverified(firstSaid)) return NEEDS_VERIFICATION;
-  if (first.value && first.value.error && (await reallyUnverified(email, password))) {
-    return NEEDS_VERIFICATION;
-  }
 
-  const made = await attempt(() => c.auth.signUp({ email, password, name: nameFromEmail(email) }));
+  const made = await attempt(() => c.signUp.email({ email, password, name: nameFromEmail(email) }));
   const madeSaid = made.thrown
     ? String((made.thrown && made.thrown.message) || made.thrown)
-    : (made.value && made.value.error && made.value.error.message) || "";
+    : (made.value && made.value.error && (made.value.error.code || made.value.error.message)) || "";
 
   if (looksUnverified(madeSaid)) return NEEDS_VERIFICATION;
 
-  if (/already exists|already registered|USER_ALREADY/i.test(madeSaid)) {
+  if (/USER_ALREADY_EXISTS|already exists|already registered/i.test(madeSaid)) {
     /* The address is the one right thing about this attempt. Saying "use
        another email", which is what the service returns, is the opposite of
        what they should do. */
@@ -217,12 +184,14 @@ export async function signIn(email, password) {
   }
 
   await new Promise((r) => setTimeout(r, 600));
-  const again = await attempt(() => c.auth.signInWithPassword({ email, password }));
+  const again = await attempt(() => c.signIn.email({ email, password }));
   if (again.value && !again.value.error) return null;
 
-  if (again.value && again.value.error && (await reallyUnverified(email, password))) {
-    return NEEDS_VERIFICATION;
-  }
+  const againSaid =
+    again.value && again.value.error
+      ? again.value.error.code || again.value.error.message || ""
+      : "";
+  if (looksUnverified(againSaid)) return NEEDS_VERIFICATION;
 
   if (first.thrown || made.thrown || again.thrown) {
     return "Could not reach the sign in service. Check your connection and try again.";
@@ -241,8 +210,8 @@ export async function sendEmailCode(email) {
   const c = db();
   if (!c) return "No connection to the database.";
   try {
-    const r = await c.auth.emailOtp.sendVerificationOtp({ email, type: "email-verification" });
-    if (r && r.error) return r.error.message || "We could not send the code.";
+    const { error } = await c.emailOtp.sendVerificationOtp({ email, type: "email-verification" });
+    if (error) return error.message || "We could not send the code.";
     return null;
   } catch (e) {
     return "We could not reach the sign in service. Check your connection.";
@@ -254,9 +223,9 @@ export async function verifyEmailCode(email, otp) {
   const c = db();
   if (!c) return "No connection to the database.";
   try {
-    const r = await c.auth.emailOtp.verifyEmail({ email, otp: String(otp).trim() });
-    if (r && r.error) {
-      const said = r.error.code || r.error.message || "";
+    const { error } = await c.emailOtp.verifyEmail({ email, otp: String(otp).trim() });
+    if (error) {
+      const said = error.code || error.message || "";
       if (/TOO_MANY_ATTEMPTS/i.test(said)) return "Too many tries. Ask for a new code.";
       if (/expired/i.test(said)) return "That code has expired. Ask for a new one.";
       return "That code is not right. Check it and try again.";
@@ -269,14 +238,11 @@ export async function verifyEmailCode(email, otp) {
 
 /** The way the onboarding email tells people to get in. */
 export async function magicLink(email, callbackURL) {
+  const c = db();
+  if (!c) return "No connection to the database.";
   try {
-    const r = await fetch(AUTH_URL + "/sign-in/magic-link", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, callbackURL }),
-    });
-    if (r.status === 404) return "Sign in links are not switched on yet. Use a password for now.";
-    if (!r.ok) return "Could not send the link (" + r.status + "). Try the password instead.";
+    const { error } = await c.signIn.magicLink({ email, callbackURL });
+    if (error) return "Could not send the link (" + (error.status || error.code || "") + "). Try the password instead.";
     return null;
   } catch (e) {
     return "Could not reach the sign in service. Check your connection.";
@@ -284,49 +250,32 @@ export async function magicLink(email, callbackURL) {
 }
 
 /**
- * Google. Answers with a one time token URL that redirects to the consent
- * screen. Credentialed because the endpoint sets state on the auth origin,
- * which its CORS headers allow from all four of our domains.
+ * Google. The client's own redirect plugin sends the browser to Google's
+ * consent screen the moment our server answers with { url, redirect: true },
+ * synchronously inside the click that started this call. The old bundled
+ * client's manual anchor-click workaround existed because that layer's
+ * redirect quietly did nothing; talking to our own server's real client
+ * needs none of that.
  *
  * This puts nobody on the staff list. is_staff() still decides what anybody
  * sees, so an address that is not on the list signs in and finds nothing.
  */
 export async function signInWithGoogle(callbackURL) {
+  const c = db();
+  if (!c) return "No connection to the database.";
   try {
-    const r = await fetch(AUTH_URL + "/sign-in/social", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ provider: "google", callbackURL }),
-    });
-    if (r.status === 400) return "Google sign in is not switched on for this project.";
-    if (!r.ok) return "Could not start Google sign in (" + r.status + "). Use the email link instead.";
-    const data = await r.json();
-    if (!data || !data.url) return "Google did not give us anywhere to send you. Use the email link instead.";
-    /* Leaving for another origin, two ways, because one of them has been
-       silently doing nothing: the button set location.href, said "Taking you
-       to Google" and stayed put, while the very same call made by hand
-       reached the account chooser every time. An anchor click is the route
-       browsers guard least, so it goes first, with the assignment behind it.
-
-       If we are somehow still here a moment later, say so. A dead button
-       under a hopeful message is worse than an error, because the person
-       just keeps pressing it. */
-    try {
-      const a = document.createElement("a");
-      a.href = data.url;
-      a.rel = "noopener";
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (e) {
-      /* fall through to the assignment below */
+    const { data, error } = await c.signIn.social({ provider: "google", callbackURL });
+    if (error) {
+      if (error.status === 400) return "Google sign in is not switched on for this project.";
+      return "Could not start Google sign in (" + (error.status || "") + "). Use the email link instead.";
     }
-    window.location.assign(data.url);
-
-    await new Promise((again) => setTimeout(again, 1500));
-    return "Google did not open. Use the email link below instead.";
+    /* Belt and suspenders: the redirect plugin above already navigates on
+       success, but if a browser ever refuses that and hands back a URL
+       anyway, still go there by hand rather than leaving a dead button. */
+    if (data && data.url) {
+      window.location.assign(data.url);
+    }
+    return null;
   } catch (e) {
     return "Could not reach the sign in service. Check your connection.";
   }
@@ -338,14 +287,11 @@ export async function signInWithGoogle(callbackURL) {
  * be used to find out who is on the staff list.
  */
 export async function requestReset(email, redirectTo) {
+  const c = db();
+  if (!c) return "No connection to the database.";
   try {
-    const r = await fetch(AUTH_URL + "/request-password-reset", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, redirectTo }),
-    });
-    if (r.status === 404) return "Password resets are not switched on. Use the sign in link instead.";
-    if (!r.ok) return "Could not send the reset (" + r.status + "). Use the sign in link instead.";
+    const { error } = await c.requestPasswordReset({ email, redirectTo });
+    if (error) return "Could not send the reset (" + (error.status || "") + "). Use the sign in link instead.";
     return null;
   } catch (e) {
     return "Could not reach the sign in service. Check your connection.";
@@ -355,7 +301,7 @@ export async function requestReset(email, redirectTo) {
 export async function signOut() {
   try {
     const c = db();
-    if (c) await c.auth.signOut();
+    if (c) await c.signOut();
   } catch (e) {
     /* already gone */
   }
