@@ -121,6 +121,13 @@ function nameFromEmail(email) {
  * also requires a name and answers [body.name] Invalid input without one,
  * which reads as a wrong password, so the name is derived from the address.
  */
+/** Better Auth says this when the address has never been confirmed. */
+export const NEEDS_VERIFICATION = "needs-verification"
+
+function looksUnverified(said) {
+  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED/i.test(String(said || ""))
+}
+
 export async function signIn(email, password) {
   const c = db();
   if (!c) return "No connection to the database.";
@@ -128,9 +135,8 @@ export async function signIn(email, password) {
   /* Each of these can reject instead of answering, and a rejection used to
      travel all the way up to the caller's catch. The console's catch says
      "Could not reach the console database", so a mistyped password was being
-     reported as the database being down, which sends somebody to check their
-     wifi over a typo. Every call is caught here and turned into something
-     true, and this function no longer throws. */
+     reported as the database being down. Every call is caught here and turned
+     into something true, and this function no longer throws. */
   const attempt = async (fn) => {
     try {
       return { value: await fn() };
@@ -142,10 +148,21 @@ export async function signIn(email, password) {
   const first = await attempt(() => c.auth.signInWithPassword({ email, password }));
   if (first.value && !first.value.error) return null;
 
+  /* Checked before anything else, because the account exists and the password
+     may well be right: the address simply has never been confirmed. Falling
+     through to sign up here is what produced "that password does not match
+     this account" for people whose password matched perfectly, and sent them
+     to reset a password that was never wrong. */
+  if (first.value && looksUnverified(first.value.error && (first.value.error.code || first.value.error.message))) {
+    return NEEDS_VERIFICATION;
+  }
+
   const made = await attempt(() => c.auth.signUp({ email, password, name: nameFromEmail(email) }));
   const madeSaid = made.thrown
     ? String((made.thrown && made.thrown.message) || made.thrown)
     : (made.value && made.value.error && made.value.error.message) || "";
+
+  if (looksUnverified(madeSaid)) return NEEDS_VERIFICATION;
 
   if (/already exists|already registered|USER_ALREADY/i.test(madeSaid)) {
     /* The address is the one right thing about this attempt. Saying "use
@@ -158,10 +175,51 @@ export async function signIn(email, password) {
   const again = await attempt(() => c.auth.signInWithPassword({ email, password }));
   if (again.value && !again.value.error) return null;
 
+  if (again.value && looksUnverified(again.value.error && (again.value.error.code || again.value.error.message))) {
+    return NEEDS_VERIFICATION;
+  }
+
   if (first.thrown || made.thrown || again.thrown) {
     return "Could not reach the sign in service. Check your connection and try again.";
   }
   return madeSaid || "Could not sign in. Try once more, and if it repeats use the reset link.";
+}
+
+/**
+ * Send the six digit code that confirms an address.
+ *
+ * Needed because verification is required on this project: an account that has
+ * never confirmed its address cannot sign in at all, and until this existed
+ * there was no way through that from any of our own pages.
+ */
+export async function sendEmailCode(email) {
+  const c = db();
+  if (!c) return "No connection to the database.";
+  try {
+    const r = await c.auth.emailOtp.sendVerificationOtp({ email, type: "email-verification" });
+    if (r && r.error) return r.error.message || "We could not send the code.";
+    return null;
+  } catch (e) {
+    return "We could not reach the sign in service. Check your connection.";
+  }
+}
+
+/** Confirm the address with the code. Returns null when it worked. */
+export async function verifyEmailCode(email, otp) {
+  const c = db();
+  if (!c) return "No connection to the database.";
+  try {
+    const r = await c.auth.emailOtp.verifyEmail({ email, otp: String(otp).trim() });
+    if (r && r.error) {
+      const said = r.error.code || r.error.message || "";
+      if (/TOO_MANY_ATTEMPTS/i.test(said)) return "Too many tries. Ask for a new code.";
+      if (/expired/i.test(said)) return "That code has expired. Ask for a new one.";
+      return "That code is not right. Check it and try again.";
+    }
+    return null;
+  } catch (e) {
+    return "We could not reach the sign in service. Check your connection.";
+  }
 }
 
 /** The way the onboarding email tells people to get in. */

@@ -2553,6 +2553,26 @@
                 Enter console
               </button>
               <p class="field-error" id="enterError"></p>
+
+              <!-- Confirming the address. Hidden until a sign in comes back
+                   saying the address has never been confirmed, which is a
+                   different thing from a wrong password and used to be
+                   reported as one. Verification is required on this project,
+                   so without this box there is no way in at all. -->
+              <div id="verifyWrap" style="display:none;margin:14px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)">
+                <p style="margin:0 0 8px;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-size:14.5px;line-height:1.55;color:#C9D1DB">
+                  This address has not been confirmed yet. We have sent a six digit code to it.
+                </p>
+                <label for="fOtp" style="display:block;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-weight:600;font-size:13px;line-height:1.6;color:#9AA6B2">Code</label>
+                <input id="fOtp" inputmode="numeric" autocomplete="one-time-code" maxlength="8"
+                       style="width:100%;box-sizing:border-box;font-size:16px;letter-spacing:.3em;font-family:var(--font-mono,ui-monospace,Menlo,monospace);color:#EDF1F6;background:rgba(10,21,35,.86);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:13px 14px;margin:0 0 10px" />
+                <button type="button" id="verifyBtn" class="btn btn-primary btn-block">Confirm and enter</button>
+                <button type="button" id="resendBtn"
+                        style="margin-top:10px;background:none;border:0;padding:0;cursor:pointer;color:#FF1A21;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-weight:600;font-size:14px">
+                  Send a new code
+                </button>
+                <p id="verifySaid" style="margin:10px 0 0;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-size:14px;line-height:1.5;color:#C9D1DB"></p>
+              </div>
               <!-- A div, not a p. This held two divs, and a paragraph cannot:
                    the browser closed it at the first one, which orphaned the
                    text at the end, stranded a closing tag, and is why the
@@ -3434,7 +3454,7 @@
       <span class="lbl" id="authOffBadge" style="display: none; color: #f8b800">Auth off</span>
     </div>
     <script type="module">
-      import { db as makeDb, signIn, magicLink } from "/vendor/ranch-db.js";
+      import { db as makeDb, signIn, magicLink, sendEmailCode, verifyEmailCode, NEEDS_VERIFICATION } from "/vendor/ranch-db.js";
       import { upload as __blobUpload } from "/vendor/vercel-blob-client.js";
       window.__blobUpload = __blobUpload;
       try {
@@ -3796,6 +3816,52 @@
               this.setAttribute("aria-pressed", show ? "true" : "false"),
               f.focus());
           }),
+          /* Confirming the address, and asking for another code.
+             Verification is required on this project, so an account that has
+             never confirmed cannot sign in at all. Before this there was no
+             box to type a code into anywhere in our own pages, which meant
+             the requirement had no way through it. */
+          document.getElementById("verifyBtn").addEventListener("click", async function () {
+            var em = (document.getElementById("fEmail").value || "").trim();
+            var code = (document.getElementById("fOtp").value || "").trim();
+            var said = document.getElementById("verifySaid");
+            var btn = this;
+            if (!code) {
+              said.textContent = "Put the code from your email in the box.";
+              return;
+            }
+            btn.disabled = true;
+            said.textContent = "Checking";
+            var problem = await verifyEmailCode(em, code);
+            if (problem) {
+              btn.disabled = false;
+              said.textContent = problem;
+              return;
+            }
+            /* auto_sign_in_after_verification is on, so confirming usually
+               hands back a session. Try the password once more anyway: if it
+               did, this succeeds immediately, and if it did not, the person is
+               told rather than left looking at a confirmed address and a
+               locked door. */
+            said.textContent = "Confirmed. Signing you in.";
+            var pw = document.getElementById("fCode").value || "";
+            var second = pw ? await signIn(em, pw) : null;
+            btn.disabled = false;
+            if (second && second !== NEEDS_VERIFICATION) {
+              said.textContent = second;
+              return;
+            }
+            location.reload();
+          }),
+          document.getElementById("resendBtn").addEventListener("click", async function () {
+            var em = (document.getElementById("fEmail").value || "").trim();
+            var said = document.getElementById("verifySaid");
+            this.disabled = true;
+            said.textContent = "Sending";
+            var problem = await sendEmailCode(em);
+            this.disabled = false;
+            said.textContent = problem || "New code sent. It is good for fifteen minutes.";
+          }),
           document.getElementById("magicBtn").addEventListener("click", async function () {
             var em = (document.getElementById("fEmail").value || "").trim();
             var said = document.getElementById("magicSaid");
@@ -3833,6 +3899,23 @@
                            account without handing back a session. This door and
                            crew now answer the same failure with the same words. */
                         var problem = await signIn(e, t);
+                        if (problem === NEEDS_VERIFICATION) {
+                          /* Not a wrong password. The account exists and this
+                             address has simply never been confirmed, which on
+                             this project blocks sign in entirely. Send a code
+                             and show the box rather than reporting it as a
+                             credential problem, which is what sent people to
+                             reset passwords that were never wrong. */
+                          E(!1);
+                          document.getElementById("verifyWrap").style.display = "";
+                          document.getElementById("verifySaid").textContent = "Sending a code to " + e;
+                          sendEmailCode(e).then(function (said) {
+                            document.getElementById("verifySaid").textContent =
+                              said || "Code sent. It is good for fifteen minutes.";
+                          });
+                          document.getElementById("fOtp").focus();
+                          return;
+                        }
                         if (problem) {
                           return (E(!1), void w(problem));
                         }
