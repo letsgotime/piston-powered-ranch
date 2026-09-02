@@ -569,6 +569,12 @@
         }
       }
       @media (prefers-reduced-motion: reduce) {
+        /* The gate drift is decoration on a door. Anyone who has asked for
+           less motion gets the photograph and none of the movement. */
+        body:has(.view[data-view="enter"].active) .ground::before {
+          animation: none !important;
+          transform: scale(1.06);
+        }
         .view {
           transition: opacity 0.2s linear;
           transform: none !important;
@@ -1340,12 +1346,62 @@
         gap: 6px;
         margin: var(--gap-3) 0;
       }
+      /* The sign in panel floats, rather than sitting flat on the page.
+         It used to be a bare flex column: the form was painted straight onto
+         the ground with nothing under it, which is why the door looked
+         unfinished next to every other surface. Now it is the same glass the
+         cards use, over a photograph that is actually visible. */
       .enter-wrap {
         min-height: calc(100dvh - 40px);
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding-top: 6vh;
+      }
+      .enter-glass {
+        width: 100%;
+        max-width: 468px;
+        margin: 0 auto;
+        padding: clamp(26px, 5vw, 40px) clamp(22px, 4.5vw, 34px)
+          clamp(30px, 5vw, 40px);
+        border-radius: 22px;
+        background: color-mix(in srgb, var(--panel) 82%, transparent);
+        backdrop-filter: blur(26px) saturate(165%);
+        -webkit-backdrop-filter: blur(26px) saturate(165%);
+        border: 1px solid color-mix(in srgb, #fff 16%, transparent);
+        box-shadow:
+          0 34px 90px -28px rgba(0, 0, 0, 0.78),
+          inset 0 1px 0 rgba(255, 255, 255, 0.09);
+      }
+
+      /* The photograph, only on this view. Everywhere else the ground stays a
+         quiet wash at 0.14; a door earns a picture. */
+      body:has(.view[data-view="enter"].active) .ground::before {
+        background-image: url("/events/img/gate-login.jpg");
+        background-position: center 46%;
+        opacity: 0.5;
+        animation: gateDrift 42s var(--ease-cine) infinite alternate;
+      }
+      body:has(.view[data-view="enter"].active) .ground {
+        background:
+          radial-gradient(
+            ellipse 120% 70% at 50% 0%,
+            color-mix(in srgb, var(--void) 42%, transparent),
+            transparent 62%
+          ),
+          linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--void) 58%, transparent),
+            color-mix(in srgb, var(--void) 88%, transparent) 78%,
+            var(--void)
+          );
+      }
+      @keyframes gateDrift {
+        from {
+          transform: scale(1.06) translate3d(-1.1%, 0.6%, 0);
+        }
+        to {
+          transform: scale(1.14) translate3d(1.1%, -0.9%, 0);
+        }
       }
       .enter-badge {
         width: 168px;
@@ -2500,6 +2556,7 @@
       <div class="views">
         <section class="view" data-view="enter">
           <div class="enter-wrap">
+            <div class="enter-glass">
             <div class="reveal d1">
               <div class="enter-badge">
                 <span class="eb-fb">PG</span><img id="pgBadgeImg3" alt="PaddockGavin" />
@@ -2601,6 +2658,7 @@
               </div>
             </div>
           </div>
+            </div>
         </section>
         <section class="view" data-view="dashboard">
           <div class="reveal d1 sampledata-strip">
