@@ -42,6 +42,17 @@
       "source": "/events/",
       "destination": "https://paddockgavin.com/events",
       "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "missing": [
+        {
+          "type": "query",
+          "key": "via"
+        }
+      ],
+      "destination": "https://pistonpoweredranch.com/$1",
+      "permanent": false
     }
   ]
 }
