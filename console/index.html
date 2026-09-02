@@ -3575,7 +3575,7 @@
             ? "$" + (t / 1e3).toFixed(t % 1e3 == 0 ? 0 : 1) + "K"
             : "$" + Math.round(t).toLocaleString("en-US");
         }
-        var o = ["submit", "event"],
+        var o = ["event"],
           l = null,
           d = {
             body: document.body,
@@ -5918,6 +5918,22 @@
               if (e && e.data && e.data.session && ((c = !0), "enter" === u)) {
                 var t = y || re || "ops";
                 ((y = null), f(t));
+              }
+              /* Pin the entry email to the signed-in account so every vehicle,
+                 vendor, or sponsor submission links back to that person's
+                 portal at /account/. Staff submitting on someone's behalf can
+                 still clear it; entrants land here pre-authenticated. */
+              var sess =
+                e && e.data && e.data.session && e.data.session.user
+                  ? e.data.session.user
+                  : null;
+              var em = sess && sess.email ? String(sess.email).trim() : "";
+              var emEl = document.getElementById("fSubmitEmail");
+              if (em && emEl) {
+                ((emEl.value = em),
+                  emEl.setAttribute("readonly", "readonly"),
+                  (emEl.style.opacity = "0.7"),
+                  emEl.setAttribute("title", "Linked to your signed-in account"));
               }
             } catch (e) {}
           })());
