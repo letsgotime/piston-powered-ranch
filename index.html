@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>The Piston Powered Ranch — October 10, 2026</title>
+    <meta
+      name="description"
+      content="A private-collector car show held to concours standards: 300 curated cars at Rancho Jaramillo near Nashville, Saturday October 10, 2026. RSVP free, enter your car, or partner as a vendor or sponsor."
+    />
+    <meta property="og:title" content="The Piston Powered Ranch" />
+    <meta
+      property="og:description"
+      content="300 curated collector cars on a Tennessee ranch. Concours standards, Nashville soil. Saturday, October 10, 2026."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pistonpoweredranch.com/" />
+    <meta property="og:image" content="https://pistonpoweredranch.com/og/ppr-og.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/rj-icon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/rj-icon-180.png" />
+    <style>
+      :root {
+        --bg: #0d1620;
+        --glass: rgba(15, 24, 36, 0.55);
+        --glass-2: rgba(20, 31, 45, 0.65);
+        --gline: rgba(255, 255, 255, 0.1);
+        --gline-2: rgba(255, 255, 255, 0.16);
+        --ink: #fff;
+        --dim: #c4cbd6;
+        --mute: #8b95a3;
+        --amber: #f8b800;
+        --teal: #00d2be;
+        --blue: #005185;
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.38);
+        --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        min-height: 100vh;
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        pointer-events: none;
+        opacity: 0.05;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+      img { max-width: 100%; display: block; }
+      a { color: inherit; }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+      .rule {
+        height: 4px;
+        position: relative;
+        z-index: 70;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, var(--blue) 50% 75%, var(--mute) 75% 100%);
+      }
+      /* backdrop */
+      .ground { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+      .ground .veil {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(120% 60% at 50% -10%, rgba(248, 184, 0, 0.1), transparent 55%),
+          radial-gradient(90% 50% at 100% 110%, rgba(0, 210, 190, 0.08), transparent 60%),
+          linear-gradient(180deg, #0d1620, #0a121b);
+      }
+      main { position: relative; z-index: 1; }
+      /* top bar */
+      .bar {
+        position: sticky;
+        top: 10px;
+        z-index: 50;
+        margin: 12px auto 0;
+        width: calc(100% - 28px);
+        max-width: 1120px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 10px 8px 16px;
+        border-radius: 999px;
+        background: rgba(13, 20, 30, 0.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline);
+        box-shadow: var(--e1);
+      }
+      .bar img { height: 26px; width: auto; }
+      .bar .live {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .bar .live .d {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal);
+        box-shadow: 0 0 8px var(--teal);
+        animation: pulse 2.2s infinite;
+      }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+      .bar .spring { margin-left: auto; }
+      .bar a.staff {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12.5px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink);
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--gline-2);
+        border-radius: 999px;
+        padding: 9px 16px;
+        transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+      }
+      .bar a.staff svg { width: 15px; height: 15px; }
+      .bar a.staff:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.12); }
+      /* hero */
+      .hero {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: clamp(48px, 12vh, 128px) 24px clamp(28px, 6vh, 56px);
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--teal);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--teal); }
+      h1 {
+        margin: 16px 0 0;
+        font-size: clamp(44px, 8.4vw, 100px);
+        line-height: 0.94;
+        letter-spacing: -0.025em;
+      }
+      h1 .a { color: var(--amber); }
+      .hero-sub {
+        margin: 18px 0 0;
+        font-size: clamp(16px, 2vw, 19px);
+        color: var(--dim);
+        max-width: 60ch;
+        text-wrap: pretty;
+      }
+      .hero-sub b { color: var(--ink); }
+      .facts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 24px;
+      }
+      .fact {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 14px;
+        border-radius: 12px;
+        background: var(--glass-2);
+        border: 1px solid var(--gline);
+        font-size: 13.5px;
+        color: var(--dim);
+      }
+      .fact svg { width: 16px; height: 16px; color: var(--amber); flex: none; }
+      .fact b { color: var(--ink); font-weight: 700; }
+      /* lanes */
+      .lanes-wrap { max-width: 1120px; margin: 0 auto; padding: 8px 24px clamp(56px, 12vh, 104px); }
+      .sec-label {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--mute);
+      }
+      .lanes {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      @media (min-width: 640px) { .lanes { grid-template-columns: 1fr 1fr; } }
+      @media (min-width: 980px) { .lanes { grid-template-columns: repeat(4, 1fr); } }
+      .lane {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        padding: 22px 20px 20px;
+        border-radius: 20px;
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.4);
+        backdrop-filter: blur(18px) saturate(1.4);
+        border: 1px solid var(--gline);
+        box-shadow: var(--e1);
+        overflow: hidden;
+        transition: transform 0.22s var(--ease), border-color 0.22s var(--ease);
+      }
+      .lane::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 4px;
+        background: var(--accent, var(--amber));
+      }
+      .lane:hover { transform: translateY(-4px); border-color: var(--gline-2); }
+      .lane .ic {
+        width: 42px; height: 42px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--accent, var(--amber)) 16%, transparent);
+        border: 1px solid color-mix(in srgb, var(--accent, var(--amber)) 40%, transparent);
+        margin-bottom: 16px;
+      }
+      .lane .ic svg { width: 22px; height: 22px; color: var(--accent, var(--amber)); }
+      .lane h3 { margin: 0; font-size: 19px; letter-spacing: -0.01em; }
+      .lane p { margin: 7px 0 0; font-size: 14px; color: var(--dim); line-height: 1.5; }
+      .lane .go {
+        margin-top: 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent, var(--amber));
+      }
+      .lane .go svg { width: 15px; height: 15px; transition: transform 0.2s var(--ease); }
+      .lane:hover .go svg { transform: translateX(3px); }
+      .note-row {
+        margin-top: 22px;
+        font-size: 13px;
+        color: var(--mute);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .note-row svg { width: 15px; height: 15px; flex: none; }
+      /* footer */
+      footer {
+        position: relative;
+        z-index: 1;
+        border-top: 1px solid var(--gline);
+        background: rgba(10, 16, 24, 0.6);
+      }
+      .foot {
+        max-width: 1120px;
+        margin: 0 auto;
+        padding: 28px 24px 40px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+      .foot img { height: 24px; width: auto; opacity: 0.9; }
+      .foot p { margin: 0; font-size: 13px; color: var(--mute); max-width: 46ch; }
+      .foot .spring { margin-left: auto; }
+      .foot a.tiny {
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--dim);
+        text-decoration: none;
+      }
+      .foot a.tiny:hover { color: var(--ink); }
+      .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s var(--ease) forwards; }
+      .d1 { animation-delay: 0.05s; }
+      .d2 { animation-delay: 0.14s; }
+      .d3 { animation-delay: 0.23s; }
+      .d4 { animation-delay: 0.32s; }
+      @keyframes rise { to { opacity: 1; transform: none; } }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal { animation: none; opacity: 1; transform: none; }
+        .bar .live .d { animation: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="ground"><div class="veil"></div></div>
+    <div class="rule"></div>
+
+    <main>
+      <div class="bar">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <span class="live"><span class="d"></span><span>Oct 10, 2026 · RSVP open</span></span>
+        <span class="spring"></span>
+        <a class="staff" href="/console/" aria-label="Staff sign in to the event console">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+          </svg>
+          Staff
+        </a>
+      </div>
+
+      <section class="hero">
+        <div class="reveal d1"><span class="eyebrow">Rancho Jaramillo · Nashville, Tennessee</span></div>
+        <h1 class="display reveal d2">
+          The Piston<br />Powered <span class="a">Ranch</span>
+        </h1>
+        <p class="hero-sub reveal d3">
+          A private-collector car show held to concours standards. <b>300 curated cars</b> on a
+          Tennessee ranch, judged with intent, open to the people who love them. One day only.
+        </p>
+        <div class="facts reveal d4">
+          <span class="fact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
+            <span><b>Saturday, October 10, 2026</b></span>
+          </span>
+          <span class="fact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+            <span>Rancho Jaramillo, near Nashville</span>
+          </span>
+          <span class="fact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="6" /><path d="M15.5 13.5 17 22l-5-3-5 3 1.5-8.5" /></svg>
+            <span>Judged to <b>concours</b> standards</span>
+          </span>
+        </div>
+      </section>
+
+      <section class="lanes-wrap">
+        <span class="sec-label reveal d1">Choose your lane</span>
+        <div class="lanes">
+          <a class="lane reveal d1" style="--accent: var(--amber)" href="/spectate/">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg></span>
+            <h3>Spectate</h3>
+            <p>Come walk the field. Free RSVP saves your spot and sends day-of details.</p>
+            <span class="go">RSVP free <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+          </a>
+          <a class="lane reveal d2" style="--accent: var(--teal)" href="/console/#submit">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17h14M6 13l1.5-5A2 2 0 0 1 9.4 6.5h5.2a2 2 0 0 1 1.9 1.5L18 13" /><circle cx="7.5" cy="17.5" r="1.5" /><circle cx="16.5" cy="17.5" r="1.5" /></svg></span>
+            <h3>Enter a car</h3>
+            <p>Show your build. Submit your vehicle for consideration in the curated field.</p>
+            <span class="go">Start entry <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+          </a>
+          <a class="lane reveal d3" style="--accent: var(--blue)" href="/console/#submit">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01" /></svg></span>
+            <h3>Vendor</h3>
+            <p>Bring a booth. Reach a room of serious collectors and enthusiasts.</p>
+            <span class="go">Request a booth <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+          </a>
+          <a class="lane reveal d4" style="--accent: #b98cff" href="/console/#submit">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 21.4l1.4-6.8L2.2 9.1l6.9-.8L12 2Z" /></svg></span>
+            <h3>Sponsor</h3>
+            <p>Put your brand on the ranch. Partnership packages with real placement.</p>
+            <span class="go">Explore packages <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg></span>
+          </a>
+        </div>
+        <div class="note-row reveal d4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="9" /></svg>
+          <span>Entrants, vendors, and sponsors sign in once and manage everything from their account.</span>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="foot">
+        <img src="/brand/pg-mark.png" alt="PaddockGavin" />
+        <p>Curated automotive gatherings in Middle Tennessee. Part of the Paddock20 family.</p>
+        <span class="spring"></span>
+        <a class="tiny" href="/console/">Staff console</a>
+      </div>
+    </footer>
+  </body>
+</html>

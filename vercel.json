@@ -19,11 +19,6 @@
   ],
   "redirects": [
     {
-      "source": "/",
-      "destination": "https://paddockgavin.com/events/pistonpoweredranch",
-      "permanent": true
-    },
-    {
       "source": "/show",
       "destination": "https://paddockgavin.com/events/pistonpoweredranch",
       "permanent": true
