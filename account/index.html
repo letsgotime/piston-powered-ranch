@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <title>Your Account · The Piston Powered Ranch</title>
+    <meta name="description" content="Your Piston Powered Ranch account: entries, RSVPs, vendor and sponsor status." />
+    <meta name="theme-color" content="#0d1620" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/brand/rj-icon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/brand/rj-icon-180.png" />
+    <style>
+      :root {
+        --bg: #0d1620; --glass: rgba(15, 24, 36, 0.55); --glass-2: rgba(20, 31, 45, 0.65);
+        --gline: rgba(255, 255, 255, 0.1); --gline-2: rgba(255, 255, 255, 0.16);
+        --ink: #fff; --dim: #c4cbd6; --mute: #8b95a3;
+        --amber: #f8b800; --teal: #00d2be; --blue: #005185; --crit: #ff1a21;
+        --e1: 0 10px 34px rgba(0, 0, 0, 0.38); --e2: 0 24px 70px rgba(0, 0, 0, 0.5);
+        --ease: cubic-bezier(0.16, 0.84, 0.32, 1);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink); min-height: 100dvh;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+        padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
+      }
+      .display { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -0.02em; }
+      .rule { height: 4px;
+        background: linear-gradient(90deg, var(--amber) 0 25%, var(--teal) 25% 50%, var(--blue) 50% 75%, var(--mute) 75% 100%); }
+      a { color: var(--teal); }
+      img { max-width: 100%; display: block; }
+      .bar {
+        position: sticky; top: 10px; z-index: 50; margin: 12px auto 0; width: calc(100% - 28px);
+        max-width: 960px; display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+        border-radius: 999px; background: rgba(13, 20, 30, 0.6);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4); backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid var(--gline); box-shadow: var(--e1);
+      }
+      .bar img { height: 26px; width: auto; }
+      .bar .brand { font-size: 13px; font-weight: 800; letter-spacing: 0.02em; }
+      .bar .spacer { margin-left: auto; }
+      .bar button.link {
+        background: none; border: 0; color: var(--dim); font: inherit; font-size: 12.5px; font-weight: 700;
+        letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; padding: 8px 10px;
+      }
+      .bar button.link:hover { color: var(--ink); }
+      main { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 26px 16px 80px; }
+      .glass {
+        background: var(--glass);
+        -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+        border: 1px solid var(--gline); border-radius: 20px; box-shadow: var(--e1);
+      }
+      .pad { padding: 22px 22px 24px; }
+      .eyebrow { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--teal);
+        display: flex; align-items: center; gap: 10px; }
+      .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--teal); }
+      h1 { margin: 12px 0 0; font-size: clamp(30px, 6vw, 46px); line-height: 1; }
+      h1 .a { color: var(--amber); }
+      h2.sec { margin: 34px 0 12px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute); font-weight: 800; }
+      p.lede { margin: 14px 0 0; color: var(--dim); max-width: 60ch; }
+      .grid { display: grid; gap: 14px; }
+      @media (min-width: 620px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+      .item { border-radius: 16px; background: var(--glass-2); border: 1px solid var(--gline); padding: 16px 18px; }
+      .item h3 { margin: 0; font-size: 16px; }
+      .item .meta { margin-top: 6px; color: var(--mute); font-size: 13.5px; }
+      .item .det { margin-top: 10px; color: var(--dim); font-size: 14px; white-space: pre-wrap; }
+      .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 800;
+        letter-spacing: 0.06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; }
+      .badge .d { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+      .b-pending { color: var(--amber); background: rgba(248, 184, 0, 0.12); }
+      .b-approved { color: var(--teal); background: rgba(0, 210, 190, 0.12); }
+      .b-declined { color: var(--crit); background: rgba(255, 26, 33, 0.12); }
+      .b-neutral { color: var(--dim); background: rgba(255, 255, 255, 0.08); }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+      .field { margin-top: 14px; }
+      .field label { display: block; font-size: 12.5px; letter-spacing: 0.04em; text-transform: uppercase;
+        color: var(--mute); font-weight: 700; margin-bottom: 6px; }
+      .field input {
+        width: 100%; padding: 13px 14px; border-radius: 12px; background: rgba(9, 15, 23, 0.7);
+        border: 1px solid var(--gline-2); color: var(--ink); font: inherit; font-size: 16px;
+      }
+      .field input:focus { outline: none; border-color: var(--teal); }
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+        margin-top: 16px; padding: 14px 18px; border-radius: 12px; border: 0; cursor: pointer;
+        font: inherit; font-size: 15px; font-weight: 800; letter-spacing: 0.03em;
+        color: #151000; background: var(--amber); transition: transform 0.16s var(--ease); text-decoration: none;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn.ghost { color: var(--ink); background: transparent; border: 1px solid var(--gline-2); }
+      .btn.teal { color: #04201d; background: var(--teal); }
+      .alt { margin-top: 14px; text-align: center; font-size: 13.5px; color: var(--mute); }
+      .alt button { background: none; border: 0; color: var(--teal); font: inherit; font-size: 13.5px; cursor: pointer; padding: 0; }
+      .msg { margin-top: 14px; padding: 12px 14px; border-radius: 12px; font-size: 14px; display: none; }
+      .msg.show { display: block; }
+      .msg.err { color: #ffd7d7; background: rgba(255, 26, 33, 0.14); border: 1px solid rgba(255, 26, 33, 0.3); }
+      .msg.ok { color: #cffff6; background: rgba(0, 210, 190, 0.14); border: 1px solid rgba(0, 210, 190, 0.32); }
+      .empty { color: var(--mute); font-size: 14.5px; }
+      .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+      .cta-row .btn { width: auto; margin: 0; }
+      .hidden { display: none !important; }
+      .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(0,0,0,0.25);
+        border-top-color: #151000; border-radius: 50%; animation: sp 0.7s linear infinite; }
+      @keyframes sp { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div class="rule"></div>
+    <div class="bar">
+      <img src="/brand/rj-icon-180.png" alt="" />
+      <span class="brand">Piston Powered Ranch</span>
+      <span class="spacer"></span>
+      <button class="link hidden" id="signOutBtn" type="button">Sign out</button>
+    </div>
+
+    <main>
+      <!-- Loading -->
+      <section id="loadingView">
+        <div class="glass pad"><p class="empty">Loading your account…</p></div>
+      </section>
+
+      <!-- Signed out: sign-in -->
+      <section id="authView" class="hidden">
+        <div class="eyebrow">Your Account</div>
+        <h1 class="display">Sign in to the<br /><span class="a">Ranch</span></h1>
+        <p class="lede">
+          The same door for everyone. Entrants, spectators, vendors and sponsors all sign in here to see
+          their own status. Staff land on a button through to the team console.
+        </p>
+
+        <div class="glass pad" style="margin-top: 22px; max-width: 460px">
+          <!-- password / email -->
+          <div id="passBlock">
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" />
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" type="password" autocomplete="current-password" placeholder="Your password" />
+            </div>
+            <button class="btn" id="signInBtn" type="button">Sign in</button>
+            <div class="alt">
+              <button id="linkBtn" type="button">Email me a sign in link</button>
+              &nbsp;·&nbsp;
+              <button id="resetBtn" type="button">Reset password</button>
+            </div>
+          </div>
+
+          <!-- OTP verification -->
+          <div id="otpBlock" class="hidden">
+            <p class="lede" style="margin-top: 0">
+              Your email needs confirming. We sent a six digit code to <b id="otpWho"></b>. Enter it below.
+            </p>
+            <div class="field">
+              <label for="otp">Six digit code</label>
+              <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="000000" />
+            </div>
+            <button class="btn teal" id="otpVerifyBtn" type="button">Confirm and sign in</button>
+            <div class="alt">
+              <button id="otpResendBtn" type="button">Send a new code</button>
+              &nbsp;·&nbsp;
+              <button id="otpBackBtn" type="button">Back</button>
+            </div>
+          </div>
+
+          <div class="msg" id="authMsg"></div>
+        </div>
+      </section>
+
+      <!-- Signed in: portal -->
+      <section id="portalView" class="hidden">
+        <div class="eyebrow">Your Account</div>
+        <h1 class="display" id="hello">Welcome back</h1>
+        <p class="lede" id="portalSub"></p>
+
+        <!-- staff shortcut -->
+        <div id="staffBlock" class="glass pad hidden" style="margin-top: 20px">
+          <div class="row">
+            <div>
+              <h3 style="margin: 0; font-size: 18px" class="display">Team access</h3>
+              <p class="meta" style="color: var(--mute); margin: 6px 0 0; font-size: 13.5px">
+                You are on the staff allowlist. The console is the full back office.
+              </p>
+            </div>
+            <a class="btn teal" style="width: auto; margin: 0" href="/console/">Enter Team Console</a>
+          </div>
+        </div>
+
+        <!-- entries (vehicles) -->
+        <div id="entriesSection" class="hidden">
+          <h2 class="sec">Your Show Entries</h2>
+          <div class="grid two" id="entriesGrid"></div>
+        </div>
+
+        <!-- vendor / sponsor -->
+        <div id="applicationsSection" class="hidden">
+          <h2 class="sec">Vendor &amp; Sponsor</h2>
+          <div class="grid two" id="applicationsGrid"></div>
+        </div>
+
+        <!-- rsvps -->
+        <div id="rsvpSection" class="hidden">
+          <h2 class="sec">Your RSVP</h2>
+          <div class="grid two" id="rsvpGrid"></div>
+        </div>
+
+        <!-- nothing yet -->
+        <div id="emptySection" class="glass pad hidden" style="margin-top: 20px">
+          <h3 style="margin: 0; font-size: 18px" class="display">You&apos;re signed in</h3>
+          <p class="empty" style="margin-top: 8px">
+            Nothing is tied to this email yet. Enter a car, reserve a spot, or apply as a vendor or sponsor
+            and it will show up here.
+          </p>
+          <div class="cta-row">
+            <a class="btn" href="/console/#submit">Enter a car</a>
+            <a class="btn ghost" href="/spectate/">RSVP to attend</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import {
+        signIn, magicLink, sendEmailCode, verifyEmailCode, requestReset,
+        getSession, signOut, accessToken, NEEDS_VERIFICATION,
+      } from "/vendor/ranch-db.js?v=2026-09-02e";
+
+      const $ = (id) => document.getElementById(id);
+      const show = (el) => el && el.classList.remove("hidden");
+      const hide = (el) => el && el.classList.add("hidden");
+
+      function msg(kind, text) {
+        const m = $("authMsg");
+        m.textContent = text;
+        m.className = "msg show " + (kind === "ok" ? "ok" : "err");
+      }
+      function clearMsg() {
+        const m = $("authMsg");
+        m.className = "msg";
+        m.textContent = "";
+      }
+      function busy(btn, on, label) {
+        if (!btn) return;
+        if (on) {
+          btn.dataset.label = btn.textContent;
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spin"></span>' + (label || "Working…");
+        } else {
+          btn.disabled = false;
+          btn.textContent = btn.dataset.label || label || "Done";
+        }
+      }
+
+      const CALLBACK = location.origin + "/account/";
+
+      // ---- sign-in handlers -------------------------------------------------
+      async function doSignIn() {
+        clearMsg();
+        const email = $("email").value.trim().toLowerCase();
+        const pw = $("password").value;
+        if (!email || !pw) return msg("err", "Enter your email and password.");
+        busy($("signInBtn"), true, "Signing in…");
+        let out;
+        try {
+          out = await signIn(email, pw);
+        } catch (e) {
+          out = "Could not reach the sign in service. Try again.";
+        }
+        busy($("signInBtn"), false, "Sign in");
+        if (out === null) return boot();
+        if (out === NEEDS_VERIFICATION) {
+          $("otpWho").textContent = email;
+          await sendEmailCode(email);
+          hide($("passBlock"));
+          show($("otpBlock"));
+          clearMsg();
+          return;
+        }
+        msg("err", out);
+      }
+
+      async function doLink() {
+        clearMsg();
+        const email = $("email").value.trim().toLowerCase();
+        if (!email) return msg("err", "Enter your email first, then request the link.");
+        busy($("signInBtn"), true, "Sending…");
+        const out = await magicLink(email, CALLBACK);
+        busy($("signInBtn"), false, "Sign in");
+        if (out === null) return msg("ok", "Check your inbox for a sign in link. It signs you straight in here.");
+        msg("err", out);
+      }
+
+      async function doReset() {
+        clearMsg();
+        const email = $("email").value.trim().toLowerCase();
+        if (!email) return msg("err", "Enter your email first, then request the reset.");
+        const out = await requestReset(email, CALLBACK);
+        if (out === null) return msg("ok", "If that address has a password, a reset link is on its way.");
+        msg("err", out);
+      }
+
+      async function doVerify() {
+        clearMsg();
+        const email = $("email").value.trim().toLowerCase();
+        const otp = $("otp").value.trim();
+        if (!otp) return msg("err", "Enter the six digit code.");
+        busy($("otpVerifyBtn"), true, "Confirming…");
+        const out = await verifyEmailCode(email, otp);
+        if (out !== null) {
+          busy($("otpVerifyBtn"), false, "Confirm and sign in");
+          return msg("err", out);
+        }
+        // verified — now sign in with the password they already typed
+        const pw = $("password").value;
+        const signedIn = pw ? await signIn(email, pw) : "verified";
+        busy($("otpVerifyBtn"), false, "Confirm and sign in");
+        if (signedIn === null) return boot();
+        // if no usable password, fall back to a magic link
+        await magicLink(email, CALLBACK);
+        msg("ok", "Your email is confirmed. We sent a sign in link to finish.");
+      }
+
+      // ---- portal rendering -------------------------------------------------
+      function badge(status) {
+        const s = String(status || "").toLowerCase();
+        if (s === "approved") return '<span class="badge b-approved"><span class="d"></span>Approved</span>';
+        if (s === "declined") return '<span class="badge b-declined"><span class="d"></span>Declined</span>';
+        if (s === "pending" || s === "applied" || !s)
+          return '<span class="badge b-pending"><span class="d"></span>Under review</span>';
+        return '<span class="badge b-neutral"><span class="d"></span>' + esc(status) + "</span>";
+      }
+      function esc(v) {
+        return String(v == null ? "" : v).replace(/[&<>"']/g, (c) =>
+          ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
+        );
+      }
+      function when(ts) {
+        if (!ts) return "";
+        try {
+          return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+        } catch (e) { return ""; }
+      }
+
+      function renderPortal(data) {
+        const first = (data.email || "").split("@")[0].replace(/[._-]+/g, " ").trim();
+        $("hello").innerHTML = "Welcome back, <span class=\"a\">" + esc(first || "friend") + "</span>";
+
+        const roles = data.roles || [];
+        const parts = [];
+        if (roles.includes("entrant")) parts.push("a show entrant");
+        if (roles.includes("vendor")) parts.push("a vendor");
+        if (roles.includes("sponsor")) parts.push("a sponsor");
+        if (roles.includes("spectator")) parts.push("on the guest list");
+        $("portalSub").textContent = parts.length
+          ? "Signed in as " + data.email + " — you're " + parts.join(", ") + "."
+          : "Signed in as " + data.email + ".";
+
+        if (data.isStaff) show($("staffBlock"));
+
+        const entries = (data.entries || []).filter((e) => e.type === "vehicle");
+        const apps = (data.entries || []).filter((e) => e.type === "vendor" || e.type === "sponsor");
+        const rsvps = data.rsvps || [];
+
+        if (entries.length) {
+          $("entriesGrid").innerHTML = entries
+            .map((e) => {
+              const scoreLine =
+                String(e.status).toLowerCase() === "approved"
+                  ? '<div class="meta">Judging &amp; your score appear here on event day.</div>'
+                  : "";
+              return (
+                '<div class="item"><div class="row"><h3>' +
+                esc(e.applicant_name || "Your entry") +
+                "</h3>" + badge(e.status) + "</div>" +
+                '<div class="meta">Vehicle entry · submitted ' + esc(when(e.created_at)) + "</div>" +
+                (e.details ? '<div class="det">' + esc(e.details) + "</div>" : "") +
+                scoreLine + "</div>"
+              );
+            })
+            .join("");
+          show($("entriesSection"));
+        }
+
+        if (apps.length) {
+          $("applicationsGrid").innerHTML = apps
+            .map(
+              (e) =>
+                '<div class="item"><div class="row"><h3>' +
+                esc(e.type === "vendor" ? "Vendor booth" : "Sponsorship") +
+                "</h3>" + badge(e.status) + "</div>" +
+                '<div class="meta">' + esc(e.applicant_name || "") +
+                " · applied " + esc(when(e.created_at)) + "</div>" +
+                (e.details ? '<div class="det">' + esc(e.details) + "</div>" : "") +
+                (String(e.status).toLowerCase() === "approved"
+                  ? '<div class="meta">Approved by the team. Booth and load-in details follow by email.</div>'
+                  : '<div class="meta">The team reviews every application before it is confirmed.</div>') +
+                "</div>"
+            )
+            .join("");
+          show($("applicationsSection"));
+        }
+
+        if (rsvps.length) {
+          $("rsvpGrid").innerHTML = rsvps
+            .map(
+              (r) =>
+                '<div class="item"><div class="row"><h3>' + esc(r.name || "Your RSVP") +
+                "</h3>" + '<span class="badge b-approved"><span class="d"></span>Confirmed</span></div>' +
+                '<div class="meta">Party of ' + esc(r.party_size || 1) +
+                " · reserved " + esc(when(r.created_at)) + "</div>" +
+                '<div class="meta">Saturday, October 10, 2026 · Rancho Jaramillo</div></div>'
+            )
+            .join("");
+          show($("rsvpSection"));
+        }
+
+        if (!entries.length && !apps.length && !rsvps.length && !data.isStaff) {
+          show($("emptySection"));
+        }
+
+        hide($("loadingView"));
+        hide($("authView"));
+        show($("portalView"));
+        show($("signOutBtn"));
+      }
+
+      function showAuth() {
+        hide($("loadingView"));
+        hide($("portalView"));
+        hide($("signOutBtn"));
+        show($("authView"));
+      }
+
+      // ---- boot -------------------------------------------------------------
+      async function boot() {
+        try {
+          const { data } = await getSession();
+          if (!data || !data.session) return showAuth();
+          const token = data.session.access_token || data.session.accessToken || (await accessToken());
+          const res = await fetch("/api/account", {
+            headers: token ? { Authorization: "Bearer " + token } : {},
+          });
+          if (res.status === 401) return showAuth();
+          if (!res.ok) {
+            showAuth();
+            return msg("err", "We could not load your account. Please sign in again.");
+          }
+          renderPortal(await res.json());
+        } catch (e) {
+          showAuth();
+        }
+      }
+
+      // ---- wiring -----------------------------------------------------------
+      $("signInBtn").addEventListener("click", doSignIn);
+      $("linkBtn").addEventListener("click", doLink);
+      $("resetBtn").addEventListener("click", doReset);
+      $("otpVerifyBtn").addEventListener("click", doVerify);
+      $("otpResendBtn").addEventListener("click", async () => {
+        clearMsg();
+        await sendEmailCode($("email").value.trim().toLowerCase());
+        msg("ok", "A new code is on its way.");
+      });
+      $("otpBackBtn").addEventListener("click", () => {
+        show($("passBlock"));
+        hide($("otpBlock"));
+        clearMsg();
+      });
+      $("password").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.nativeEvent?.isComposing && e.keyCode !== 229) doSignIn();
+      });
+      $("signOutBtn").addEventListener("click", async () => {
+        try { await signOut(); } catch (e) {}
+        location.reload();
+      });
+
+      boot();
+    </script>
+  </body>
+</html>
