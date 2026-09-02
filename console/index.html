@@ -2302,14 +2302,14 @@
          they were most of what made this screen feel broken: you scrolled past
          the form into blank pills, a stray link card and a site footer.
 
-         Both come back the moment a view other than the door is showing. */
-      .views:has(.view[data-view="enter"].active) ~ .site-footer,
-      .views:has(.view[data-view="enter"].active) ~ .upload-row {
-        display: none;
-      }
+         Both come back the moment a view other than the door is showing.
 
-      /* An empty one is a bordered box with nothing in it. */
-      .upload-row:empty {
+         Matched as children of the app rather than siblings of the views,
+         because a following-sibling rule missed one of these rows: it sits
+         before the views in the markup, so it stayed on screen as a thirty
+         pixel empty box while its twin below was correctly hidden. */
+      #app:has(.view[data-view="enter"].active) > .site-footer,
+      #app:has(.view[data-view="enter"].active) > .upload-row {
         display: none;
       }
 
