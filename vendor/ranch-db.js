@@ -125,7 +125,10 @@ function nameFromEmail(email) {
 export const NEEDS_VERIFICATION = "needs-verification"
 
 function looksUnverified(said) {
-  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED/i.test(String(said || ""))
+  /* Neon maps Better Auth's raw EMAIL_NOT_VERIFIED into the Supabase-compatible
+     email_not_confirmed code. Recognize both forms: the client-facing one is
+     the only value signInWithPassword exposes to this module. */
+  return /not verified|unverified|verify your email|EMAIL_NOT_VERIFIED|email_not_confirmed/i.test(String(said || ""))
 }
 
 /**
