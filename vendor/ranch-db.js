@@ -353,38 +353,6 @@ export async function magicLink(email, callbackURL) {
 }
 
 /**
- * Google. The client's own redirect plugin sends the browser to Google's
- * consent screen the moment our server answers with { url, redirect: true },
- * synchronously inside the click that started this call. The old bundled
- * client's manual anchor-click workaround existed because that layer's
- * redirect quietly did nothing; talking to our own server's real client
- * needs none of that.
- *
- * This puts nobody on the staff list. is_staff() still decides what anybody
- * sees, so an address that is not on the list signs in and finds nothing.
- */
-export async function signInWithGoogle(callbackURL) {
-  const c = authClient();
-  if (!c) return "No connection to the database.";
-  try {
-    const { data, error } = await c.signIn.social({ provider: "google", callbackURL });
-    if (error) {
-      if (error.status === 400) return "Google sign in is not switched on for this project.";
-      return "Could not start Google sign in (" + (error.status || "") + "). Use the email link instead.";
-    }
-    /* Belt and suspenders: the redirect plugin above already navigates on
-       success, but if a browser ever refuses that and hands back a URL
-       anyway, still go there by hand rather than leaving a dead button. */
-    if (data && data.url) {
-      window.location.assign(data.url);
-    }
-    return null;
-  } catch (e) {
-    return "Could not reach the sign in service. Check your connection.";
-  }
-}
-
-/**
  * A reset, for somebody who set a password and cannot remember it. The success
  * line is deliberately vague about whether the address exists, so this cannot
  * be used to find out who is on the staff list.
