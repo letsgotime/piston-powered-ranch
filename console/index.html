@@ -2294,6 +2294,25 @@
         line-height: 1.7;
         max-width: 560px;
       }
+      /* The lock screen is a door, not a page.
+
+         A thousand pixels of public marketing footer was hanging below the
+         sign in card, and an upload row with nothing in it above that. Neither
+         belongs in front of somebody who has not signed in yet, and together
+         they were most of what made this screen feel broken: you scrolled past
+         the form into blank pills, a stray link card and a site footer.
+
+         Both come back the moment a view other than the door is showing. */
+      .views:has(.view[data-view="enter"].active) ~ .site-footer,
+      .views:has(.view[data-view="enter"].active) ~ .upload-row {
+        display: none;
+      }
+
+      /* An empty one is a bordered box with nothing in it. */
+      .upload-row:empty {
+        display: none;
+      }
+
       .protoctl {
         position: fixed;
         left: 50%;
@@ -2534,7 +2553,11 @@
                 Enter console
               </button>
               <p class="field-error" id="enterError"></p>
-              <p class="enter-note">
+              <!-- A div, not a p. This held two divs, and a paragraph cannot:
+                   the browser closed it at the first one, which orphaned the
+                   text at the end, stranded a closing tag, and is why the
+                   bottom of this screen fell apart. -->
+              <div class="enter-note">
                 <div id="googleWrap" style="margin:18px 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)">
                   <button type="button" id="googleBtn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font:700 15px/1 var(--font-sans,Archivo,system-ui,sans-serif);color:#14181D;background:#FFFFFF;border:1px solid #DADCE0;border-radius:10px;padding:13px 18px;cursor:pointer">
                     <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 01-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 009 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 010-3.44V4.95H.96a9 9 0 000 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 00.96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
@@ -2548,11 +2571,13 @@
                   <p id="magicSaid" style="margin:10px 0 0;font-family:var(--font-sans,Archivo,system-ui,sans-serif);font-size:14px;line-height:1.5;color:var(--muted,#8b95a3)"></p>
                 </div>
                 <p style="margin:10px 0 0"><a href="/reset/" style="font-family:var(--mono,monospace);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent,#F2C94C);text-decoration:none">Forgot your password</a></p>
-                Real sign-in. First time signing in with an approved email creates your account;
-                after that, the same email and password sign you back in. Only
-                approved addresses can reach internal data. Anyone else can sign in but
-                won't see anything.
-              </p>
+                <p style="margin:12px 0 0;font-size:13.5px;line-height:1.6;color:#9AA6B2">
+                  First time signing in with an approved email creates your account;
+                  after that the same email and password bring you back. Only approved
+                  addresses reach internal data, and anyone else can sign in and will
+                  see nothing.
+                </p>
+              </div>
             </div>
           </div>
         </section>
