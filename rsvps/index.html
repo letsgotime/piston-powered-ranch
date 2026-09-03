@@ -79,6 +79,10 @@
       .row b { display: block; font-size: 15px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
       .row span.e { display: block; font-family: var(--mono); font-size: 11px; color: var(--faint); margin-top: 2px; }
       .row .p { font-family: var(--mono); font-size: 13px; color: var(--teal); font-variant-numeric: tabular-nums; white-space: nowrap; }
+      /* What the other list knows about this person. Amber while the desk
+         still owes them an answer, teal once it has been given. */
+      .row .x { display: block; margin-top: 4px; font-size: 12.5px; color: var(--teal); }
+      .row .x.wait { color: var(--amber); }
       .row .w { font-family: var(--mono); font-size: 10.5px; color: var(--faint); white-space: nowrap; }
       .empty { padding: 24px 20px; font-size: 15px; color: var(--mute); }
       .lock { margin-top: 15px; padding: 18px 22px; font-size: 15px; } .lock a { color: var(--amber); }
@@ -123,7 +127,7 @@
     <script type="module">
       import { db as makeDb, DATA_API } from "/vendor/ranch-db.js?v=2026-09-02f";
 
-      var db = null, staff = false, ROWS = [], q = "";
+      var db = null, staff = false, ROWS = [], ENTRIES = {}, q = "";
 
       try {
         db = makeDb();
@@ -174,7 +178,11 @@
           '<span class="n t">People expected<b>' + heads + "</b><small>parties counted</small></span>" +
           '<span class="n a">This week<b>' + since + "</b></span>" +
           '<span class="n">Average party<b>' + (ROWS.length ? (heads / ROWS.length).toFixed(1) : "0") + "</b></span>" +
-          (top ? '<span class="n">Mostly from<b style="font-size:15px">' + esc(top) + "</b></span>" : "");
+          (top ? '<span class="n">Mostly from<b style="font-size:15px">' + esc(top) + "</b></span>" : "") +
+            (function () {
+              var both = ROWS.filter(function (r) { return ENTRIES[String(r.email || "").toLowerCase()]; }).length;
+              return both ? '<span class="n a">Also entered a car<b>' + both + "</b></span>" : "";
+            })();
 
         var set = ROWS.filter(function (r) {
           if (!q) return true;
@@ -189,7 +197,14 @@
           '<div class="glass list">' +
           (set.length ? set.map(function (r) {
             return '<div class="row"><span><b>' + esc(r.name || "No name given") + "</b>" +
-              '<span class="e">' + esc(r.email || "") + (r.source ? "  &middot;  " + esc(r.source) : "") + "</span></span>" +
+              '<span class="e">' + esc(r.email || "") + (r.source ? "  &middot;  " + esc(r.source) : "") + "</span>" +
+                (function () {
+                  var en = ENTRIES[String(r.email || "").toLowerCase()];
+                  if (!en) return "";
+                  var wait = en.status === "pending";
+                  return '<span class="x' + (wait ? " wait" : "") + '">Entered ' + esc(en.car) +
+                    " &middot; " + (wait ? "waiting on you" : esc(en.status)) + "</span>";
+                })() + "</span>" +
               '<span class="p">' + (r.party_size || 1) + (r.party_size === 1 ? " guest" : " guests") + "</span>" +
               '<span class="w">' + esc(when(r.created_at)) + "</span></div>";
           }).join("")
@@ -207,6 +222,19 @@
         if (staff) {
           var r = await db.from("spectators").select("*").order("created_at", { ascending: false });
           ROWS = r.error ? [] : r.data || [];
+          /* The same people, from the other list. Three of the four car
+             entrants also RSVPed and until now this page did not know it: a
+             headcount and a guest list are different things, and the
+             difference is whether a row knows who it is. Keyed by email,
+             lowercased, because that is the one field both forms share. */
+          var s = await db.from("submissions").select("email,type,status,details");
+          ENTRIES = {};
+          (s.error ? [] : s.data || []).forEach(function (x) {
+            if (x.type !== "vehicle" || !x.email) return;
+            var d = x.details || {};
+            var car = (d.vehicle || d.org || "").toString().trim();
+            ENTRIES[String(x.email).toLowerCase()] = { car: car || "a car", status: x.status || "pending" };
+          });
         }
         var a = document.activeElement;
         if (!a || a.id !== "find") render();
@@ -224,10 +252,12 @@
         if (!e.target.closest("#csv")) return;
         /* Quoted properly, because a name with a comma in it is not a reason to
            hand somebody a broken spreadsheet. */
-        var head = ["name", "email", "party_size", "source", "created_at"];
+        var head = ["name", "email", "party_size", "source", "created_at", "entered_car", "entry_status"];
         var lines = [head.join(",")].concat(ROWS.map(function (r) {
+          var en = ENTRIES[String(r.email || "").toLowerCase()] || {};
+          var row = Object.assign({}, r, { entered_car: en.car || "", entry_status: en.status || "" });
           return head.map(function (k) {
-            return '"' + String(r[k] == null ? "" : r[k]).replace(/"/g, '""') + '"';
+            return '"' + String(row[k] == null ? "" : r[k]).replace(/"/g, '""') + '"';
           }).join(",");
         }));
         var blob = new Blob([lines.join("\n")], { type: "text/csv" });
