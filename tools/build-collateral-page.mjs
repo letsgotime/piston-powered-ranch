@@ -69,11 +69,11 @@ const CATALOG = [
   },
   {
     base: "PPR_OnePager_TitleSponsor_111Motorcars",
-    title: "Title Sponsor Pitch",
+    title: "Presenting Sponsor Pitch",
     aud: "title",
     group: "Sponsorship",
     sensitive: true,
-    blurb: "The premier title position pitch. One title, top billing.",
+    blurb: "The presenting position pitch. One name on the event, top billing.",
   },
   {
     base: "PPR_OnePager_Sponsors",

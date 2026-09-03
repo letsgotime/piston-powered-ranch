@@ -94,11 +94,15 @@ phase.
 
 - Charity is Community Elementary School everywhere, app and database. The
   Folds of Honor swap the spec requests was completed Aug 27.
-- Pricing decisions, Sep 3: no entry fee for show cars (curation only);
-  15 to 25 percent of alcohol sales to PaddockGavin, food share still open;
-  booth fee tiers by footprint from the $250 base (the ladder above the
-  base is in the Scope of Work, pending sign-off), so the vendor portal
-  needs footprint prices, not one flat price; charity recipient entity is
+- Pricing decisions, Sep 3: no entry fee for show cars (curation only).
+  Booth fees tier by footprint: $250 10x10, $350 10x20, $500 20x20, $650
+  past 20x20, premium placement +$150, so the vendor portal needs one
+  Stripe price per footprint plus the placement add-on, not one flat
+  price. Rancho Jaramillo and PaddockGavin split net, so every vendor pays
+  one share: food and refreshment 15 to 20 percent of sales, the mobile
+  bar 15 to 25 percent of alcohol sales, nothing stacks. Sponsor tiers are
+  named Presenting Sponsor, Venue Partner, Title, Secondary and Supporting
+  Sponsors, Vendors, Community Partner. Charity recipient entity is
   Community Elementary School itself, not the district and not the PTO.
 - Turnstile cannot just be "flipped on": the code ships inert and needs Gavin
   to create the widget in the Cloudflare dashboard and set TURNSTILE_SECRET,
