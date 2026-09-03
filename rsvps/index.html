@@ -83,6 +83,14 @@
          still owes them an answer, teal once it has been given. */
       .row .x { display: block; margin-top: 4px; font-size: 12.5px; color: var(--teal); }
       .row .x.wait { color: var(--amber); }
+      /* The check in control. Amber until they arrive, teal once they have,
+         and a real tap target because this is pressed at a gate in October. */
+      .row .ci { grid-column: 1 / -1; justify-self: start; margin-top: 6px; font: 600 13px/1 var(--mono);
+        letter-spacing: .04em; text-transform: uppercase; color: var(--amber);
+        background: rgba(248,184,0,.12); border: 1px solid rgba(248,184,0,.35); border-radius: 999px;
+        padding: 9px 14px; min-height: 36px; cursor: pointer; }
+      .row .ci.on { color: var(--teal); background: rgba(0,210,190,.12); border-color: rgba(0,210,190,.35); }
+      .row .ci:disabled { opacity: .6; cursor: progress; }
       .row .w { font-family: var(--mono); font-size: 10.5px; color: var(--faint); white-space: nowrap; }
       .empty { padding: 24px 20px; font-size: 15px; color: var(--mute); }
       .lock { margin-top: 15px; padding: 18px 22px; font-size: 15px; } .lock a { color: var(--amber); }
@@ -117,10 +125,7 @@
       <div id="stage"></div>
 
       <div class="glass note">
-        The list is staff only and lives in <code>public.spectators</code>. Nobody outside the five
-        of us can read it, and a stranger who RSVPs cannot read it back.
-        Every twenty fifth RSVP posts to the <a href="/chat/">Spectator RSVPs</a> thread in chat, so
-        the number finds you rather than you having to come looking.
+        Staff only. Every twenty fifth RSVP also posts to the <a href="/chat/">Spectator RSVPs</a> thread.
       </div>
     </div>
 
@@ -162,8 +167,8 @@
         var bar = document.getElementById("bar"), stage = document.getElementById("stage");
         if (!staff) {
           bar.style.display = "none";
-          stage.innerHTML = '<div class="glass lock">The spectator list is staff only. Sign in at the ' +
-            '<a href="/console/">console</a> on this device and it unlocks here.</div>';
+          stage.innerHTML = '<div class="glass lock">Staff only. <a href="/console/">Sign in</a> and it opens here.</div>';
+
           return;
         }
         bar.style.display = "";
@@ -182,6 +187,10 @@
             (function () {
               var both = ROWS.filter(function (r) { return ENTRIES[String(r.email || "").toLowerCase()]; }).length;
               return both ? '<span class="n a">Also entered a car<b>' + both + "</b></span>" : "";
+            })() +
+            (function () {
+              var here = ROWS.filter(function (r) { return r.checked_in_at; }).length;
+              return here ? '<span class="n t">Arrived<b>' + here + "</b></span>" : "";
             })();
 
         var set = ROWS.filter(function (r) {
@@ -206,7 +215,10 @@
                     " &middot; " + (wait ? "waiting on you" : esc(en.status)) + "</span>";
                 })() + "</span>" +
               '<span class="p">' + (r.party_size || 1) + (r.party_size === 1 ? " guest" : " guests") + "</span>" +
-              '<span class="w">' + esc(when(r.created_at)) + "</span></div>";
+              '<span class="w">' + esc(when(r.created_at)) + "</span>" +
+                '<button type="button" class="ci' + (r.checked_in_at ? " on" : "") + '" data-checkin="' + r.id +
+                  '" data-on="' + (r.checked_in_at ? "1" : "0") + '">' +
+                  (r.checked_in_at ? "Arrived" : "Check in") + "</button></div>";
           }).join("")
             : '<p class="empty">' + (q ? "Nothing matches that." :
                 "Nobody yet. The form is live on the event page, so the first one lands here on its own.") + "</p>") +
@@ -248,11 +260,28 @@
         var again = document.getElementById("find");
         if (again) { again.focus(); again.setSelectionRange(pos, pos); }
       });
+      /* Check in. The one thing this list has to do on the tenth that a
+         spreadsheet cannot: somebody at the gate taps the name and the row
+         knows they arrived. Writes through the same staff policy as every
+         read on this page. A second tap clears it, because the first one
+         will sometimes be the wrong person. */
+      document.addEventListener("click", async function (e) {
+        var b = e.target.closest("[data-checkin]");
+        if (!b || !db || !staff) return;
+        var id = b.getAttribute("data-checkin"), on = b.getAttribute("data-on") === "1";
+        b.disabled = true;
+        var u = await db.from("spectators")
+          .update({ checked_in_at: on ? null : new Date().toISOString() })
+          .eq("id", id).select("id");
+        b.disabled = false;
+        if (u.error) { b.textContent = "Could not save"; return; }
+        load();
+      });
       document.addEventListener("click", function (e) {
-        if (!e.target.closest("#csv")) return;
+if (!e.target.closest("#csv")) return;
         /* Quoted properly, because a name with a comma in it is not a reason to
            hand somebody a broken spreadsheet. */
-        var head = ["name", "email", "party_size", "source", "created_at", "entered_car", "entry_status"];
+        var head = ["name", "email", "party_size", "source", "created_at", "entered_car", "entry_status", "checked_in_at"];
         var lines = [head.join(",")].concat(ROWS.map(function (r) {
           var en = ENTRIES[String(r.email || "").toLowerCase()] || {};
           var row = Object.assign({}, r, { entered_car: en.car || "", entry_status: en.status || "" });
