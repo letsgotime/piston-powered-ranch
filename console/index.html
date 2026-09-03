@@ -3287,6 +3287,42 @@
             <div id="opsIntelRows" style="margin-top: 10px"></div>
           </div>
           <div class="reveal d4 ops-grid" style="margin-top: var(--gap-4)">
+              <!-- The two lists Gavin kept asking where to find. Both tools
+                   already existed and nothing in HQ pointed at either, so the
+                   only RSVP link in the whole console went to the public form.
+                   These are anchors rather than modals: the full tools are
+                   better than a panel would be, and the ask was to link out. -->
+              <a class="card card-pad clickable ops-card" href="/rsvps/" style="text-decoration:none">
+                <div class="oc-ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <div class="oc-t">Who is coming</div>
+                <div class="oc-s" id="ocRsvps">Loading…</div>
+                <span class="cl-hint"
+                  >Open the list
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M9 18l6-6-6-6" /></svg
+                ></span>
+              </a>
+              <a class="card card-pad clickable ops-card" href="/entries" style="text-decoration:none">
+                <div class="oc-ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6 M9 15l2 2 4-4" />
+                  </svg>
+                </div>
+                <div class="oc-t">The field, in public</div>
+                <div class="oc-s" id="ocField">Loading…</div>
+                <span class="cl-hint"
+                  >Open the page
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M9 18l6-6-6-6" /></svg
+                ></span>
+              </a>
             <div class="card card-pad clickable ops-card" data-detail="decisions" tabindex="0">
               <div class="oc-ic">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -4950,6 +4986,35 @@
             }
             var k = document.getElementById("ocVendors");
             k && (k.textContent = d + " confirmed · $250/booth");
+            /* The two counts the cards above show. Same client, same table,
+               and each says what went wrong rather than spinning: a card that
+               reads Loading forever is what sent somebody hunting for a page
+               that had been there all along. */
+            var rEl = document.getElementById("ocRsvps");
+            if (rEl) {
+              var rs = await n.from("spectators").select("party_size,unsubscribed_at");
+              if (rs && rs.data) {
+                var live = rs.data.filter(function (x) { return !x.unsubscribed_at; });
+                var heads = live.reduce(function (t, x) { return t + (x.party_size || 1); }, 0);
+                rEl.textContent = live.length + " said yes · " + heads + " people";
+              } else {
+                rEl.textContent = "Could not read the RSVP list";
+              }
+            }
+            var fEl = document.getElementById("ocField");
+            if (fEl) {
+              var sb = await n.from("submissions").select("type,status");
+              if (sb && sb.data) {
+                var cars = sb.data.filter(function (x) { return "vehicle" === x.type; });
+                var yes = cars.filter(function (x) {
+                  return "approved" === x.status || "accepted" === x.status;
+                }).length;
+                var wait = cars.filter(function (x) { return "pending" === x.status; }).length;
+                fEl.textContent = yes + " in public · " + wait + " waiting on you";
+              } else {
+                fEl.textContent = "Could not read the entries";
+              }
+            }
             var dcs = await n.from("open_decisions").select("status"),
               dEl = document.getElementById("ocDecisions");
             dEl && (dcs.error || !dcs.data) && (dEl.textContent = "Unavailable right now");
