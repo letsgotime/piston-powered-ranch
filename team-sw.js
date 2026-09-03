@@ -24,7 +24,9 @@
  * two do not fight.
  */
 
-var SHELL = "ranch-team-shell-v1";
+/* v2 retires v1. The activate step throws away every cache that is not
+   this one, which is how the poisoned copies leave every phone. */
+var SHELL = "ranch-team-shell-v2";
 var API_HOST = "apirest.c-10.us-east-1.aws.neon.tech";
 
 /* Only the things that make an offline page legible. Deliberately small: a
@@ -101,6 +103,7 @@ self.addEventListener("fetch", function (e) {
     e.respondWith(
       fetch(req)
         .then(function (res) {
+          if (!res.ok) return res;
           var copy = res.clone();
           caches.open(SHELL).then(function (c) {
             c.put(req, copy).catch(function () {});
@@ -136,6 +139,13 @@ self.addEventListener("fetch", function (e) {
         return (
           hit ||
           fetch(req).then(function (res) {
+            /* Only what actually arrived. This used to store whatever came
+               back, and for the five ground pictures that was a 404 page from
+               the days before /img/ was forwarded. The branch below is cache
+               first, so that page was then served as the picture, forever,
+               on every phone that had ever opened the tool, long after the
+               server was fixed. A miss is not a thing to remember. */
+            if (!res.ok) return res;
             var copy = res.clone();
             caches.open(SHELL).then(function (c) {
               c.put(req, copy).catch(function () {});
