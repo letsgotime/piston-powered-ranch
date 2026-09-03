@@ -75,7 +75,7 @@
       .mine .tm { padding: 17px 15px; background: rgba(0,0,0,.24); border-right: 1px solid var(--gline); text-align: center; }
       .mine .tm b { display: block; font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -.02em;
         font-variant-numeric: tabular-nums; line-height: 1.1; }
-      .mine .tm span { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em;
+      .mine .tm span { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
         text-transform: uppercase; color: var(--faint); margin-top: 3px; }
       .mine .bd { padding: 15px 18px; }
       .mine .bd .r { font-size: 17px; font-weight: 900; color: var(--ink); letter-spacing: -.015em; }
@@ -89,7 +89,7 @@
       .mine .bd .acts button.yes { background: var(--teal); border-color: var(--teal); color: #04211d; font-weight: 900; }
       .mine .bd .acts button:hover, .mine .bd .acts a:hover { border-color: var(--amber); color: var(--ink); }
       .mine .bd .acts button.yes:hover { color: #04211d; }
-      .pill { display: inline-block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+      .pill { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
         text-transform: uppercase; border-radius: 999px; padding: 3px 9px; font-weight: 600; }
       .pill.assigned { background: rgba(248,184,0,.16); color: var(--amber); }
       .pill.confirmed { background: rgba(0,210,190,.16); color: var(--teal); }
@@ -105,7 +105,7 @@
       .sh .nm .names { margin-top: 5px; font-size: 12px; color: var(--teal); }
       .sh .cv { text-align: right; white-space: nowrap; }
       .sh .cv b { font-size: 19px; font-weight: 900; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-      .sh .cv span { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
+      .sh .cv span { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .1em;
         text-transform: uppercase; color: var(--faint); }
       .sh.full .cv b { color: var(--teal); }
       .sh.part .cv b { color: var(--amber); }
@@ -127,7 +127,7 @@
       /* sign up */
       .signup { margin-top: 13px; padding: 20px 22px; }
       .signup .g { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-top: 13px; }
-      .signup label { display: block; font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em;
+      .signup label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .14em;
         text-transform: uppercase; color: var(--faint); font-weight: 600; }
       .signup input, .signup select, .signup textarea { width: 100%; margin-top: 5px; font: inherit; font-size: 15px;
         color: var(--ink); background: rgba(0,0,0,.3); border: 1px solid var(--gline); border-radius: 10px; padding: 10px 12px; }
@@ -406,7 +406,7 @@
         var on = {};
         filled(s.id).forEach(function (a) { on[a.volunteer_id] = a; });
         document.getElementById("shPeople").innerHTML =
-          "<p style='font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:18px 0 0'>" +
+          "<p style='font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:18px 0 0'>" +
           Object.keys(on).length + " of " + s.needed + " on this post</p>" +
           (VOLS.length ? VOLS.map(function (v) {
             return '<div class="row' + (on[v.id] ? " on" : "") + '">' +
