@@ -95,7 +95,7 @@ phase.
 - Charity is Community Elementary School everywhere, app and database. The
   Folds of Honor swap the spec requests was completed Aug 27.
 - Pricing decisions, Sep 3: no entry fee for show cars (curation only);
-  30 to 50 percent of alcohol sales to PaddockGavin, food share still open;
+  15 to 25 percent of alcohol sales to PaddockGavin, food share still open;
   booth fee tiers by footprint from the $250 base (the ladder above the
   base is in the Scope of Work, pending sign-off), so the vendor portal
   needs footprint prices, not one flat price; charity recipient entity is
