@@ -143,6 +143,9 @@
           return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
         });
       }
+      /* The last failed RPC, so a refusal from the database reads as one
+         instead of as a missing session. */
+      var lastRpcError = null;
       async function rpc(fn) {
         try {
           var s = await db.auth.getSession();
@@ -150,7 +153,7 @@
           if (!tok) return null;
           var r = await fetch(DATA_API + "/rpc/" + fn, {
             method: "POST", headers: { Authorization: "Bearer " + tok, "Content-Type": "application/json" }, body: "{}" });
-          if (!r.ok) return null;
+          if (!r.ok) { lastRpcError = "The database refused " + fn + " (" + r.status + "): " + (await r.text()).slice(0, 160); return null; }
           var t = await r.text();
           try { return JSON.parse(t); } catch (e) { return t.trim(); }
         } catch (e) { return null; }
@@ -235,7 +238,7 @@
         if (!staff) {
           try {
             var ses = await db.auth.getSession();
-            if (ses && ses.data && ses.data.session) reason = lastTokenError || "Signed in, but this address is not on the staff list";
+            if (ses && ses.data && ses.data.session) reason = lastTokenError || lastRpcError || "Signed in, but this address is not on the staff list";
           } catch (e) {}
         }
         document.getElementById("who").classList.toggle("on", staff);
