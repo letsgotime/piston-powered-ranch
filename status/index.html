@@ -50,6 +50,7 @@
         background: rgba(255, 255, 255, 0.05); border: 1px solid var(--gline); }
       .verdict.approved { border-color: rgba(0, 210, 190, 0.4); }
       .verdict.declined { border-color: rgba(229, 20, 26, 0.4); }
+      .verdict.waitlisted { border-color: rgba(242, 201, 76, 0.4); }
       .fine { margin: 16px 0 0; font-size: 12.5px; color: var(--mute); }
       .fine a { color: var(--dim); }
       #ask { display: none; }
@@ -159,10 +160,11 @@
             s3.textContent = "Approved";
             v.className = "verdict approved";
             v.innerHTML =
-              "Approved for the field. Watch your email and iMessage for your pass details. Gates open 9 AM, October 10.";
+              "Approved for the field. Watch your email for what comes next. Gates open 9 AM, October 10.";
           } else if (row.status === "waitlisted") {
             h1.innerHTML = 'On the<br /><span class="a">waitlist</span>';
             s3.textContent = "Waitlisted";
+            v.className = "verdict waitlisted";
             v.innerHTML =
               "The field is tight and your submission is on the waitlist. If a spot opens you hear from us first.";
           } else {

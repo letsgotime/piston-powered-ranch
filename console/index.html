@@ -2920,7 +2920,7 @@
                 />
               </div>
               <div class="field" style="margin-bottom: 4px">
-                <label for="fPhone">Mobile (for iMessage updates)</label>
+                <label for="fPhone">Mobile, optional</label>
                 <input type="tel" id="fPhone" placeholder="(615) 555-0134" />
               </div>
             </div>
@@ -3042,7 +3042,7 @@
               </div>
               <div style="margin-top: 10px">
                 <p class="lede">
-                  You'll hear back by iMessage first, then email, usually within a few days.
+                  You will hear back by email, usually within a few days.
                 </p>
                 <p class="note" id="statusLinkRow" style="display: none; margin-top: 10px">
                   Track your status any time, no login needed:<br />
@@ -3317,6 +3317,21 @@
                 <div class="oc-s" id="ocField">Loading…</div>
                 <span class="cl-hint"
                   >Open the page
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="M9 18l6-6-6-6" /></svg
+                ></span>
+              </a>
+              <a class="card card-pad clickable ops-card" href="#/ops" style="text-decoration:none">
+                <div class="oc-ic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <path d="M2 10h20 M6 15h4" />
+                  </svg>
+                </div>
+                <div class="oc-t">Paid</div>
+                <div class="oc-s" id="ocPaid">Loading…</div>
+                <span class="cl-hint"
+                  >Booths and invoices, booked by the webhook
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
                     <path d="M9 18l6-6-6-6" /></svg
                 ></span>
@@ -4733,15 +4748,18 @@
                     : "declined" === a.status
                       ? "decline"
                       : "received") +
-                  " notice</button></div>"
+                  " notice (backup)</button></div>"
                 : "") +
               ("pending" === a.status
                 ? '<div class="stat-row" style="gap:10px;margin-top:14px;"><button class="btn-mini" data-action="approve" data-id="' +
                   a.id +
-                  '">Approve</button><button class="btn-mini" data-action="decline" data-id="' +
+                  '">Approve</button><button class="btn-mini" data-action="waitlist" data-id="' + a.id + '">Waitlist</button><button class="btn-mini" data-action="decline" data-id="' +
                   a.id +
                   '">Decline</button></div>'
                 : "");
+          var acc = await n.from("accounts").select("id,pipeline_stage").eq("submission_id", a.id).limit(1);
+          var onRow = !!(acc.data && acc.data[0] && "committed" === acc.data[0].pipeline_stage);
+          o += invoiceBlock(a) + publishBlock(a, onRow);
           return {
             eyebrow: "Activity · " + s(a.created_at),
             title: i(a.applicant_name) + ", " + r,
@@ -4830,6 +4848,148 @@
             ? (t.style.outline = "1px solid var(--crit)")
             : ((t.value = ""), (t.style.outline = ""), (t.placeholder = "Saved. Add another?"));
         });
+        /* The console's own token, for the two hub routes that act for
+           staff: /api/notify and /api/invoice. The hub hands the token to the
+           database's is_staff(), so a token that is not ours does nothing. */
+        async function bearer() {
+          try {
+            var s = await n.auth.getSession();
+            var t = s && s.data && s.data.session && (s.data.session.access_token || s.data.session.accessToken);
+            return t || "";
+          } catch (e) {
+            return "";
+          }
+        }
+        async function hqPost(path, body) {
+          var tok = await bearer();
+          var r = await fetch(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok },
+            body: JSON.stringify(body),
+          });
+          var j = null;
+          try {
+            j = await r.json();
+          } catch (e) {}
+          return { ok: r.ok, status: r.status, body: j || {} };
+        }
+        function invoiceBlock(a) {
+          if ("vendor" !== a.type && "sponsor" !== a.type) return "";
+          var d = a.details || {};
+          var box = "padding:8px 10px;font-size:14px;border-radius:8px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.28);color:inherit";
+          return (
+            '<div class="stat-row" style="gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center" data-invoice-for="' +
+            a.id +
+            '" data-inv-type="' +
+            a.type +
+            '" data-inv-email="' +
+            i(a.email || "") +
+            '" data-inv-name="' +
+            i(a.applicant_name || "") +
+            '" data-inv-org="' +
+            i(d.business || d.company || d.org || "") +
+            '">' +
+            '<input class="inv-amt" inputmode="decimal" placeholder="$ amount" style="width:110px;' + box + '" />' +
+            '<input class="inv-for" placeholder="What it covers" style="flex:1 1 180px;' + box + '" />' +
+            '<input class="inv-due" placeholder="Due by, optional" style="width:140px;' + box + '" />' +
+            '<button class="btn-mini" data-invoice="' +
+            a.id +
+            '">Send invoice</button>' +
+            '<p class="note inv-note" style="flex-basis:100%;margin:4px 0 0"></p>' +
+            "</div>"
+          );
+        }
+        function publishBlock(a, onRow) {
+          if ("vendor" !== a.type && "sponsor" !== a.type) return "";
+          var where = "vendor" === a.type ? "the public vendor row" : "the public partners list";
+          return (
+            '<div class="stat-row" style="gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center">' +
+            (onRow
+              ? '<span class="note" style="margin:0">On ' + where + '.</span><button class="btn-mini" data-unpublish="' + a.id + '">Take it off</button>'
+              : '<button class="btn-mini" data-publish="' + a.id + '">Put on ' + where + "</button>" +
+                ("approved" === a.status ? "" : '<span class="note" style="margin:0">Usually after approval.</span>')) +
+            "</div>"
+          );
+        }
+        document.addEventListener("click", async function (e) {
+          var b = e.target.closest ? e.target.closest("[data-invoice],[data-publish],[data-unpublish]") : null;
+          if (!b) return;
+          e.preventDefault();
+          if (b.hasAttribute("data-invoice")) {
+            var w = b.closest("[data-invoice-for]"),
+              note = w.querySelector(".inv-note");
+            var dollars = parseFloat((w.querySelector(".inv-amt").value || "").replace(/[^0-9.]/g, ""));
+            var covers = (w.querySelector(".inv-for").value || "").trim();
+            var due = (w.querySelector(".inv-due").value || "").trim();
+            if (!(dollars > 0) || !covers) {
+              note.textContent = "Amount and what it covers, both.";
+              return;
+            }
+            b.disabled = true;
+            note.textContent = "Making the link and sending the invoice.";
+            var res = await hqPost("/api/invoice", {
+              email: w.getAttribute("data-inv-email"),
+              name: w.getAttribute("data-inv-name"),
+              org: w.getAttribute("data-inv-org"),
+              amountCents: Math.round(dollars * 100),
+              covers: covers,
+              dueBy: due,
+              kind: "vendor" === w.getAttribute("data-inv-type") ? "vendor_setup" : "sponsorship",
+              eventSlug: "pistonpoweredranch",
+              submissionId: Number(w.getAttribute("data-invoice-for")),
+            });
+            b.disabled = false;
+            note.innerHTML = res.ok
+              ? "Invoice " + i(res.body.receiptNo || "") + " for " + i(res.body.amount || "") + " sent to " + i(res.body.to || "") +
+                '. <a href="' + i(res.body.url || "#") + '" target="_blank" rel="noopener">The link</a>'
+              : "Not sent: " + i(res.body.detail || res.body.error || "HTTP " + res.status) +
+                (res.body.url ? ' <a href="' + i(res.body.url) + '" target="_blank" rel="noopener">The link was made, send it by hand</a>' : "");
+            return;
+          }
+          /* The vendor row and the partners list are the CRM's committed
+             accounts. This is the one place they are made from a submission,
+             and it is a person pressing a button, on purpose. */
+          var id = b.getAttribute("data-publish") || b.getAttribute("data-unpublish"),
+            on = b.hasAttribute("data-publish");
+          b.disabled = true;
+          try {
+            var sub = await n.from("submissions").select("*").eq("id", id).single();
+            if (sub.error) throw new Error(sub.error.message);
+            var a = sub.data,
+              d = a.details || {};
+            var ex = await n.from("accounts").select("id").eq("submission_id", a.id).limit(1);
+            if (ex.data && ex.data.length) {
+              var up = await n
+                .from("accounts")
+                .update({ pipeline_stage: on ? "committed" : "warm", status: on ? "approved" : "applied" })
+                .eq("id", ex.data[0].id);
+              if (up.error) throw new Error(up.error.message);
+            } else if (on) {
+              var ev = await n.from("events").select("id").eq("slug", "pistonpoweredranch").limit(1);
+              var ins = await n.from("accounts").insert({
+                type: a.type,
+                company: d.business || d.company || d.org || a.applicant_name,
+                contact_name: a.applicant_name,
+                email: a.email,
+                phone: a.phone || null,
+                event_id: ev.data && ev.data[0] ? ev.data[0].id : null,
+                submission_id: a.id,
+                status: "approved",
+                pipeline_stage: "committed",
+                category: d.category || null,
+              });
+              if (ins.error) throw new Error(ins.error.message);
+            }
+            var fresh = await _(id);
+            P("sheetEyebrow", fresh.eyebrow);
+            D("sheetTitle", fresh.title);
+            D("sheetBody", fresh.body);
+          } catch (err) {
+            b.disabled = false;
+            b.insertAdjacentHTML("afterend", '<p class="field-error">' + i(err.message || String(err)) + "</p>");
+          }
+        });
+
         function noticeText(kind, status, name, token) {
           var link = location.origin + "/status/?t=" + token;
           var first = (name || "").split(" ")[0] || "there";
@@ -5013,6 +5173,22 @@
                 fEl.textContent = yes + " in public · " + wait + " waiting on you";
               } else {
                 fEl.textContent = "Could not read the entries";
+              }
+            }
+            /* Money. payments is readable by the money roles only, so the
+               card says that rather than pretending the ledger is empty. */
+            var pEl = document.getElementById("ocPaid");
+            if (pEl) {
+              var pm = await n.from("payments").select("amount_cents,kind,livemode,created_at");
+              if (pm && pm.data) {
+                var real = pm.data.filter(function (x) { return x.livemode; });
+                var tests = pm.data.length - real.length;
+                var total = real.reduce(function (t, x) { return t + (x.amount_cents || 0); }, 0);
+                pEl.textContent =
+                  (real.length ? real.length + " paid · $" + Math.round(total / 100).toLocaleString() : "Nothing paid yet") +
+                  (tests ? " · " + tests + " test" : "");
+              } else {
+                pEl.textContent = "Owner, Property Owner and Brand Director see money";
               }
             }
             var dcs = await n.from("open_decisions").select("status"),
@@ -5232,41 +5408,59 @@
             var t = e.target.closest ? e.target.closest("[data-action]") : null;
             if (t) {
               var a = t.getAttribute("data-action");
-              if ("approve" === a || "decline" === a) {
+              var STATUS = { approve: "approved", decline: "declined", waitlist: "waitlisted" };
+              if (STATUS[a]) {
                 var s = t.getAttribute("data-id"),
-                  r = t.closest(".stat-row");
-                (r &&
+                  r = t.closest(".stat-row"),
+                  st = STATUS[a];
+                r &&
                   r.querySelectorAll("[data-action]").forEach(function (e) {
                     e.disabled = !0;
-                  }),
-                  n
-                    .from("submissions")
-                    .update({ status: "approve" === a ? "approved" : "declined" })
-                    .eq("id", s)
-                    .then(function (e) {
-                      if (e.error)
-                        return (
-                          r &&
-                            r.insertAdjacentHTML(
-                              "afterend",
-                              '<p class="field-error">Could not update: ' +
-                                i(e.error.message) +
-                                "</p>",
-                            ),
-                          void (
-                            r &&
-                            r.querySelectorAll("[data-action]").forEach(function (e) {
-                              e.disabled = !1;
-                            })
-                          )
+                  });
+                n.from("submissions")
+                  .update({ status: st })
+                  .eq("id", s)
+                  .then(function (e) {
+                    if (e.error) {
+                      r &&
+                        r.insertAdjacentHTML(
+                          "afterend",
+                          '<p class="field-error">Could not update: ' + i(e.error.message) + "</p>",
                         );
-                      (_(s).then(function (e) {
-                        (P("sheetEyebrow", e.eyebrow),
-                          D("sheetTitle", e.title),
-                          D("sheetBody", e.body));
-                      }),
-                        k());
-                    }));
+                      r &&
+                        r.querySelectorAll("[data-action]").forEach(function (e) {
+                          e.disabled = !1;
+                        });
+                      return;
+                    }
+                    /* Saved. Now delivered: the hub renders the template for
+                       this stage and emails it with the status link, and the
+                       sheet redraws with what happened. Until this existed the
+                       button copied a paragraph to the clipboard. */
+                    hqPost("/api/notify", { id: Number(s), stage: st }).then(function (res) {
+                      var line = res.ok
+                        ? "Emailed " + (res.body.to || "the applicant") + ": " + (res.body.subject || st)
+                        : "Saved as " +
+                          st +
+                          ", but the email did not send (" +
+                          (res.body.detail || res.body.error || "HTTP " + res.status) +
+                          "). Use the copy button below as a backup.";
+                      _(s).then(function (e) {
+                        P("sheetEyebrow", e.eyebrow);
+                        D("sheetTitle", e.title);
+                        D(
+                          "sheetBody",
+                          '<p class="note" style="margin:0 0 12px;color:' +
+                            (res.ok ? "var(--accent-2)" : "var(--crit)") +
+                            '">' +
+                            i(line) +
+                            "</p>" +
+                            e.body,
+                        );
+                      });
+                      k();
+                    });
+                  });
               }
             }
           });
@@ -5355,6 +5549,12 @@
         };
         document.querySelectorAll("#roleToggle button").forEach(function (e) {
           e.addEventListener("click", function () {
+            /* Vendors and sponsors apply on the public site now, one form
+               each, with the bot check and the confirmation email that this
+               one never had. Cars stay here for the photographs. */
+            var r0 = e.getAttribute("data-role");
+            if ("vendor" === r0) return void (location.href = "https://pistonpoweredranch.com/vendor#apply");
+            if ("sponsor" === r0) return void (location.href = "https://pistonpoweredranch.com/sponsor#apply");
             (document.querySelectorAll("#roleToggle button").forEach(function (e) {
               e.classList.remove("active");
             }),

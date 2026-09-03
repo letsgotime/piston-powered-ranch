@@ -620,14 +620,13 @@
           var v = LIVE.accounts ? LIVE.accounts.filter(function (x) { return x.type === "vendor"; }) : null;
           return { e: "Vendors", t: "Vendor applications", body:
             (v ? stat("Vendor categories", v.length, true) + stat("Applied", v.filter(function (x) { return x.status === "applied"; }).length) + stat("Approved", v.filter(function (x) { return x.status === "approved"; }).length, true) + pipeline(v) : lock()) +
-            acts('<a class="primary" href="/console/#/submit">Open submit</a>') };
+            acts('<a class="primary" href="https://pistonpoweredranch.com/vendor#apply" target="_blank" rel="noopener">The vendor form</a>') };
         },
         deposit: function () {
           return { e: "Vendors · money", t: "The $250 deposit", body:
-            stat("Amount", "$250, standard 10x10 base tier. Larger footprints tier up") + stat("Mode", "Sandbox until live keys") +
-            "<p style='margin-top:10px'>Send the payment link with an approval; the webhook books it the moment it clears.</p>" +
-            acts(copyBtn("Copy TEST deposit link", "https://buy.stripe.com/test_3cI00jfiC04W7CJbdu0kE0a")) +
-            "<p style='margin-top:8px;color:var(--amber);font-size:13px'>This is a sandbox link. Money does not move. Do not send it to a vendor until the live key is in and this line is gone.</p>" };
+            stat("Amount", "$250, standard 10x10 base tier. Larger footprints are invoiced from HQ") + stat("Where", "The booth page, Stripe Checkout") +
+            "<p style='margin-top:10px'>The 10 by 10 is paid on the booth page and booked by the webhook the moment it clears. Larger footprints get an invoice link from the review sheet in HQ.</p>" +
+            acts('<a class="primary" href="https://pistonpoweredranch.com/vendor/booth" target="_blank" rel="noopener">The booth page</a>') };
         },
         /* ---------- the desk ---------- */
         deskQueue: function () {

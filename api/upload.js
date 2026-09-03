@@ -41,6 +41,12 @@ const KINDS = {
       "image/jpeg",
       "image/png",
       "application/zip",
+      /* The sponsor form asks for a vector logo. These are what a vector logo
+         arrives as. */
+      "image/svg+xml",
+      "application/postscript",
+      "application/illustrator",
+      "image/x-eps",
     ],
   },
 };
