@@ -45,6 +45,25 @@ export function verifySession(token, secret) {
   return payload;
 }
 
+/**
+ * Whether the human check is actually enforceable, which is not the same
+ * question as whether somebody set a variable.
+ *
+ * A Cloudflare secret is an 0x string of about thirty five characters. The
+ * value set here was eleven characters with no prefix, and siteverify answers
+ * invalid-input-secret for it, so the gate has never filtered a single bot.
+ * It has only been closing: this endpoint refused every session, and
+ * api/upload then refused every photograph, on the public car entry form.
+ *
+ * A key that cannot pass is treated as no key. Turnstile filters bots, it does
+ * not authorise anyone, and refusing every genuine entrant is the worse
+ * failure by a distance. Put a real secret in and the gate closes properly.
+ */
+export function gateEnforced() {
+  const s = process.env.TURNSTILE_SECRET || "";
+  return s.startsWith("0x") && s.length >= 20;
+}
+
 export function sessionSecret() {
   // A dedicated secret is preferred; fall back to the Turnstile secret so
   // enabling the gate never depends on remembering a second variable.
@@ -58,9 +77,14 @@ export default async function handler(request, response) {
   }
 
   const secret = process.env.TURNSTILE_SECRET || "";
-  if (!secret) {
-    // Not configured: uploads remain open. Loud on the server, explicit to the client.
-    console.warn("[turnstile] TURNSTILE_SECRET unset, upload gate NOT enforced");
+  if (!gateEnforced()) {
+    // Not configured, or configured with something Cloudflare will not accept.
+    // Uploads remain open. Loud on the server, explicit to the client.
+    console.warn(
+      secret
+        ? "[turnstile] TURNSTILE_SECRET is not a key Cloudflare accepts, upload gate NOT enforced"
+        : "[turnstile] TURNSTILE_SECRET unset, upload gate NOT enforced",
+    );
     return response.status(200).json({ enforced: false, session: null });
   }
 

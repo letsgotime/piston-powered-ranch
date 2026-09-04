@@ -1,6 +1,6 @@
 import { handleUpload } from "@vercel/blob/client";
 import { createRemoteJWKSet, jwtVerify } from "jose";
-import { verifySession, sessionSecret } from "./upload-session.js";
+import { verifySession, sessionSecret, gateEnforced } from "./upload-session.js";
 import { DATA_API, jwksUrlFromRequest } from "./_neon.js";
 
 /**
@@ -205,10 +205,11 @@ export default async function handler(request, response) {
           };
         }
 
-        // Bot gate. Enforced only once TURNSTILE_SECRET exists, so this ships
-        // inert and turns on with configuration rather than a code change.
-        const gateOn = Boolean(process.env.TURNSTILE_SECRET);
-        if (gateOn) {
+        // Bot gate. The same function the session exchange calls, so the two
+        // can never tell one browser two different things: that disagreement
+        // is what refused every photograph on the entry form, the exchange
+        // saying the gate was off and this endpoint demanding a pass for it.
+        if (gateEnforced()) {
           const session = verifySession(payload.session, sessionSecret());
           if (!session) throw new Error("Verification required. Refresh the form and try again");
           if (session.d !== String(payload.draftId || "")) {
